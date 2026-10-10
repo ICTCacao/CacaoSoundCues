@@ -80,6 +80,8 @@ private struct SequenceEditor: View {
                 ForEach(Array(seq.steps.enumerated()), id: \.element.id) { index, step in
                     StepRow(index: index, step: step, sequenceID: seq.id)
                         .tag(step.id)
+                        // 選び直さない（同じ行の）クリックでも文字入力を終え、Return をリストに戻す
+                        .simultaneousGesture(TapGesture().onEnded { AppModel.endEditing() })
                 }
                 .onMove { seq.steps.move(fromOffsets: $0, toOffset: $1) }
                 .onDelete { offsets in
@@ -158,6 +160,7 @@ private struct SequenceEditor: View {
                 return nil
             },
             set: { new in
+                AppModel.endEditing()
                 if let new { model.selection = .step(sequence: seq.id, step: new) }
             })
     }

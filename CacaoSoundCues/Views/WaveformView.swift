@@ -127,6 +127,7 @@ struct WaveformView: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { g in
                         guard duration > 0, w > 0 else { return }
+                        if dragging == nil { AppModel.endEditing() }
                         if dragging == nil, g.startLocation.y <= handleBand {
                             // 上端ではフェードの丸を優先してつかむ
                             let hIn = abs(g.startLocation.x - handleX(fadeIn: true, xIn: xIn, xOut: xOut, w: w))

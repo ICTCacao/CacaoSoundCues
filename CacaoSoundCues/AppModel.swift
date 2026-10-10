@@ -287,6 +287,7 @@ final class AppModel {
     /// ダブルクリック: 次に鳴らす曲をこの曲にする（鳴らさない）。Return で鳴る。
     /// リストが鳴っていれば、今の曲の後はこの曲へ（この曲のタイミング設定どおりに）続く
     func cueStep(_ id: UUID, index: Int) {
+        Self.endEditing()
         guard let seq = show.sequences.first(where: { $0.id == id }), seq.steps.indices.contains(index) else { return }
         selectedSequenceID = id
         selection = .step(sequence: id, step: seq.steps[index].id)
