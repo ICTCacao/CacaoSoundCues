@@ -5,7 +5,7 @@ public enum ShowPackageError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .missingAudio(let name): return "音ファイルが見つかりません: \(name)"
+        case .missingAudio(let name): return L("音ファイルが見つかりません: %@", name)
         }
     }
 }

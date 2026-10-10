@@ -108,7 +108,7 @@ struct WaveformView: View {
                     }
                     .shadow(color: .yellow.opacity(0.7), radius: 4)
                     .allowsHitTesting(false)
-                    Text(fade.rising ? "フェードイン ↑" : "フェードアウト ↓")
+                    Text(fade.rising ? L("フェードイン ↑") : L("フェードアウト ↓"))
                         .font(.caption.bold())
                         .foregroundStyle(.black)
                         .padding(.horizontal, 6)

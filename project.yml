@@ -35,11 +35,12 @@ targets:
       properties:
         CFBundleDisplayName: CacaoSoundCues
         CFBundleName: CacaoSoundCues
-        CFBundleShortVersionString: "2.4.0"
-        CFBundleVersion: "2.4.0"
+        CFBundleShortVersionString: "2.7.0"
+        CFBundleVersion: "2.7.0"
         LSMinimumSystemVersion: "14.0"
         CFBundleDevelopmentRegion: ja
-        CFBundleLocalizations: [ja]
+        CFBundleLocalizations: [ja, en]
+        CFBundleAllowMixedLocalizations: true
         LSApplicationCategoryType: public.app-category.music
         NSHumanReadableCopyright: "© 2026 ICTCacao"
         CFBundleDocumentTypes:

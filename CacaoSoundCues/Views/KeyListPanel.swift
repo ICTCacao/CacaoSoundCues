@@ -9,18 +9,21 @@ struct KeyListPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("キー").font(.headline)
+                Text(L("キー")).font(.headline)
                 Spacer()
-                Button { model.addKeyGroup() } label: { Label("グループ", systemImage: "folder.badge.plus") }
-                    .help("グループを追加")
-                Button { model.chooseFileThenKey(group: nil) } label: { Label("割り当て", systemImage: "plus") }
-                    .help("音ファイルを選んで、キーに割り当てる")
+                if !model.showMode {
+                    Button { model.addKeyGroup() } label: { Label(L("グループ"), systemImage: "folder.badge.plus") }
+                        .help(L("グループを追加"))
+                    Button { model.chooseFileThenKey(group: nil) } label: { Label(L("割り当て"), systemImage: "plus") }
+                        .help(L("音ファイルを選んで、キーに割り当てる"))
+                }
             }
 
             if let pending = model.pendingAssign {
                 HStack {
                     Image(systemName: "keyboard")
-                    Text("「\(pending.urls.first?.deletingPathExtension().lastPathComponent ?? "")」を割り当てるキーを押してください（Esc で取消）")
+                    Text(L("「%@」を割り当てるキーを押してください（Esc で取消）",
+                           pending.urls.first?.deletingPathExtension().lastPathComponent ?? ""))
                         .lineLimit(2)
                 }
                 .font(.callout.bold())
@@ -33,7 +36,7 @@ struct KeyListPanel: View {
                     Section {
                         rows(ungrouped, group: nil)
                     } header: {
-                        if !model.show.keyGroups.isEmpty { Text("未分類") }
+                        if !model.show.keyGroups.isEmpty { Text(L("未分類")) }
                     }
                 }
                 ForEach(model.show.keyGroups) { group in
@@ -45,14 +48,14 @@ struct KeyListPanel: View {
                 }
                 let seqKeys = model.show.sequences.filter { $0.toggleKey != nil }
                 if !seqKeys.isEmpty {
-                    Section("リストの開始／停止") {
+                    Section(L("リストの開始／停止")) {
                         ForEach(seqKeys) { seq in
                             HStack {
                                 KeyBadge(code: seq.toggleKey!, color: .indigo, lit: model.isRunning(seq.id))
                                 Text("≡ " + seq.name)
                                 Spacer()
                                 if model.isRunning(seq.id) {
-                                    Text(model.run?.isWaiting == true ? "Return 待ち" : "再生中")
+                                    Text(model.run?.isWaiting == true ? L("Return 待ち") : L("再生中"))
                                         .font(.caption.bold())
                                         .foregroundStyle(.green)
                                 }
@@ -64,7 +67,7 @@ struct KeyListPanel: View {
             }
             .overlay {
                 if model.show.keyCues.isEmpty {
-                    Text("音ファイルをここにドラッグして、\n割り当てるキーを押します")
+                    Text(L("音ファイルをここにドラッグして、\n割り当てるキーを押します"))
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                 }
@@ -73,7 +76,7 @@ struct KeyListPanel: View {
             .background(RoundedRectangle(cornerRadius: 6).fill(Theme.panel))
             .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(targeted ? Color.accentColor : Theme.keyBorder.opacity(0.6), lineWidth: targeted ? 2 : 1))
             .dropDestination(for: URL.self) { urls, _ in
-                guard !urls.isEmpty else { return false }
+                guard !urls.isEmpty, !model.showMode else { return false }
                 model.pendingAssign = (urls, nil)
                 return true
             } isTargeted: { targeted = $0 }
@@ -88,6 +91,7 @@ struct KeyListPanel: View {
                 .tag(cue.keyCode)
         }
         .onMove { model.moveCues(in: group, from: $0, to: $1) }
+        .moveDisabled(model.showMode)
     }
 
     private var selectionBinding: Binding<UInt16?> {
@@ -106,22 +110,25 @@ private struct GroupHeader: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            TextField("グループ名", text: Binding(get: { group.name }, set: { model.renameKeyGroup(group.id, to: $0) }))
+            TextField(L("グループ名"), text: Binding(get: { group.name }, set: { model.renameKeyGroup(group.id, to: $0) }))
+                .disabled(model.showMode)
                 .textFieldStyle(.plain)
                 .font(.subheadline.bold())
             Spacer()
-            Button { model.chooseFileThenKey(group: group.id) } label: { Image(systemName: "plus") }
-                .help("このグループに割り当てを追加")
-            Button { model.moveKeyGroup(group.id, by: -1) } label: { Image(systemName: "chevron.up") }
-                .help("グループを上へ")
-            Button { model.moveKeyGroup(group.id, by: 1) } label: { Image(systemName: "chevron.down") }
-                .help("グループを下へ")
-            Button { model.removeKeyGroup(group.id) } label: { Image(systemName: "trash") }
-                .help("グループを削除（中のキーは未分類へ）")
+            if !model.showMode {
+                Button { model.chooseFileThenKey(group: group.id) } label: { Image(systemName: "plus") }
+                    .help(L("このグループに割り当てを追加"))
+                Button { model.moveKeyGroup(group.id, by: -1) } label: { Image(systemName: "chevron.up") }
+                    .help(L("グループを上へ"))
+                Button { model.moveKeyGroup(group.id, by: 1) } label: { Image(systemName: "chevron.down") }
+                    .help(L("グループを下へ"))
+                Button { model.removeKeyGroup(group.id) } label: { Image(systemName: "trash") }
+                    .help(L("グループを削除（中のキーは未分類へ）"))
+            }
         }
         .buttonStyle(.borderless)
         .dropDestination(for: URL.self) { urls, _ in
-            guard !urls.isEmpty else { return false }
+            guard !urls.isEmpty, !model.showMode else { return false }
             model.pendingAssign = (urls, group.id)
             return true
         }
@@ -146,16 +153,18 @@ private struct KeyRow: View {
             }
         }
         .contextMenu {
-            Button { model.trigger(cue) } label: { Label("鳴らす／止める", systemImage: "playpause") }
-            Menu {
-                Button { model.setGroup(nil, forCue: cue.id) } label: { Label("未分類", systemImage: "tray") }
-                ForEach(model.show.keyGroups) { g in
-                    Button { model.setGroup(g.id, forCue: cue.id) } label: { Label(g.name, systemImage: "folder") }
+            Button { model.trigger(cue) } label: { Label(L("鳴らす／止める"), systemImage: "playpause") }
+            if !model.showMode {
+                Menu {
+                    Button { model.setGroup(nil, forCue: cue.id) } label: { Label(L("未分類"), systemImage: "tray") }
+                    ForEach(model.show.keyGroups) { g in
+                        Button { model.setGroup(g.id, forCue: cue.id) } label: { Label(g.name, systemImage: "folder") }
+                    }
+                } label: {
+                    Label(L("グループへ移動"), systemImage: "folder.badge.gearshape")
                 }
-            } label: {
-                Label("グループへ移動", systemImage: "folder.badge.gearshape")
+                Button(role: .destructive) { model.removeCue(atKey: cue.keyCode) } label: { Label(L("割り当てを外す"), systemImage: "xmark.circle") }
             }
-            Button(role: .destructive) { model.removeCue(atKey: cue.keyCode) } label: { Label("割り当てを外す", systemImage: "xmark.circle") }
         }
     }
 }

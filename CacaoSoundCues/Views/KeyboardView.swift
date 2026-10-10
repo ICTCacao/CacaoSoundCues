@@ -44,7 +44,7 @@ struct KeyboardView: View {
                     if showKeypad { keypad(kw) }
                 }
                 if showFnHint {
-                    Text("F キーは fn を押しながら押します。「システム設定 → キーボード → キーボードショートカット → ファンクションキー」で「F1、F2 などのキーを標準のファンクションキーとして使用」を ON にすると、F キーだけで鳴らせます。")
+                    Text(L("F キーは fn を押しながら押します。「システム設定 → キーボード → キーボードショートカット → ファンクションキー」で「F1、F2 などのキーを標準のファンクションキーとして使用」を ON にすると、F キーだけで鳴らせます。"))
                         .font(.caption)
                         .foregroundStyle(.orange)
                         .lineLimit(1)
@@ -105,13 +105,13 @@ struct KeypadEnterView: View {
             RoundedRectangle(cornerRadius: 7).strokeBorder(Theme.keyBorder, lineWidth: 1)
             VStack(alignment: .leading, spacing: 2) {
                 Text("enter").font(.system(size: 13, weight: .bold, design: .monospaced))
-                Text("次の曲へ").font(.system(size: 10))
+                Text(L("次の曲へ")).font(.system(size: 10))
             }
             .padding(5)
         }
         .frame(width: width, height: height)
         .contentShape(Rectangle())
-        .help("テンキーの enter は Return と同じ「リストの次の曲へ」です（割り当てはできません）")
+        .help(L("テンキーの enter は Return と同じ「リストの次の曲へ」です（割り当てはできません）"))
     }
 }
 
@@ -163,7 +163,7 @@ struct KeyCapView: View {
                     Text(voice.loop ? "∞" : remaining(voice))
                         .font(.system(size: 10, weight: .semibold).monospacedDigit())
                 } else if seqRunning {
-                    Text(model.run?.isWaiting == true ? "Return 待ち" : "再生中")
+                    Text(model.run?.isWaiting == true ? L("Return 待ち") : L("再生中"))
                         .font(.system(size: 10, weight: .semibold))
                 }
             }
@@ -178,7 +178,7 @@ struct KeyCapView: View {
         }
         // 割り当て済みのキーは、別のキーへドラッグして移せる（移り先も割り当て済みなら入れ替え）
         .onDrag {
-            guard cue != nil || seq != nil else { return NSItemProvider() }
+            guard cue != nil || seq != nil, !model.showMode else { return NSItemProvider() }
             return NSItemProvider(object: (keyDragPrefix + String(code)) as NSString)
         }
         // 音ファイルのドロップ（割り当て）と、キーのドロップ（移動・入れ替え）
@@ -187,14 +187,18 @@ struct KeyCapView: View {
         }
         .contextMenu {
             if let cue {
-                Button { model.trigger(cue) } label: { Label("鳴らす／止める", systemImage: "playpause") }
-                Button(role: .destructive) { model.removeCue(atKey: code) } label: { Label("割り当てを外す", systemImage: "xmark.circle") }
+                Button { model.trigger(cue) } label: { Label(L("鳴らす／止める"), systemImage: "playpause") }
+                if !model.showMode {
+                    Button(role: .destructive) { model.removeCue(atKey: code) } label: { Label(L("割り当てを外す"), systemImage: "xmark.circle") }
+                }
             }
         }
-        .help(cue.map { "\($0.name)（\(model.sound($0.play.soundID)?.fileName ?? "")）" } ?? "音ファイルをドラッグして割り当て。割り当て済みのキーはドラッグで別のキーへ移せます")
+        .help(cue.map { L("%@（%@）", $0.name, model.sound($0.play.soundID)?.fileName ?? "") }
+              ?? L("音ファイルをドラッグして割り当て。割り当て済みのキーはドラッグで別のキーへ移せます"))
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
+        if model.showMode { return false }
         if let p = providers.first(where: { $0.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) }) {
             _ = p.loadObject(ofClass: URL.self) { url, _ in
                 guard let url else { return }

@@ -45,7 +45,7 @@ public enum AudioDecodeError: LocalizedError {
 
     public var errorDescription: String? {
         switch self {
-        case .unsupported(let s): return "読み込めない形式です: \(s)"
+        case .unsupported(let s): return L("読み込めない形式です: %@", s)
         }
     }
 }

@@ -12,13 +12,17 @@
 		1CF48BBE1A6B322BA929FD18 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77F3DE6649ABA109E101B51 /* WaveformView.swift */; };
 		326F7DF48C4C9457D643DCC9 /* CacaoSoundCuesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AFA6614C72E4294887A8AD /* CacaoSoundCuesApp.swift */; };
 		36EF72B2049C5F467EB720E9 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74CF3DC1F785BADAA220EA2B /* KeyboardLayout.swift */; };
+		39753FA7275E16199F27187F /* LanguageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55C9ED6F074FDC41546190C8 /* LanguageManager.swift */; };
+		464C3B4D693B3F3CA81CF6E0 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1CCD9506727CF373C4BF43D1 /* InfoPlist.strings */; };
 		4E76DEC3600508395716BC28 /* SequencePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D10A87B10FAA257572B71E /* SequencePanel.swift */; };
 		4ECB59F851F9022DB4AEDB1A /* NewSoundDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */; };
+		4F21778F7EBA41193D771533 /* ShowModePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48CAD935537445A74E1C3F04 /* ShowModePanel.swift */; };
 		57D6C8B31D990FAEBF12934E /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACCD1B1F9EA9A45D2E67F61 /* MainView.swift */; };
 		715E95ABB6186344B1CD9912 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AC56E6F71ADA641E516409 /* SettingsView.swift */; };
 		74E94DFD24BEFCC0F18CFD9C /* KeyListPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383741F7FE20C5D0917D328 /* KeyListPanel.swift */; };
 		75B82B375CF25E5BAAE7D77C /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC141BA9D9DA80CAFC8AC3F7 /* KeyboardView.swift */; };
 		8D7E5078E901B19DB9437212 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE1AF2250BC51CF10D842D02 /* AppModel.swift */; };
+		A340C9EE3F68123D6D2E5A71 /* en.json in Resources */ = {isa = PBXBuildFile; fileRef = 092047D9CF42BA88AE791881 /* en.json */; };
 		A9103EAB31D08F2893F16024 /* CueSheet.icns in Resources */ = {isa = PBXBuildFile; fileRef = B77B3604047395E8C99BA99F /* CueSheet.icns */; };
 		AD7E78DE8EAB80CAB1CD7A73 /* CacaoSoundCuesCore in Frameworks */ = {isa = PBXBuildFile; productRef = 54D8CD158DCF18FE7C69BE48 /* CacaoSoundCuesCore */; };
 		F9F65FEC1DDFD6DE5FD3B6A5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1144C18B5CB38B346E8858AA /* InspectorView.swift */; };
@@ -27,19 +31,24 @@
 /* Begin PBXFileReference section */
 		02B866B345F905AC7A30BDDD /* CacaoSoundCues.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CacaoSoundCues.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		08AFA6614C72E4294887A8AD /* CacaoSoundCuesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacaoSoundCuesApp.swift; sourceTree = "<group>"; };
+		092047D9CF42BA88AE791881 /* en.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = en.json; sourceTree = "<group>"; };
 		1144C18B5CB38B346E8858AA /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		21D10A87B10FAA257572B71E /* SequencePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequencePanel.swift; sourceTree = "<group>"; };
 		38AC56E6F71ADA641E516409 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3E26E58D95BA34DAFFC7A7F9 /* CacaoSoundCuesCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CacaoSoundCuesCore; path = Packages/CacaoSoundCuesCore; sourceTree = SOURCE_ROOT; };
+		4539E786349C77C3462F60A4 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		48CAD935537445A74E1C3F04 /* ShowModePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowModePanel.swift; sourceTree = "<group>"; };
 		4ACCD1B1F9EA9A45D2E67F61 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		4EBC8D51D1CACA6E5929E65B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSoundDefaults.swift; sourceTree = "<group>"; };
+		55C9ED6F074FDC41546190C8 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		682B3F49FA9AA5FE1BFB61E7 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		74CF3DC1F785BADAA220EA2B /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
 		AC141BA9D9DA80CAFC8AC3F7 /* KeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardView.swift; sourceTree = "<group>"; };
 		B383741F7FE20C5D0917D328 /* KeyListPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyListPanel.swift; sourceTree = "<group>"; };
 		B77B3604047395E8C99BA99F /* CueSheet.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = CueSheet.icns; sourceTree = "<group>"; };
 		BE1AF2250BC51CF10D842D02 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		D6CABB5DD44E194EABD633FD /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E77F3DE6649ABA109E101B51 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -76,8 +85,18 @@
 			children = (
 				4EBC8D51D1CACA6E5929E65B /* Assets.xcassets */,
 				B77B3604047395E8C99BA99F /* CueSheet.icns */,
+				1CCD9506727CF373C4BF43D1 /* InfoPlist.strings */,
+				74D3E1255A613C6C57FBE6E0 /* Languages */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		74D3E1255A613C6C57FBE6E0 /* Languages */ = {
+			isa = PBXGroup;
+			children = (
+				092047D9CF42BA88AE791881 /* en.json */,
+			);
+			path = Languages;
 			sourceTree = "<group>";
 		};
 		864451FDB69EB1D4E6ECBDDC /* Views */ = {
@@ -89,6 +108,7 @@
 				4ACCD1B1F9EA9A45D2E67F61 /* MainView.swift */,
 				21D10A87B10FAA257572B71E /* SequencePanel.swift */,
 				38AC56E6F71ADA641E516409 /* SettingsView.swift */,
+				48CAD935537445A74E1C3F04 /* ShowModePanel.swift */,
 				E77F3DE6649ABA109E101B51 /* WaveformView.swift */,
 			);
 			path = Views;
@@ -100,6 +120,7 @@
 				BE1AF2250BC51CF10D842D02 /* AppModel.swift */,
 				08AFA6614C72E4294887A8AD /* CacaoSoundCuesApp.swift */,
 				74CF3DC1F785BADAA220EA2B /* KeyboardLayout.swift */,
+				55C9ED6F074FDC41546190C8 /* LanguageManager.swift */,
 				4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */,
 				682B3F49FA9AA5FE1BFB61E7 /* Theme.swift */,
 				19DBE5E5CFC42F116CEC6218 /* Resources */,
@@ -161,6 +182,7 @@
 			knownRegions = (
 				Base,
 				en,
+				ja,
 			);
 			mainGroup = CEC11BBCE00BDEE615AF8BA7;
 			minimizedProjectReferenceProxies = 1;
@@ -184,6 +206,8 @@
 			files = (
 				1B6EC66BCF4E3807407A4C5D /* Assets.xcassets in Resources */,
 				A9103EAB31D08F2893F16024 /* CueSheet.icns in Resources */,
+				464C3B4D693B3F3CA81CF6E0 /* InfoPlist.strings in Resources */,
+				A340C9EE3F68123D6D2E5A71 /* en.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,16 +224,30 @@
 				74E94DFD24BEFCC0F18CFD9C /* KeyListPanel.swift in Sources */,
 				36EF72B2049C5F467EB720E9 /* KeyboardLayout.swift in Sources */,
 				75B82B375CF25E5BAAE7D77C /* KeyboardView.swift in Sources */,
+				39753FA7275E16199F27187F /* LanguageManager.swift in Sources */,
 				57D6C8B31D990FAEBF12934E /* MainView.swift in Sources */,
 				4ECB59F851F9022DB4AEDB1A /* NewSoundDefaults.swift in Sources */,
 				4E76DEC3600508395716BC28 /* SequencePanel.swift in Sources */,
 				715E95ABB6186344B1CD9912 /* SettingsView.swift in Sources */,
+				4F21778F7EBA41193D771533 /* ShowModePanel.swift in Sources */,
 				0EB832F823C149862FD03ADD /* Theme.swift in Sources */,
 				1CF48BBE1A6B322BA929FD18 /* WaveformView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		1CCD9506727CF373C4BF43D1 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D6CABB5DD44E194EABD633FD /* en */,
+				4539E786349C77C3462F60A4 /* ja */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		2FE6F296D0F49F798CB1F3E4 /* Release */ = {

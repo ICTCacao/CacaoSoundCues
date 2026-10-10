@@ -9,10 +9,10 @@ public enum FadeCurve: String, Codable, CaseIterable, Sendable {
 
     public var label: String {
         switch self {
-        case .linear: return "直線"
-        case .equalPower: return "等パワー"
-        case .sCurve: return "S字"
-        case .custom: return "カスタム"
+        case .linear: return L("直線")
+        case .equalPower: return L("等パワー")
+        case .sCurve: return L("S字")
+        case .custom: return L("カスタム")
         }
     }
 }
@@ -26,10 +26,10 @@ public enum RetriggerMode: String, Codable, CaseIterable, Sendable {
 
     public var label: String {
         switch self {
-        case .fadeOut: return "止める（フェードアウト）"
-        case .restart: return "頭から鳴らし直す"
-        case .layer: return "重ねて鳴らす"
-        case .ignore: return "何もしない"
+        case .fadeOut: return L("止める（フェードアウト）")
+        case .restart: return L("頭から鳴らし直す")
+        case .layer: return L("重ねて鳴らす")
+        case .ignore: return L("何もしない")
         }
     }
 }
@@ -141,9 +141,9 @@ public enum StepStart: String, Codable, CaseIterable, Sendable {
 
     public var label: String {
         switch self {
-        case .afterPrevious: return "前の曲が終わったとき"
-        case .overlap: return "前の曲に重ねる"
-        case .returnKey: return "Return キーを押したとき（自動再生しない）"
+        case .afterPrevious: return L("前の曲が終わったとき")
+        case .overlap: return L("前の曲に重ねる")
+        case .returnKey: return L("Return キーを押したとき（自動再生しない）")
         }
     }
 }

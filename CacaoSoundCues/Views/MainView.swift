@@ -5,12 +5,14 @@ struct MainView: View {
     @Environment(AppModel.self) private var model
     /// キーボードを表示するか（隠すと、割り当て済みキーの一覧を左に出す）
     @AppStorage("showKeyboard") private var showKeyboard = true
+    /// 言語が変わったら画面全体を作り直す
+    @AppStorage(LanguageManager.storageKey) private var language = LanguageManager.defaultCode
 
     var body: some View {
         @Bindable var model = model
         VStack(spacing: 0) {
             TopBar(showKeyboard: $showKeyboard)
-                .background(Theme.topBar)
+                .background(model.showMode ? Color.red.opacity(0.22) : Theme.topBar)
             ThemeDivider()
             if showKeyboard {
                 KeyboardView()
@@ -21,9 +23,8 @@ struct MainView: View {
                     SequencePanel()
                         .frame(minWidth: 400, idealWidth: 480)
                         .background(Theme.background)
-                    InspectorView()
+                    rightPanel
                         .frame(minWidth: 480)
-                        .background(Theme.panel)
                 }
             } else {
                 HSplitView {
@@ -33,24 +34,36 @@ struct MainView: View {
                     SequencePanel()
                         .frame(minWidth: 380, idealWidth: 460)
                         .background(Theme.background)
-                    InspectorView()
+                    rightPanel
                         .frame(minWidth: 460)
-                        .background(Theme.panel)
                 }
             }
         }
         .background(Theme.background)
-        .navigationTitle(model.show.name + (model.dirty ? " — 未保存" : ""))
+        .id(language)
+        .navigationTitle((model.showMode ? L("● 本番モード — ") : "") + model.show.name + (model.dirty ? L(" — 未保存") : ""))
         // 文字を入れて Return したら入力を終え、キーをすぐ音出しに戻す
         .onSubmit { AppModel.endEditing() }
         .onAppear {
             // 起動直後に文字入力欄が選ばれていると、キーを押しても鳴らないため
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { AppModel.endEditing() }
         }
-        .alert("お知らせ", isPresented: Binding(get: { model.message != nil }, set: { if !$0 { model.message = nil } })) {
+        .alert(L("お知らせ"), isPresented: Binding(get: { model.message != nil }, set: { if !$0 { model.message = nil } })) {
             Button("OK") { model.message = nil }
         } message: {
             Text(model.message ?? "")
+        }
+    }
+}
+
+extension MainView {
+    /// 右側: ふだんは設定画面、本番モードでは本番用の表示
+    @ViewBuilder
+    var rightPanel: some View {
+        if model.showMode {
+            ShowModePanel().background(Theme.panel)
+        } else {
+            InspectorView().background(Theme.panel)
         }
     }
 }
@@ -64,25 +77,33 @@ struct TopBar: View {
     var body: some View {
         @Bindable var model = model
         HStack(spacing: 14) {
-            TextField("キューシート名", text: $model.show.name)
+            TextField(L("キューシート名"), text: $model.show.name)
                 .textFieldStyle(.roundedBorder)
                 .frame(width: 220)
-            Button { model.openPanel() } label: { Label("開く…", systemImage: "folder") }
-            Button { model.save() } label: { Label("保存", systemImage: "square.and.arrow.down") }
+                .disabled(model.showMode)
+            Button { model.openPanel() } label: { Label(L("開く…"), systemImage: "folder") }
+                .disabled(model.showMode)
+            Button { model.save() } label: { Label(L("保存"), systemImage: "square.and.arrow.down") }
+            Button { model.toggleShowMode() } label: {
+                Label(model.showMode ? L("本番モード中") : L("本番モード"), systemImage: model.showMode ? "lock.fill" : "lock.open")
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(model.showMode ? .red : .gray)
+            .help(model.showMode ? L("本番モードを終了して、編集できるようにする") : L("編集を止めて、キー操作と再生だけにする"))
             Toggle(isOn: $showKeyboard) {
-                Label("キーボード", systemImage: "keyboard")
+                Label(L("キーボード"), systemImage: "keyboard")
             }
             .toggleStyle(.button)
-            .help("キーボードを隠すと、割り当てたキーだけを一覧で表示します")
+            .help(L("キーボードを隠すと、割り当てたキーだけを一覧で表示します"))
             Menu {
-                Toggle("F キー（F1〜F12）の行を表示", isOn: $showFunctionKeys)
-                Toggle("テンキーを表示", isOn: $showKeypad)
+                Toggle(L("F キー（F1〜F12）の行を表示"), isOn: $showFunctionKeys)
+                Toggle(L("テンキーを表示"), isOn: $showKeypad)
             } label: {
                 Image(systemName: "slider.horizontal.3")
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
-            .help("キーボードに出すキーの設定（この Mac に保存）")
+            .help(L("キーボードに出すキーの設定（この Mac に保存）"))
 
             Spacer()
 
@@ -99,15 +120,15 @@ struct TopBar: View {
             Button {
                 model.panic()
             } label: {
-                Label("全停止（Esc）", systemImage: "stop.fill")
+                Label(L("全停止（Esc）"), systemImage: "stop.fill")
             }
             .tint(.red)
             .buttonStyle(.borderedProminent)
-            .help("全部フェードアウト。1秒以内にもう一度 Esc でカット")
+            .help(L("全部フェードアウト。1秒以内にもう一度 Esc でカット"))
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text("\(AppModel.versionText) ・ \(model.output.deviceName)  \(String(format: "%.1f", model.sampleRate / 1000))kHz")
-                Text("バッファ \(model.output.bufferFrames)（\(String(format: "%.1f", model.output.latencyMilliseconds))ms）・メモリ \(model.memoryBytes / 1_048_576)MB")
+                Text(L("バッファ %d（%.1fms）・メモリ %dMB", Int(model.output.bufferFrames), model.output.latencyMilliseconds, model.memoryBytes / 1_048_576))
             }
             .font(.caption)
             .foregroundStyle(.secondary)

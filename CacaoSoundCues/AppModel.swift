@@ -45,7 +45,7 @@ final class AppModel {
     static let versionText = "β" + (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
     static let colors: [Color] = [.gray, .red, .orange, .yellow, .green, .teal, .blue, .purple]
 
-    var show = Show(name: "新しいキューシート") {
+    var show = Show(name: L("新しいキューシート")) {
         didSet { if show != oldValue { dirty = true } }
     }
     private(set) var showURL: URL?
@@ -64,6 +64,10 @@ final class AppModel {
     /// ダブルクリックで決めた「次に始める曲」（鳴っていないリスト用）。Return か開始キーでここから始まる
     private(set) var cuedStart: (sequence: UUID, index: Int)?
     var message: String?
+    /// 本番モード: 編集を止め、キー操作と再生だけにする（この Mac に保存。起動し直しても続く）
+    private(set) var showMode = UserDefaults.standard.bool(forKey: "showMode") {
+        didSet { UserDefaults.standard.set(showMode, forKey: "showMode") }
+    }
 
     @ObservationIgnored let output = AudioOutput()
     @ObservationIgnored private var pendingFiles: [UUID: URL] = [:]
@@ -91,7 +95,7 @@ final class AppModel {
         do {
             try output.start(preferredBufferFrames: 128)
         } catch {
-            message = "音声出力を開始できません: \(error.localizedDescription)"
+            message = L("音声出力を開始できません: %@", error.localizedDescription)
         }
         output.onRestart = { [weak self] rateChanged in
             guard let self else { return }
@@ -104,7 +108,7 @@ final class AppModel {
         // 本番中にスリープ・App Nap で音が途切れないようにする
         activity = ProcessInfo.processInfo.beginActivity(
             options: [.userInitiated, .idleSystemSleepDisabled, .latencyCritical],
-            reason: "舞台の音出し")
+            reason: L("舞台の音出し"))
 
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self else { return event }
@@ -119,7 +123,7 @@ final class AppModel {
 
         if let path = UserDefaults.standard.string(forKey: "lastShowPath"),
            FileManager.default.fileExists(atPath: path) {
-            open(URL(fileURLWithPath: path))
+            open(URL(fileURLWithPath: path), evenInShowMode: true)
         }
     }
 
@@ -150,7 +154,7 @@ final class AppModel {
                 if let reason = KeyboardLayout.reservedReason(code) {
                     message = reason
                 } else if !KeyboardLayout.allKeys.contains(code) {
-                    message = "このキーには割り当てられません（数字・英字・記号・スペースのキーを使ってください）"
+                    message = L("このキーには割り当てられません（数字・英字・記号・スペースのキーを使ってください）")
                 } else {
                     assign(pending.urls, toKey: code, group: pending.group)
                 }
@@ -183,6 +187,32 @@ final class AppModel {
             return true
         }
         return false
+    }
+
+    // MARK: - 本番モード
+
+    func toggleShowMode() {
+        if showMode {
+            let alert = NSAlert()
+            alert.messageText = L("本番モードを終了しますか？")
+            alert.informativeText = L("終了すると、キューシートを編集できるようになります。")
+            alert.addButton(withTitle: L("キャンセル"))
+            alert.addButton(withTitle: L("本番モードを終了"))
+            guard alert.runModal() == .alertSecondButtonReturn else { return }
+            showMode = false
+        } else {
+            Self.endEditing()
+            capturingSequenceKey = nil
+            pendingAssign = nil
+            showMode = true
+        }
+    }
+
+    /// 本番モード中なら知らせて true（編集の操作の頭で使う）
+    private func lockedForShow() -> Bool {
+        guard showMode else { return false }
+        message = L("本番モード中は編集できません。上の「本番モード」を押して終了してください。")
+        return true
     }
 
     /// 文字入力を終えてキーを音出しに戻す
@@ -226,10 +256,12 @@ final class AppModel {
 
     /// 鳴っている音の再生位置を秒で移す
     func seek(token: UInt64, to seconds: Double) {
+        if showMode { return }
         output.mixer.send(.seek(token, frame: Int(seconds * sampleRate)))
     }
 
     func preview(_ p: PlaySettings) {
+        if lockedForShow() { return }
         guard let spec = makeSpec(p, owner: Self.previewOwner, tag: Self.previewOwner) else { return }
         output.mixer.send(.toggle(spec))
     }
@@ -318,7 +350,7 @@ final class AppModel {
         }
         cuedStart = nil
         guard let i = playableIndex(in: seq, from: index) else {
-            message = "再生できる曲がありません"
+            message = L("再生できる曲がありません")
             return
         }
         playStep(seq, i)
@@ -465,11 +497,11 @@ final class AppModel {
 
     private func addSound(_ url: URL) -> SoundRef? {
         guard let type = UTType(filenameExtension: url.pathExtension), type.conforms(to: .audio) else {
-            message = "音ファイルではありません: \(url.lastPathComponent)"
+            message = L("音ファイルではありません: %@", url.lastPathComponent)
             return nil
         }
         guard let duration = AudioDecoder.duration(of: url) else {
-            message = "読み込めません: \(url.lastPathComponent)"
+            message = L("読み込めません: %@", url.lastPathComponent)
             return nil
         }
         let s = SoundRef(fileName: url.lastPathComponent,
@@ -482,7 +514,7 @@ final class AppModel {
 
     private func load(_ sound: SoundRef) {
         guard let url = fileURL(for: sound), FileManager.default.fileExists(atPath: url.path) else {
-            loadStates[sound.id] = .failed("ファイルが見つかりません")
+            loadStates[sound.id] = .failed(L("ファイルが見つかりません"))
             return
         }
         loadStates[sound.id] = .loading
@@ -531,13 +563,14 @@ final class AppModel {
     func sequence(forKey code: UInt16) -> CueSequence? { show.sequences.first { $0.toggleKey == code } }
 
     func assign(_ urls: [URL], toKey code: UInt16, group: UUID? = nil) {
+        if lockedForShow() { return }
         guard let url = urls.first else { return }
         if let reason = KeyboardLayout.reservedReason(code) {
             message = reason
             return
         }
         if let seq = sequence(forKey: code) {
-            message = "このキーはリスト「\(seq.name)」の開始／停止キーです"
+            message = L("このキーはリスト「%@」の開始／停止キーです", seq.name)
             return
         }
         guard let s = addSound(url) else { return }
@@ -560,23 +593,24 @@ final class AppModel {
     private func releaseReservedKeys() -> Bool {
         var released: [String] = []
         for cue in show.keyCues where KeyboardLayout.reservedReason(cue.keyCode) != nil {
-            released.append("「\(cue.name)」（\(KeyboardLayout.label(cue.keyCode))）")
+            released.append(L("「%@」（%@）", cue.name, KeyboardLayout.label(cue.keyCode)))
         }
         show.keyCues.removeAll { KeyboardLayout.reservedReason($0.keyCode) != nil }
         for i in show.sequences.indices {
             if let k = show.sequences[i].toggleKey, KeyboardLayout.reservedReason(k) != nil {
-                released.append("リスト「\(show.sequences[i].name)」の開始／停止キー（\(KeyboardLayout.label(k))）")
+                released.append(L("リスト「%@」の開始／停止キー（%@）", show.sequences[i].name, KeyboardLayout.label(k)))
                 show.sequences[i].toggleKey = nil
             }
         }
         if !released.isEmpty {
-            message = "次の割り当てを外しました。スペース・Return・Esc は操作用のキーです。\n" + released.joined(separator: "\n")
+            message = L("次の割り当てを外しました。スペース・Return・Esc は操作用のキーです。\n") + released.joined(separator: "\n")
         }
         return !released.isEmpty
     }
 
     /// キーの割り当てを別のキーへ移す。移り先も割り当て済みなら入れ替える（音・リストの開始／停止キーとも）
     func moveKey(from: UInt16, to: UInt16) {
+        if lockedForShow() { return }
         guard from != to else { return }
         if let reason = KeyboardLayout.reservedReason(to) {
             message = reason
@@ -595,6 +629,7 @@ final class AppModel {
     }
 
     func removeCue(atKey code: UInt16) {
+        if lockedForShow() { return }
         if let cue = cue(forKey: code) { output.mixer.send(.stopOwner(cue.id, fadeFrames: 0)) }
         show.keyCues.removeAll { $0.keyCode == code }
     }
@@ -615,7 +650,7 @@ final class AppModel {
             return
         }
         if let cue = cue(forKey: code) {
-            message = "このキーには「\(cue.name)」が割り当て済みです"
+            message = L("このキーには「%@」が割り当て済みです", cue.name)
             return
         }
         for i in show.sequences.indices where show.sequences[i].toggleKey == code {
@@ -626,6 +661,7 @@ final class AppModel {
 
     /// 音ファイルを選んでから、割り当てるキーを押してもらう（キーボードを隠しているとき）
     func chooseFileThenKey(group: UUID?) {
+        if lockedForShow() { return }
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.audio]
         guard panel.runModal() == .OK, let url = panel.url else { return }
@@ -643,7 +679,7 @@ final class AppModel {
     }
 
     func addKeyGroup() {
-        show.keyGroups.append(KeyGroup(name: "グループ\(show.keyGroups.count + 1)"))
+        show.keyGroups.append(KeyGroup(name: L("グループ%d", show.keyGroups.count + 1)))
     }
 
     func removeKeyGroup(_ id: UUID) {
@@ -680,19 +716,22 @@ final class AppModel {
     // MARK: - リストの編集
 
     func addSequence() {
-        var seq = CueSequence(name: "リスト\(show.sequences.count + 1)")
+        if lockedForShow() { return }
+        var seq = CueSequence(name: L("リスト%d", show.sequences.count + 1))
         seq.loop = true
         show.sequences.append(seq)
         selectedSequenceID = seq.id
     }
 
     func removeSequence(_ id: UUID) {
+        if lockedForShow() { return }
         stopSequence(id)
         show.sequences.removeAll { $0.id == id }
         selectedSequenceID = show.sequences.first?.id
     }
 
     func appendSteps(_ urls: [URL], to id: UUID) {
+        if lockedForShow() { return }
         guard let i = show.sequences.firstIndex(where: { $0.id == id }) else { return }
         for url in urls {
             guard let s = addSound(url) else { continue }
@@ -701,6 +740,7 @@ final class AppModel {
     }
 
     func removeStep(_ stepID: UUID, from id: UUID) {
+        if lockedForShow() { return }
         guard let i = show.sequences.firstIndex(where: { $0.id == id }) else { return }
         show.sequences[i].steps.removeAll { $0.id == stepID }
         if selection == .step(sequence: id, step: stepID) { selection = .none }
@@ -730,6 +770,7 @@ final class AppModel {
     // MARK: - ファイル
 
     func newShow() {
+        if lockedForShow() { return }
         guard confirmDiscard() else { return }
         output.mixer.send(.stopAll(fadeFrames: 0))
         run = nil
@@ -740,13 +781,14 @@ final class AppModel {
         pendingFiles = [:]
         showURL = nil
         selection = .none
-        show = Show(name: "新しいキューシート")
+        show = Show(name: L("新しいキューシート"))
         selectedSequenceID = nil
         dirty = false
         applyMasterVolume()
     }
 
     func openPanel() {
+        if lockedForShow() { return }
         guard confirmDiscard() else { return }
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.cacaoSoundCuesShow]
@@ -755,7 +797,9 @@ final class AppModel {
         open(url)
     }
 
-    func open(_ url: URL) {
+    /// 起動時に前回のキューシートを開くときは、本番モード中でも開く
+    func open(_ url: URL, evenInShowMode: Bool = false) {
+        if !evenInShowMode, lockedForShow() { return }
         do {
             let loaded = try ShowPackage.load(from: url)
             output.mixer.send(.stopAll(fadeFrames: 0))
@@ -776,7 +820,7 @@ final class AppModel {
             UserDefaults.standard.set(url.path, forKey: "lastShowPath")
             NSDocumentController.shared.noteNewRecentDocumentURL(url)
         } catch {
-            message = "開けません: \(error.localizedDescription)"
+            message = L("開けません: %@", error.localizedDescription)
         }
     }
 
@@ -811,7 +855,7 @@ final class AppModel {
             NSDocumentController.shared.noteNewRecentDocumentURL(url)
             return true
         } catch {
-            message = "保存できません: \(error.localizedDescription)"
+            message = L("保存できません: %@", error.localizedDescription)
             return false
         }
     }
@@ -820,10 +864,10 @@ final class AppModel {
     func confirmDiscard() -> Bool {
         guard dirty else { return true }
         let alert = NSAlert()
-        alert.messageText = "「\(show.name)」の変更を保存しますか？"
-        alert.addButton(withTitle: "保存")
-        alert.addButton(withTitle: "キャンセル")
-        alert.addButton(withTitle: "保存しない")
+        alert.messageText = L("「%@」の変更を保存しますか？", show.name)
+        alert.addButton(withTitle: L("保存"))
+        alert.addButton(withTitle: L("キャンセル"))
+        alert.addButton(withTitle: L("保存しない"))
         switch alert.runModal() {
         case .alertFirstButtonReturn: return save()
         case .alertThirdButtonReturn: return true
@@ -832,11 +876,17 @@ final class AppModel {
     }
 
     func confirmQuit() -> Bool {
-        if isPlaying {
+        if showMode {
             let alert = NSAlert()
-            alert.messageText = "再生中です。終了しますか？"
-            alert.addButton(withTitle: "キャンセル")
-            alert.addButton(withTitle: "終了")
+            alert.messageText = L("本番モード中です。終了しますか？")
+            alert.addButton(withTitle: L("キャンセル"))
+            alert.addButton(withTitle: L("終了する"))
+            if alert.runModal() != .alertSecondButtonReturn { return false }
+        } else if isPlaying {
+            let alert = NSAlert()
+            alert.messageText = L("再生中です。終了しますか？")
+            alert.addButton(withTitle: L("キャンセル"))
+            alert.addButton(withTitle: L("終了する"))
             if alert.runModal() != .alertSecondButtonReturn { return false }
         }
         return confirmDiscard()

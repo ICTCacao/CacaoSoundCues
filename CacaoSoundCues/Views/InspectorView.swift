@@ -31,23 +31,23 @@ struct InspectorView: View {
         if let cue = model.cueBinding(code) {
             KeyCueInspector(cue: cue)
         } else if let seq = model.sequence(forKey: code) {
-            Text("キー「\(KeyboardLayout.label(code))」: リスト「\(seq.name)」の開始／停止").font(.headline)
+            Text(L("キー「%@」: リスト「%@」の開始／停止", KeyboardLayout.label(code), seq.name)).font(.headline)
         } else {
-            Text("キー「\(KeyboardLayout.label(code))」").font(.headline)
-            Text("音ファイルをこのキーにドラッグすると割り当てられます。").foregroundStyle(.secondary)
+            Text(L("キー「%@」", KeyboardLayout.label(code))).font(.headline)
+            Text(L("音ファイルをこのキーにドラッグすると割り当てられます。")).foregroundStyle(.secondary)
         }
     }
 
     private var placeholder: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("使い方").font(.headline)
-            Text("・音ファイル（wav / aiff / mp3 / m4a など）をキーにドラッグして割り当てる")
-            Text("・キーを押すと鳴る。鳴っている間にもう一度押すとフェードアウト（0秒ならカットアウト）")
-            Text("・キーをクリックすると、ここで再生範囲・フェード・リピートを設定できる")
-            Text("・リスト（幕間 BGM など）は1つずつ鳴る。Return で次の曲へ進む（鳴っていなければ選んでいるリストを開始）")
-            Text("・リストの曲をダブルクリックすると、その曲が「次」になる。Return で鳴る")
-            Text("・スペースでリストの今の曲を途中で終える（次の曲はその曲のタイミング設定どおりに続く）")
-            Text("・Esc で全部フェードアウト、続けてもう一度 Esc でカット")
+            Text(L("使い方")).font(.headline)
+            Text(L("・音ファイル（wav / aiff / mp3 / m4a など）をキーにドラッグして割り当てる"))
+            Text(L("・キーを押すと鳴る。鳴っている間にもう一度押すとフェードアウト（0秒ならカットアウト）"))
+            Text(L("・キーをクリックすると、ここで再生範囲・フェード・リピートを設定できる"))
+            Text(L("・リスト（幕間 BGM など）は1つずつ鳴る。Return で次の曲へ進む（鳴っていなければ選んでいるリストを開始）"))
+            Text(L("・リストの曲をダブルクリックすると、その曲が「次」になる。Return で鳴る"))
+            Text(L("・スペースでリストの今の曲を途中で終える（次の曲はその曲のタイミング設定どおりに続く）"))
+            Text(L("・Esc で全部フェードアウト、続けてもう一度 Esc でカット"))
         }
         .foregroundStyle(.secondary)
     }
@@ -63,7 +63,7 @@ private struct KeyCueInspector: View {
                 .font(.system(size: 20, weight: .bold, design: .monospaced))
                 .frame(width: 40, height: 40)
                 .background(RoundedRectangle(cornerRadius: 6).fill(AppModel.colors[cue.colorIndex % AppModel.colors.count].opacity(0.5)))
-            TextField("名前", text: $cue.name)
+            TextField(L("名前"), text: $cue.name)
                 .textFieldStyle(.roundedBorder)
                 .font(.title3)
             ForEach(AppModel.colors.indices, id: \.self) { i in
@@ -75,8 +75,8 @@ private struct KeyCueInspector: View {
             }
         }
         HStack {
-            Text("鳴っている間にもう一度押したら").fixedSize()
-            Picker("鳴っている間にもう一度押したら", selection: $cue.retrigger) {
+            Text(L("鳴っている間にもう一度押したら")).fixedSize()
+            Picker(L("鳴っている間にもう一度押したら"), selection: $cue.retrigger) {
                 ForEach(RetriggerMode.allCases, id: \.self) { Text($0.label).tag($0) }
             }
             .labelsHidden()
@@ -91,10 +91,10 @@ private struct StepInspector: View {
     @Binding var step: SequenceStep
 
     var body: some View {
-        TextField("曲名", text: $step.name)
+        TextField(L("曲名"), text: $step.name)
             .textFieldStyle(.roundedBorder)
             .font(.title3)
-        GroupBox("この曲を鳴らし始めるタイミング") {
+        GroupBox(L("この曲を鳴らし始めるタイミング")) {
             VStack(alignment: .leading, spacing: 6) {
                 Picker("", selection: $step.start) {
                     ForEach(StepStart.allCases, id: \.self) { Text($0.label).tag($0) }
@@ -102,10 +102,10 @@ private struct StepInspector: View {
                 .pickerStyle(.radioGroup)
                 .labelsHidden()
                 HStack {
-                    Text(step.start == .overlap ? "重ねる長さ" : step.start == .returnKey ? "Return を押してから" : "前の曲との間").fixedSize()
+                    Text(step.start == .overlap ? L("重ねる長さ") : step.start == .returnKey ? L("Return を押してから") : L("前の曲との間")).fixedSize()
                     Slider(value: $step.startSeconds.rounded(0.1), in: 0...30)
                     SecondsField(value: $step.startSeconds).frame(width: 60)
-                    Text(step.start == .returnKey ? "秒待って鳴らす" : "秒").fixedSize()
+                    Text(step.start == .returnKey ? L("秒待って鳴らす") : L("秒")).fixedSize()
                 }
                 Text(hint)
                     .font(.caption)
@@ -118,14 +118,14 @@ private struct StepInspector: View {
     }
 
     private var hint: String {
-        let common = "どのタイミングでも、再生中に Return を押すとすぐこの曲へ進みます（前の曲はその曲のフェードアウトで止まります）。リストの最初の曲は開始キーで鳴ります。"
+        let common = L("どのタイミングでも、再生中に Return を押すとすぐこの曲へ進みます（前の曲はその曲のフェードアウトで止まります）。リストの最初の曲は開始キーで鳴ります。")
         switch step.start {
         case .afterPrevious:
-            return "前の曲が終わったら自動で鳴ります。" + common
+            return L("前の曲が終わったら自動で鳴ります。") + common
         case .overlap:
-            return "前の曲の終わりに重ねて鳴ります（クロスフェード）。前の曲は重ねる長さで自動的にフェードアウトし、この曲は重ねる長さでフェードインします。前の曲の「終了位置に向けて自動でフェードアウト」や、この曲の「フェードイン」を設定してあれば、そちらが優先されます。" + common
+            return L("前の曲の終わりに重ねて鳴ります（クロスフェード）。前の曲は重ねる長さで自動的にフェードアウトし、この曲は重ねる長さでフェードインします。前の曲の「終了位置に向けて自動でフェードアウト」や、この曲の「フェードイン」を設定してあれば、そちらが優先されます。") + common
         case .returnKey:
-            return "自動では鳴りません。前の曲が終わってもリストは待機したままで、Return を押すと鳴ります（待機中に開始／停止キーを押すとリストは止まります）。秒数を入れると、Return を押してからその秒数だけ待って鳴ります（前の曲は Return を押したときに止まります）。待っている間にもう一度 Return を押すと、すぐ鳴ります。"
+            return L("自動では鳴りません。前の曲が終わってもリストは待機したままで、Return を押すと鳴ります（待機中に開始／停止キーを押すとリストは止まります）。秒数を入れると、Return を押してからその秒数だけ待って鳴ります（前の曲は Return を押したときに止まります）。待っている間にもう一度 Return を押すと、すぐ鳴ります。")
         }
     }
 }
@@ -145,7 +145,7 @@ struct PlaySettingsEditor: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Image(systemName: "waveform")
-                Text(sound.map(originalFileName) ?? "（音なし）").lineLimit(1).truncationMode(.middle)
+                Text(sound.map(originalFileName) ?? L("（音なし）")).lineLimit(1).truncationMode(.middle)
                 Text(duration.timeText).monospacedDigit().foregroundStyle(.secondary)
                 if case .failed(let reason) = model.loadStates[settings.soundID] {
                     Text(reason).foregroundStyle(.red)
@@ -154,12 +154,12 @@ struct PlaySettingsEditor: View {
                 Button {
                     model.preview(settings)
                 } label: {
-                    Label(previewing != nil ? "試聴を止める" : "試聴", systemImage: previewing != nil ? "stop.fill" : "play.fill")
+                    Label(previewing != nil ? L("試聴を止める") : L("試聴"), systemImage: previewing != nil ? "stop.fill" : "play.fill")
                 }
                 .disabled(buffer == nil)
             }
 
-            GroupBox("再生範囲") {
+            GroupBox(L("再生範囲")) {
                 VStack(alignment: .leading, spacing: 6) {
                     WaveformView(peaks: buffer?.peaks ?? [], duration: duration,
                                  inPoint: $settings.inPoint, outPoint: $settings.outPoint,
@@ -176,13 +176,13 @@ struct PlaySettingsEditor: View {
                                  })
                         .frame(height: 110)
                     HStack {
-                        Text("開始").fixedSize()
+                        Text(L("開始")).fixedSize()
                         SecondsField(value: Binding(get: { settings.inPoint },
                                                     set: { settings.inPoint = min(max(0, $0), (settings.outPoint ?? duration) - 0.01) }))
                             .frame(width: 80)
                         Text(settings.inPoint.timeText).monospacedDigit().foregroundStyle(.secondary).fixedSize()
                         Spacer(minLength: 4)
-                        Text("終了").fixedSize()
+                        Text(L("終了")).fixedSize()
                         SecondsField(value: Binding(get: { settings.outPoint ?? duration },
                                                     set: { v in
                                                         let c = min(max(v, settings.inPoint + 0.01), duration)
@@ -193,25 +193,25 @@ struct PlaySettingsEditor: View {
                         Button {
                             settings.inPoint = 0
                             settings.outPoint = nil
-                        } label: { Label("全体に戻す", systemImage: "arrow.left.and.right") }
+                        } label: { Label(L("全体に戻す"), systemImage: "arrow.left.and.right") }
                     }
-                    Text("緑（開始）と赤（終了）の線をドラッグして範囲を、上の端のオレンジの丸をドラッグしてフェードの長さを、白い四角をドラッグしてフェードの形（ベジエ曲線）を決めます（点線は止めたときのフェードアウト）。再生中は波形をクリックするとその位置へ移ります。長さ \(((settings.outPoint ?? duration) - settings.inPoint).timeText)")
+                    Text(L("緑（開始）と赤（終了）の線をドラッグして範囲を、上の端のオレンジの丸をドラッグしてフェードの長さを、白い四角をドラッグしてフェードの形（ベジエ曲線）を決めます（点線は止めたときのフェードアウト）。再生中は波形をクリックするとその位置へ移ります。長さ %@", ((settings.outPoint ?? duration) - settings.inPoint).timeText))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 .padding(4)
             }
 
-            GroupBox("フェード（0秒 = カット）") {
+            GroupBox(L("フェード（0秒 = カット）")) {
                 VStack(alignment: .leading, spacing: 6) {
-                    FadeRow(label: "フェードイン", value: $settings.fadeIn)
-                    FadeRow(label: "フェードアウト", value: $settings.fadeOut)
-                    Toggle("終了位置に向けて自動でフェードアウトする（長さは上と同じ）", isOn: $settings.fadeOutAtEnd)
+                    FadeRow(label: L("フェードイン"), value: $settings.fadeIn)
+                    FadeRow(label: L("フェードアウト"), value: $settings.fadeOut)
+                    Toggle(L("終了位置に向けて自動でフェードアウトする（長さは上と同じ）"), isOn: $settings.fadeOutAtEnd)
                         .disabled(settings.plays == nil)
                     // ラベルとボタンを別にして、幅が足りなくてもラベルが縦に折れないようにする
                     HStack {
-                        Text("カーブ").fixedSize()
-                        Picker("カーブ", selection: $settings.curve) {
+                        Text(L("カーブ")).fixedSize()
+                        Picker(L("カーブ"), selection: $settings.curve) {
                             ForEach(FadeCurve.allCases, id: \.self) { Text($0.label).tag($0) }
                         }
                         .pickerStyle(.segmented)
@@ -224,28 +224,28 @@ struct PlaySettingsEditor: View {
 
             // 幅が狭くても文字が縦に折れないよう、リピートと音量は別の行にする
             HStack(spacing: 12) {
-                Toggle("リピート（開始〜終了をくり返す）", isOn: $settings.loop)
+                Toggle(L("リピート（開始〜終了をくり返す）"), isOn: $settings.loop)
                     .fixedSize()
                 if settings.loop {
-                    Picker("回数", selection: Binding(
+                    Picker(L("回数"), selection: Binding(
                         get: { settings.loopCount > 0 },
                         set: { settings.loopCount = $0 ? max(2, settings.loopCount) : 0 })) {
-                        Text("止めるまで").tag(false)
-                        Text("回数を指定").tag(true)
+                        Text(L("止めるまで")).tag(false)
+                        Text(L("回数を指定")).tag(true)
                     }
                     .pickerStyle(.segmented)
                     .labelsHidden()
                     .fixedSize()
                     if settings.loopCount > 0 {
                         Stepper(value: $settings.loopCount, in: 2...99) {
-                            Text("\(settings.loopCount) 回鳴らす").monospacedDigit()
+                            Text(L("%d 回鳴らす", settings.loopCount)).monospacedDigit()
                         }
                         .fixedSize()
                     }
                 }
             }
             HStack {
-                Text("音量").fixedSize()
+                Text(L("音量")).fixedSize()
                 Slider(value: $settings.volumeDB, in: -40...10)
                     .frame(minWidth: 120, maxWidth: 260)
                 Text(String(format: "%+.1f dB", settings.volumeDB))
@@ -292,8 +292,8 @@ private struct FadeRow: View {
             Text(label).frame(width: 190, alignment: .leading).fixedSize(horizontal: false, vertical: true)
             Slider(value: $value.rounded(0.1), in: 0...20)
             SecondsField(value: $value).frame(width: 60)
-            Text("秒")
-            Text(value == 0 ? "カット" : "").foregroundStyle(.orange).frame(width: 40, alignment: .leading)
+            Text(L("秒"))
+            Text(value == 0 ? L("カット") : "").foregroundStyle(.orange).frame(width: 40, alignment: .leading)
         }
     }
 }

@@ -1,3 +1,4 @@
+import CacaoSoundCuesCore
 import Carbon
 import Foundation
 
@@ -64,9 +65,9 @@ enum KeyboardLayout {
     /// 操作用に固定していて割り当てられないキーなら、その理由
     static func reservedReason(_ code: UInt16) -> String? {
         switch code {
-        case returnKey, enterKey: return "Return キーは「リストの次の曲へ」に使うため割り当てられません"
-        case space: return "スペースキーは「リストの曲を途中で終える」に使うため割り当てられません"
-        case escape: return "Esc キーは「全停止」に使うため割り当てられません"
+        case returnKey, enterKey: return L("Return キーは「リストの次の曲へ」に使うため割り当てられません")
+        case space: return L("スペースキーは「リストの曲を途中で終える」に使うため割り当てられません")
+        case escape: return L("Esc キーは「全停止」に使うため割り当てられません")
         default: return nil
         }
     }

@@ -1,0 +1,2 @@
+/* macOS にこのアプリが日本語に対応していると知らせるためのファイル */
+"CFBundleDisplayName" = "CacaoSoundCues";

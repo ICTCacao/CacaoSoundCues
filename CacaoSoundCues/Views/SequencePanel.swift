@@ -9,7 +9,7 @@ struct SequencePanel: View {
         @Bindable var model = model
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("リスト").font(.headline)
+                Text(L("リスト")).font(.headline)
                 if !model.show.sequences.isEmpty {
                     Picker("", selection: $model.selectedSequenceID) {
                         ForEach(model.show.sequences) { seq in
@@ -19,11 +19,13 @@ struct SequencePanel: View {
                     .labelsHidden()
                     .frame(maxWidth: 200)
                 }
-                Button { model.addSequence() } label: { Image(systemName: "plus") }
-                    .help("リストを追加")
-                if let id = model.selectedSequenceID {
-                    Button { model.removeSequence(id) } label: { Image(systemName: "minus") }
-                        .help("このリストを削除")
+                if !model.showMode {
+                    Button { model.addSequence() } label: { Image(systemName: "plus") }
+                        .help(L("リストを追加"))
+                    if let id = model.selectedSequenceID {
+                        Button { model.removeSequence(id) } label: { Image(systemName: "minus") }
+                            .help(L("このリストを削除"))
+                    }
                 }
                 Spacer()
             }
@@ -32,8 +34,8 @@ struct SequencePanel: View {
                 SequenceEditor(seq: seq)
             } else {
                 VStack(spacing: 8) {
-                    Text("幕間 BGM など、曲を順番に続けて再生するリストです。")
-                    Button { model.addSequence() } label: { Label("リストを作る", systemImage: "music.note.list") }
+                    Text(L("幕間 BGM など、曲を順番に続けて再生するリストです。"))
+                    Button { model.addSequence() } label: { Label(L("リストを作る"), systemImage: "music.note.list") }
                 }
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -51,29 +53,33 @@ private struct SequenceEditor: View {
     var body: some View {
         let running = model.isRunning(seq.id)
         VStack(alignment: .leading, spacing: 8) {
+            // リスト名・ループ・キー・停止フェードは本番モードでは触れない
+            Group {
             HStack {
-                TextField("リスト名", text: $seq.name).textFieldStyle(.roundedBorder)
-                Toggle("最後まで行ったら先頭へ", isOn: $seq.loop)
+                TextField(L("リスト名"), text: $seq.name).textFieldStyle(.roundedBorder)
+                Toggle(L("最後まで行ったら先頭へ"), isOn: $seq.loop)
             }
             HStack {
-                Text("開始／停止キー").fixedSize()
+                Text(L("開始／停止キー")).fixedSize()
                 Button {
                     model.capturingSequenceKey = seq.id
                 } label: {
                     Label(model.capturingSequenceKey == seq.id
-                          ? "キーを押してください…"
-                          : (seq.toggleKey.map { KeyboardLayout.label($0) } ?? "未設定"),
+                          ? L("キーを押してください…")
+                          : (seq.toggleKey.map { KeyboardLayout.label($0) } ?? L("未設定")),
                           systemImage: "keyboard")
                         .font(.body.monospaced())
                 }
                 if seq.toggleKey != nil {
-                    Button { seq.toggleKey = nil } label: { Label("解除", systemImage: "xmark") }
+                    Button { seq.toggleKey = nil } label: { Label(L("解除"), systemImage: "xmark") }
                 }
                 Spacer()
-                Text("停止フェード").fixedSize()
+                Text(L("停止フェード")).fixedSize()
                 SecondsField(value: $seq.stopFade).frame(width: 60)
-                Text("秒")
+                Text(L("秒"))
             }
+            }
+            .disabled(model.showMode)
 
             ScrollViewReader { proxy in
             List(selection: selectionBinding) {
@@ -87,12 +93,16 @@ private struct SequenceEditor: View {
                 .onDelete { offsets in
                     offsets.map { seq.steps[$0].id }.forEach { model.removeStep($0, from: seq.id) }
                 }
+                .moveDisabled(model.showMode)
+                .deleteDisabled(model.showMode)
             }
             // ダブルクリックで「次に鳴らす曲」をこの曲にする（鳴らすのは Return）
             .contextMenu(forSelectionType: UUID.self) { ids in
                 if let id = ids.first, let index = seq.steps.firstIndex(where: { $0.id == id }) {
-                    Button { model.cueStep(seq.id, index: index) } label: { Label("次に鳴らす曲にする（Return で再生）", systemImage: "return") }
-                    Button(role: .destructive) { model.removeStep(id, from: seq.id) } label: { Label("削除", systemImage: "trash") }
+                    Button { model.cueStep(seq.id, index: index) } label: { Label(L("次に鳴らす曲にする（Return で再生）"), systemImage: "return") }
+                    if !model.showMode {
+                        Button(role: .destructive) { model.removeStep(id, from: seq.id) } label: { Label(L("削除"), systemImage: "trash") }
+                    }
                 }
             } primaryAction: { ids in
                 if let id = ids.first, let index = seq.steps.firstIndex(where: { $0.id == id }) {
@@ -101,7 +111,7 @@ private struct SequenceEditor: View {
             }
             .overlay {
                 if seq.steps.isEmpty {
-                    Text("曲のファイルをここにドラッグ").foregroundStyle(.secondary)
+                    Text(L("曲のファイルをここにドラッグ")).foregroundStyle(.secondary)
                 }
             }
             .scrollContentBackground(.hidden)
@@ -119,9 +129,9 @@ private struct SequenceEditor: View {
 
             // 操作キーの説明（スペースは画面のキーボードに出さないため、ここで案内する）
             HStack(spacing: 14) {
-                KeyHint(key: "space", text: "今の曲を途中で終える")
-                KeyHint(key: "return", text: "次の曲へ")
-                KeyHint(key: "↑↓・ダブルクリック", text: "次に鳴らす曲を選ぶ")
+                KeyHint(key: "space", text: L("今の曲を途中で終える"))
+                KeyHint(key: "return", text: L("次の曲へ"))
+                KeyHint(key: L("↑↓・ダブルクリック"), text: L("次に鳴らす曲を選ぶ"))
             }
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -130,7 +140,7 @@ private struct SequenceEditor: View {
                 Button {
                     model.toggleSequence(seq.id)
                 } label: {
-                    Label(running ? "停止" : "開始", systemImage: running ? "stop.fill" : "play.fill")
+                    Label(running ? L("停止") : L("開始"), systemImage: running ? "stop.fill" : "play.fill")
                         .frame(width: 70)
                 }
                 .buttonStyle(.borderedProminent)
@@ -138,15 +148,15 @@ private struct SequenceEditor: View {
                 Button {
                     if running { model.advanceActiveSequence() } else { model.startSequence(seq.id) }
                 } label: {
-                    Label("次の曲へ（Return）", systemImage: "return")
+                    Label(L("次の曲へ（Return）"), systemImage: "return")
                 }
                 if let r = model.run, r.sequenceID == seq.id, r.isWaiting {
-                    Text("Return 待ち")
+                    Text(L("Return 待ち"))
                         .font(.callout.bold())
                         .foregroundStyle(.orange)
                 }
                 Spacer()
-                Text("\(seq.steps.count) 曲・\(totalDuration.timeText)")
+                Text(L("%d 曲・%@", seq.steps.count, totalDuration.timeText))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
             }
@@ -196,12 +206,12 @@ private struct StepRow: View {
             Spacer()
             if let wait = model.status.first(where: { $0.tag == step.id && $0.armed && $0.startsIn >= 0 }),
                step.start == .returnKey {
-                Text("あと " + String(format: "%.1f", Double(wait.startsIn) / model.sampleRate) + " 秒")
+                Text(L("あと %.1f 秒", Double(wait.startsIn) / model.sampleRate))
                     .font(.caption.bold().monospacedDigit())
                     .foregroundStyle(.orange)
             }
             if upcoming && voice == nil {
-                Text("次").font(.caption.bold()).foregroundStyle(.orange)
+                Text(L("次")).font(.caption.bold()).foregroundStyle(.orange)
             }
             if let voice {
                 Text(voice.loop ? "∞" : "-" + (Double(voice.remainingFrames) / model.sampleRate).timeText)
@@ -216,17 +226,17 @@ private struct StepRow: View {
     private var detail: String {
         var parts: [String] = []
         switch step.start {
-        case .afterPrevious: parts.append(step.startSeconds > 0 ? "前の曲の後 \(fmt(step.startSeconds))あけて" : "前の曲の後すぐ")
-        case .overlap: parts.append("前の曲に \(fmt(step.startSeconds))重ねる")
-        case .returnKey: parts.append(step.startSeconds > 0 ? "⏎ Return の \(fmt(step.startSeconds))後" : "⏎ Return で")
+        case .afterPrevious: parts.append(step.startSeconds > 0 ? L("前の曲の後 %@あけて", fmt(step.startSeconds)) : L("前の曲の後すぐ"))
+        case .overlap: parts.append(L("前の曲に %@重ねる", fmt(step.startSeconds)))
+        case .returnKey: parts.append(step.startSeconds > 0 ? L("⏎ Return の %@後", fmt(step.startSeconds)) : L("⏎ Return で"))
         }
         parts.append(step.play.fadeIn > 0 ? "F.in \(fmt(step.play.fadeIn))" : "C.in")
-        if step.play.fadeOutAtEnd { parts.append("終わり F.out \(fmt(step.play.fadeOut))") }
-        if step.play.loop { parts.append(step.play.plays.map { "リピート \($0)回" } ?? "リピート ∞") }
+        if step.play.fadeOutAtEnd { parts.append(L("終わり F.out %@", fmt(step.play.fadeOut))) }
+        if step.play.loop { parts.append(step.play.plays.map { L("リピート %d回", $0) } ?? L("リピート ∞")) }
         return parts.joined(separator: " · ")
     }
 
-    private func fmt(_ s: Double) -> String { String(format: "%.1f秒", s) }
+    private func fmt(_ s: Double) -> String { String(format: L("%.1f秒"), s) }
 }
 
 /// 「space 今の曲を途中で終える」のような操作の案内
