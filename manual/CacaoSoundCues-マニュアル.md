@@ -49,7 +49,7 @@ footer: "CacaoSoundCues マニュアル ／ ICTCacao"
 # CacaoSoundCues マニュアル
 
 舞台のための、ポン出し音響アプリ
-バージョン β2.9.0 ／ 2026 年 10 月
+バージョン β2.10.0 ／ 2026 年 10 月
 
 ---
 
@@ -63,6 +63,9 @@ footer: "CacaoSoundCues マニュアル ／ ICTCacao"
 6. 設定と、困ったときの対処
 
 > 対応 Mac: **macOS 14 以降**。インターネット接続は不要です。MacBook だけで本番でポン出しができます。
+
+<span class="small">CacaoSoundCues は**オープンソース**（MIT License）です。無料で使え、学校や劇団で自由に配れます。
+https://github.com/ICTCacao/CacaoSoundCues</span>
 
 ---
 
@@ -98,7 +101,7 @@ footer: "CacaoSoundCues マニュアル ／ ICTCacao"
 <div class="cols">
 <div>
 
-1. **CacaoSoundCues-2.9.0.dmg** をダブルクリック
+1. **CacaoSoundCues-2.10.0.dmg** をダブルクリック
 2. 左の **CacaoSoundCues** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 4. アプリケーション フォルダの CacaoSoundCues をダブルクリック

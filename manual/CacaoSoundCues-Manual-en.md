@@ -49,7 +49,7 @@ footer: "CacaoSoundCues Manual / ICTCacao"
 # CacaoSoundCues Manual
 
 A sound cue player for the stage
-Version β2.9.0 / October 2026
+Version β2.10.0 / October 2026
 
 ---
 
@@ -63,6 +63,9 @@ Version β2.9.0 / October 2026
 6. Settings and troubleshooting
 
 > Requires **macOS 14 or later**. No internet connection needed. A MacBook alone is enough to run sound cues for a show.
+
+<span class="small">CacaoSoundCues is **open source** (MIT License) — free to use and to share with your school or theater group.
+https://github.com/ICTCacao/CacaoSoundCues</span>
 
 ---
 
@@ -98,7 +101,7 @@ Version β2.9.0 / October 2026
 <div class="cols">
 <div>
 
-1. Double-click **CacaoSoundCues-2.9.0.dmg**
+1. Double-click **CacaoSoundCues-2.10.0.dmg**
 2. Drag **CacaoSoundCues** onto **Applications**
 3. Close the dmg (eject the disk icon on the desktop)
 4. Double-click CacaoSoundCues in the Applications folder

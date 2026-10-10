@@ -87,3 +87,12 @@ rm -rf dist/CacaoSoundCues.app && ditto build/Build/Products/Release/CacaoSoundC
 ```
 
 起動するアプリは `dist/CacaoSoundCues.app`。dist に置くビルドの前に `./bump-version.sh` でバージョンを上げる。ベータ版の間は 0.1.0 ずつ（β1.1.0 → β1.2.0）。
+
+## ライセンス
+
+- CacaoSoundCues は **オープンソース**です。コードは **MIT License**（[LICENSE](LICENSE)）。
+  学校・劇団などで、自由に使い、改変し、配ってかまいません（著作権表示とライセンス文は残してください）。
+- アプリ本体（Contents/Resources）にも LICENSE を同梱している。
+- 外部のライブラリは使っていない（macOS の標準フレームワークだけ）。
+- 本ソフトウェアは「現状のまま」提供され、本番での動作や結果について保証はありません。
+  本番の前に、使う Mac とスピーカーで必ず確かめてください。

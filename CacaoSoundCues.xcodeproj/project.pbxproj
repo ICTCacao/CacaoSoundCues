@@ -25,6 +25,7 @@
 		A340C9EE3F68123D6D2E5A71 /* en.json in Resources */ = {isa = PBXBuildFile; fileRef = 092047D9CF42BA88AE791881 /* en.json */; };
 		A9103EAB31D08F2893F16024 /* CueSheet.icns in Resources */ = {isa = PBXBuildFile; fileRef = B77B3604047395E8C99BA99F /* CueSheet.icns */; };
 		AD7E78DE8EAB80CAB1CD7A73 /* CacaoSoundCuesCore in Frameworks */ = {isa = PBXBuildFile; productRef = 54D8CD158DCF18FE7C69BE48 /* CacaoSoundCuesCore */; };
+		CCFF41D60C469677737E62E8 /* LICENSE in Resources */ = {isa = PBXBuildFile; fileRef = 629BC746C647E64733E5C8B3 /* LICENSE */; };
 		F9F65FEC1DDFD6DE5FD3B6A5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1144C18B5CB38B346E8858AA /* InspectorView.swift */; };
 /* End PBXBuildFile section */
 
@@ -42,6 +43,7 @@
 		4EBC8D51D1CACA6E5929E65B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSoundDefaults.swift; sourceTree = "<group>"; };
 		55C9ED6F074FDC41546190C8 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
+		629BC746C647E64733E5C8B3 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
 		682B3F49FA9AA5FE1BFB61E7 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		74CF3DC1F785BADAA220EA2B /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
 		AC141BA9D9DA80CAFC8AC3F7 /* KeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardView.swift; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 		CEC11BBCE00BDEE615AF8BA7 = {
 			isa = PBXGroup;
 			children = (
+				629BC746C647E64733E5C8B3 /* LICENSE */,
 				C0668152959E1242A28C3D2F /* CacaoSoundCues */,
 				157428D5E58BDEC5B3120957 /* Packages */,
 				1154B975E833EAC5A4186B6E /* Products */,
@@ -207,6 +210,7 @@
 				1B6EC66BCF4E3807407A4C5D /* Assets.xcassets in Resources */,
 				A9103EAB31D08F2893F16024 /* CueSheet.icns in Resources */,
 				464C3B4D693B3F3CA81CF6E0 /* InfoPlist.strings in Resources */,
+				CCFF41D60C469677737E62E8 /* LICENSE in Resources */,
 				A340C9EE3F68123D6D2E5A71 /* en.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
