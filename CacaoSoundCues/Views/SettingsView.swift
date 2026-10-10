@@ -17,7 +17,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            Section(L("言語") + " / Language") {
+            Section(L("言語 / Language")) {
                 // 先に言葉を切り替えてから値を変える（画面を描き直すときに新しい言葉を使うため）
                 Picker(L("画面の言語"), selection: Binding(
                     get: { language },

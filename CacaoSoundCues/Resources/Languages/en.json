@@ -192,7 +192,6 @@
     "Return キーを押したとき（自動再生しない）": "On Return (no auto-play)",
     "音ファイルが見つかりません: %@": "Audio file not found: %@",
     "終了する": "Quit",
-    "言語": "Language",
     "画面の言語": "Display language",
     "ほかの言語は、翻訳用のひな形（英語）を書き出し、英語の部分を置き換えて言語のフォルダに置くと選べるようになります。訳の無い言葉は英語で表示されます。": "To add another language, export the translation template (English), replace the English text, and put the file in the language folder. Untranslated text appears in English.",
     "翻訳用のひな形を書き出す…": "Export Translation Template…",
@@ -201,6 +200,7 @@
     "メニューバーの言語は、アプリを起動し直すと切り替わります。": "The menu bar language changes when the app is restarted.",
     "今すぐ起動し直しますか？": "Restart now?",
     "起動し直す": "Restart",
-    "あとで": "Later"
+    "あとで": "Later",
+    "言語 / Language": "Language"
   }
 }

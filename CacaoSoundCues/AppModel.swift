@@ -121,11 +121,33 @@ final class AppModel {
         RunLoop.main.add(t, forMode: .common)
         timer = t
 
+        #if DEBUG
+        if openForScreenshots() { return }
+        #endif
         if let path = UserDefaults.standard.string(forKey: "lastShowPath"),
            FileManager.default.fileExists(atPath: path) {
             open(URL(fileURLWithPath: path), evenInShowMode: true)
         }
     }
+
+    #if DEBUG
+    /// 開発版だけ: マニュアルの画面写真用に、起動引数でキューシートを開いて選ぶ
+    /// （-debugOpen パス -debugSelectKey キーコード -debugSelectStep 番号 -debugSettings YES）。
+    /// 最近使ったキューシートの記録は変えない
+    static var isScreenshotRun: Bool { UserDefaults.standard.string(forKey: "debugOpen") != nil }
+
+    private func openForScreenshots() -> Bool {
+        let d = UserDefaults.standard
+        guard let path = d.string(forKey: "debugOpen") else { return false }
+        open(URL(fileURLWithPath: path), evenInShowMode: true, remember: false)
+        if let k = Int(d.string(forKey: "debugSelectKey") ?? "") { selection = .key(UInt16(k)) }
+        if let i = Int(d.string(forKey: "debugSelectStep") ?? ""), let seq = show.sequences.first, seq.steps.indices.contains(i) {
+            selectedSequenceID = seq.id
+            selection = .step(sequence: seq.id, step: seq.steps[i].id)
+        }
+        return true
+    }
+    #endif
 
     private func tick() {
         let s = output.mixer.snapshot()
@@ -798,7 +820,7 @@ final class AppModel {
     }
 
     /// 起動時に前回のキューシートを開くときは、本番モード中でも開く
-    func open(_ url: URL, evenInShowMode: Bool = false) {
+    func open(_ url: URL, evenInShowMode: Bool = false, remember: Bool = true) {
         if !evenInShowMode, lockedForShow() { return }
         do {
             let loaded = try ShowPackage.load(from: url)
@@ -817,8 +839,10 @@ final class AppModel {
             dirty = released
             applyMasterVolume()
             show.sounds.forEach(load)
-            UserDefaults.standard.set(url.path, forKey: "lastShowPath")
-            NSDocumentController.shared.noteNewRecentDocumentURL(url)
+            if remember {
+                UserDefaults.standard.set(url.path, forKey: "lastShowPath")
+                NSDocumentController.shared.noteNewRecentDocumentURL(url)
+            }
         } catch {
             message = L("開けません: %@", error.localizedDescription)
         }

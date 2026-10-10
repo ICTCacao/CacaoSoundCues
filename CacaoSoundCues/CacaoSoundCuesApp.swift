@@ -13,6 +13,9 @@ struct CacaoSoundCuesApp: App {
     init() {
         LanguageManager.apply()
         // メニューバーなど macOS が出す部分の言語も合わせておく（次に起動したときから効く）
+        #if DEBUG
+        if AppModel.isScreenshotRun { return }   // 画面写真用の起動ではアプリの言語の記録を変えない
+        #endif
         UserDefaults.standard.set([LanguageManager.currentCode], forKey: "AppleLanguages")
     }
     @AppStorage("showFunctionKeys") private var showFunctionKeys = false

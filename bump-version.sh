@@ -12,4 +12,9 @@ else
 fi
 sed -i '' "s/\"$cur\"/\"$new\"/" project.yml
 [[ -f CacaoSoundCues/Resources/Info.plist ]] && sed -i '' "s|<string>$cur</string>|<string>$new</string>|" CacaoSoundCues/Resources/Info.plist
+month="$(date +%Y) 年 $(( $(date +%m) )) 月"
+sed -i '' "s/バージョン β[0-9.]* ／ [0-9]* 年 [0-9]* 月/バージョン β$new ／ $month/" manual/CacaoSoundCues-マニュアル.md
+month_en="$(LC_ALL=en_US.UTF-8 date +'%B %Y')"
+sed -i '' "s/^Version β[0-9.]* \/ .*/Version β$new \/ $month_en/" manual/CacaoSoundCues-Manual-en.md
+sed -i '' "s/CacaoSoundCues-[0-9.]*\.dmg/CacaoSoundCues-$new.dmg/" manual/CacaoSoundCues-マニュアル.md manual/CacaoSoundCues-Manual-en.md
 echo "β$cur → β$new"

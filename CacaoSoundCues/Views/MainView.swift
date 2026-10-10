@@ -7,6 +7,7 @@ struct MainView: View {
     @AppStorage("showKeyboard") private var showKeyboard = true
     /// 言語が変わったら画面全体を作り直す
     @AppStorage(LanguageManager.storageKey) private var language = LanguageManager.defaultCode
+    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         @Bindable var model = model
@@ -47,6 +48,10 @@ struct MainView: View {
         .onAppear {
             // 起動直後に文字入力欄が選ばれていると、キーを押しても鳴らないため
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { AppModel.endEditing() }
+            #if DEBUG
+            // 開発版だけ: マニュアルの画面写真用に設定画面を開く
+            if UserDefaults.standard.bool(forKey: "debugSettings") { openSettings() }
+            #endif
         }
         .alert(L("お知らせ"), isPresented: Binding(get: { model.message != nil }, set: { if !$0 { model.message = nil } })) {
             Button("OK") { model.message = nil }
