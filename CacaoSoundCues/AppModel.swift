@@ -341,6 +341,11 @@ final class AppModel {
             if let id = activeSequenceID { startSequence(id) }
             return
         }
+        // 「Return を押してから n 秒」を待っている間にもう一度 Return を押したら、待たずにすぐ鳴らす
+        if let current = r.currentToken, status.contains(where: { $0.token == current && $0.armed }) {
+            output.mixer.send(.startNow(current))
+            return
+        }
         let target = r.pendingIndex ?? r.armedIndex
             ?? r.currentIndex.flatMap { playableIndex(in: seq, from: $0 + 1) }
         if let armed = r.armedToken { output.mixer.send(.stopToken(armed, fadeFrames: 0)) }
@@ -365,8 +370,13 @@ final class AppModel {
         return cuedIndex(id)
     }
 
+    /// タイミングが「Return キーを押したとき」で秒数があれば、その秒数だけ待ってから鳴らす
     private func playStep(_ seq: CueSequence, _ i: Int) {
-        guard let spec = makeSpec(seq.steps[i].play, owner: seq.id, tag: seq.steps[i].id) else { return }
+        guard var spec = makeSpec(seq.steps[i].play, owner: seq.id, tag: seq.steps[i].id) else { return }
+        let step = seq.steps[i]
+        if step.start == .returnKey, step.startSeconds > 0 {
+            spec.delayFrames = Int(step.startSeconds * sampleRate)
+        }
         output.mixer.send(.play(spec))
         run = SequenceRun(sequenceID: seq.id, currentToken: spec.token, currentIndex: i)
         followPlaying(seq.id, i)

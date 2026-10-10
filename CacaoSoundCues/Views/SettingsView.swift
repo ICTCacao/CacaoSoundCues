@@ -30,9 +30,9 @@ struct SettingsView: View {
                 Picker("鳴らし始めるタイミング", selection: $stepStart) {
                     ForEach(StepStart.allCases, id: \.self) { Text($0.label).tag($0) }
                 }
-                if stepStart == .afterPrevious || stepStart == .overlap {
-                    SettingsSeconds(label: stepStart == .overlap ? "重ねる長さ" : "前の曲との間", value: $stepStartSeconds)
-                }
+                SettingsSeconds(label: stepStart == .overlap ? "重ねる長さ"
+                                    : stepStart == .returnKey ? "Return を押してから待つ時間" : "前の曲との間",
+                                value: $stepStartSeconds)
                 SettingsSeconds(label: "フェードイン", value: $stepFadeIn)
                 SettingsSeconds(label: "フェードアウト", value: $stepFadeOut)
                 Toggle("終了位置に向けて自動でフェードアウトする", isOn: $stepFadeOutAtEnd)

@@ -191,6 +191,12 @@ private struct StepRow: View {
                 Text(detail).font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
+            if let wait = model.status.first(where: { $0.tag == step.id && $0.armed && $0.startsIn >= 0 }),
+               step.start == .returnKey {
+                Text("あと " + String(format: "%.1f", Double(wait.startsIn) / model.sampleRate) + " 秒")
+                    .font(.caption.bold().monospacedDigit())
+                    .foregroundStyle(.orange)
+            }
             if upcoming && voice == nil {
                 Text("次").font(.caption.bold()).foregroundStyle(.orange)
             }
@@ -209,7 +215,7 @@ private struct StepRow: View {
         switch step.start {
         case .afterPrevious: parts.append(step.startSeconds > 0 ? "前の曲の後 \(fmt(step.startSeconds))あけて" : "前の曲の後すぐ")
         case .overlap: parts.append("前の曲に \(fmt(step.startSeconds))重ねる")
-        case .returnKey: parts.append("⏎ Return で")
+        case .returnKey: parts.append(step.startSeconds > 0 ? "⏎ Return の \(fmt(step.startSeconds))後" : "⏎ Return で")
         }
         parts.append(step.play.fadeIn > 0 ? "F.in \(fmt(step.play.fadeIn))" : "C.in")
         if step.play.fadeOutAtEnd { parts.append("終わり F.out \(fmt(step.play.fadeOut))") }

@@ -155,7 +155,7 @@ public struct SequenceStep: Codable, Identifiable, Hashable, Sendable {
     public var play: PlaySettings
     /// この曲を鳴らし始めるタイミング（曲を追加したときは「Return キーを押したとき」）
     public var start: StepStart = .returnKey
-    /// afterPrevious なら間の秒数、overlap なら重ねる秒数
+    /// afterPrevious なら間の秒数、overlap なら重ねる秒数、returnKey なら Return を押してから鳴るまでの秒数
     public var startSeconds: Double = 0
 
     public init(name: String, play: PlaySettings) {

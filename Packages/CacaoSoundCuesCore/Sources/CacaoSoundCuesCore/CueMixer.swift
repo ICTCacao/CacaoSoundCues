@@ -29,6 +29,8 @@ public struct CueVoiceSpec: @unchecked Sendable {
     public var gapFrames: Int
     /// 重ねるとき（gapFrames < 0）、先の音を重なりの長さで自動フェードアウトさせる
     public var crossfade: Bool
+    /// follow が 0 のとき、このフレーム数だけ待ってから鳴らす（Return を押してから n 秒）
+    public var delayFrames: Int = 0
 
     public init(token: UInt64, owner: UUID, tag: UUID,
                 left: UnsafePointer<Float>, right: UnsafePointer<Float>,
@@ -73,6 +75,8 @@ public enum MixerCommand: @unchecked Sendable {
     case setMasterGain(Float)
     /// 鳴っている音の再生位置を移す（再生範囲の中に収める）
     case seek(UInt64, frame: Int)
+    /// 待っている音（delayFrames）を、待たずにすぐ鳴らす
+    case startNow(UInt64)
 }
 
 public struct VoiceStatus: Sendable, Hashable {
@@ -101,6 +105,8 @@ public struct VoiceStatus: Sendable, Hashable {
     public var fadeLength: Int
     public var fadeFrom: Float
     public var fadeTo: Float
+    /// 待っている音が鳴り始めるまでの残りフレーム（待っていなければ -1）
+    public var startsIn: Int
 }
 
 private let silentSample: UnsafeMutablePointer<Float> = {
@@ -248,6 +254,10 @@ public final class CueMixer: @unchecked Sendable {
             }
         case .setMasterGain(let g):
             masterTarget = g
+        case .startNow(let token):
+            for i in 0..<Self.maxVoices where voices[i].inUse && voices[i].armed && voices[i].spec.token == token {
+                voices[i].countdown = 0
+            }
         case .seek(let token, let frame):
             for i in 0..<Self.maxVoices where voices[i].inUse && !voices[i].armed && voices[i].spec.token == token {
                 var v = voices[i]
@@ -278,6 +288,9 @@ public final class CueMixer: @unchecked Sendable {
         v.repeatsLeft = s.loop ? (s.loopCount > 0 ? s.loopCount - 1 : -1) : 0
         if s.follow != 0 {
             v.armed = true
+        } else if s.delayFrames > 0 {
+            v.armed = true
+            v.countdown = s.delayFrames
         } else {
             setEnv(&v, to: 1, len: max(minFade, s.fadeInFrames))
         }
@@ -307,6 +320,12 @@ public final class CueMixer: @unchecked Sendable {
             let follow = voices[i].spec.follow
             let gap = voices[i].spec.gapFrames
             var startIn: Int
+            // 先の音もまだ待っている（Return から n 秒待ちの曲）なら、それが鳴り始めるまで待つ
+            if follow != 0, (0..<Self.maxVoices).contains(where: {
+                voices[$0].inUse && voices[$0].armed && voices[$0].spec.token == follow
+            }) {
+                continue
+            }
             if let j = (0..<Self.maxVoices).first(where: {
                 voices[$0].inUse && !voices[$0].armed && voices[$0].spec.token == follow
             }) {
@@ -411,7 +430,8 @@ public final class CueMixer: @unchecked Sendable {
                                          armed: v.armed, stopping: v.stopping, loop: v.repeatsLeft < 0,
                                          remainingFrames: remainingFrames(v),
                                          level: v.env, fading: v.envPos < v.envLen, fadingDown: v.envTo < v.envFrom,
-                                         fadeElapsed: v.envPos, fadeLength: v.envLen, fadeFrom: v.envFrom, fadeTo: v.envTo))
+                                         fadeElapsed: v.envPos, fadeLength: v.envLen, fadeFrom: v.envFrom, fadeTo: v.envTo,
+                                         startsIn: v.armed && v.countdown != Int.min ? v.countdown : -1))
         }
     }
 }

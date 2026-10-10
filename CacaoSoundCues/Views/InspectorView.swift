@@ -101,13 +101,11 @@ private struct StepInspector: View {
                 }
                 .pickerStyle(.radioGroup)
                 .labelsHidden()
-                if step.start == .afterPrevious || step.start == .overlap {
-                    HStack {
-                        Text(step.start == .overlap ? "重ねる長さ" : "前の曲との間").fixedSize()
-                        Slider(value: $step.startSeconds.rounded(0.1), in: 0...30)
-                        SecondsField(value: $step.startSeconds).frame(width: 60)
-                        Text("秒")
-                    }
+                HStack {
+                    Text(step.start == .overlap ? "重ねる長さ" : step.start == .returnKey ? "Return を押してから" : "前の曲との間").fixedSize()
+                    Slider(value: $step.startSeconds.rounded(0.1), in: 0...30)
+                    SecondsField(value: $step.startSeconds).frame(width: 60)
+                    Text(step.start == .returnKey ? "秒待って鳴らす" : "秒").fixedSize()
                 }
                 Text(hint)
                     .font(.caption)
@@ -127,7 +125,7 @@ private struct StepInspector: View {
         case .overlap:
             return "前の曲の終わりに重ねて鳴ります（クロスフェード）。前の曲は重ねる長さで自動的にフェードアウトし、この曲は重ねる長さでフェードインします。前の曲の「終了位置に向けて自動でフェードアウト」や、この曲の「フェードイン」を設定してあれば、そちらが優先されます。" + common
         case .returnKey:
-            return "自動では鳴りません。前の曲が終わってもリストは待機したままで、Return を押すと鳴ります（待機中に開始／停止キーを押すとリストは止まります）。"
+            return "自動では鳴りません。前の曲が終わってもリストは待機したままで、Return を押すと鳴ります（待機中に開始／停止キーを押すとリストは止まります）。秒数を入れると、Return を押してからその秒数だけ待って鳴ります（前の曲は Return を押したときに止まります）。待っている間にもう一度 Return を押すと、すぐ鳴ります。"
         }
     }
 }

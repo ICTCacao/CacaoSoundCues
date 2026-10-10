@@ -200,4 +200,27 @@ final class CueMixerTests: XCTestCase {
         XCTAssertEqual(out[30], 0.5, accuracy: 1e-6, "重なりの真ん中で半分")
         XCTAssertEqual(out[39], 0.05, accuracy: 1e-6)
     }
+
+    /// n 秒待ってから鳴る。待っている間に次の曲を「後に続く」で待たせても、先に鳴り出さない。startNow で待たずに鳴る
+    func testDelayedStart() {
+        let m = CueMixer(sampleRate: 1000)
+        let ones = buffer([Float](repeating: 1, count: 100))
+        let zeros = buffer([Float](repeating: 0, count: 100))
+        var first = spec(1, ones, start: 0, end: 20)
+        first.delayFrames = 30
+        m.send(.play(first))
+        m.send(.play(spec(2, zeros, start: 0, end: 50, follow: 1)))
+        let out = render(m, total: 64, chunk: 8)
+        XCTAssertEqual(out[29], 0, accuracy: 1e-6, "30 フレームは鳴らない")
+        XCTAssertEqual(out[35], 1, accuracy: 1e-6)
+        XCTAssertEqual(out[52], 0, accuracy: 1e-6, "次の曲は先の曲の後")
+
+        let m2 = CueMixer(sampleRate: 1000)
+        var late = spec(3, ones, start: 0, end: 100)
+        late.delayFrames = 10_000
+        m2.send(.play(late))
+        _ = render(m2, total: 8)
+        m2.send(.startNow(3))
+        XCTAssertEqual(render(m2, total: 8)[5], 1, accuracy: 1e-6)
+    }
 }
