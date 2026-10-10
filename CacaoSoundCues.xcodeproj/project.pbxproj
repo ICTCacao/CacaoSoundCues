@@ -1,0 +1,414 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0EB832F823C149862FD03ADD /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 682B3F49FA9AA5FE1BFB61E7 /* Theme.swift */; };
+		1B6EC66BCF4E3807407A4C5D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4EBC8D51D1CACA6E5929E65B /* Assets.xcassets */; };
+		1CF48BBE1A6B322BA929FD18 /* WaveformView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E77F3DE6649ABA109E101B51 /* WaveformView.swift */; };
+		326F7DF48C4C9457D643DCC9 /* CacaoSoundCuesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08AFA6614C72E4294887A8AD /* CacaoSoundCuesApp.swift */; };
+		36EF72B2049C5F467EB720E9 /* KeyboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74CF3DC1F785BADAA220EA2B /* KeyboardLayout.swift */; };
+		4E76DEC3600508395716BC28 /* SequencePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21D10A87B10FAA257572B71E /* SequencePanel.swift */; };
+		4ECB59F851F9022DB4AEDB1A /* NewSoundDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */; };
+		57D6C8B31D990FAEBF12934E /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACCD1B1F9EA9A45D2E67F61 /* MainView.swift */; };
+		715E95ABB6186344B1CD9912 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AC56E6F71ADA641E516409 /* SettingsView.swift */; };
+		74E94DFD24BEFCC0F18CFD9C /* KeyListPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383741F7FE20C5D0917D328 /* KeyListPanel.swift */; };
+		75B82B375CF25E5BAAE7D77C /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC141BA9D9DA80CAFC8AC3F7 /* KeyboardView.swift */; };
+		8D7E5078E901B19DB9437212 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE1AF2250BC51CF10D842D02 /* AppModel.swift */; };
+		A9103EAB31D08F2893F16024 /* CueSheet.icns in Resources */ = {isa = PBXBuildFile; fileRef = B77B3604047395E8C99BA99F /* CueSheet.icns */; };
+		AD7E78DE8EAB80CAB1CD7A73 /* CacaoSoundCuesCore in Frameworks */ = {isa = PBXBuildFile; productRef = 54D8CD158DCF18FE7C69BE48 /* CacaoSoundCuesCore */; };
+		F9F65FEC1DDFD6DE5FD3B6A5 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1144C18B5CB38B346E8858AA /* InspectorView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		02B866B345F905AC7A30BDDD /* CacaoSoundCues.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CacaoSoundCues.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		08AFA6614C72E4294887A8AD /* CacaoSoundCuesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacaoSoundCuesApp.swift; sourceTree = "<group>"; };
+		1144C18B5CB38B346E8858AA /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		21D10A87B10FAA257572B71E /* SequencePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequencePanel.swift; sourceTree = "<group>"; };
+		38AC56E6F71ADA641E516409 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		3E26E58D95BA34DAFFC7A7F9 /* CacaoSoundCuesCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = CacaoSoundCuesCore; path = Packages/CacaoSoundCuesCore; sourceTree = SOURCE_ROOT; };
+		4ACCD1B1F9EA9A45D2E67F61 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		4EBC8D51D1CACA6E5929E65B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSoundDefaults.swift; sourceTree = "<group>"; };
+		682B3F49FA9AA5FE1BFB61E7 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		74CF3DC1F785BADAA220EA2B /* KeyboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardLayout.swift; sourceTree = "<group>"; };
+		AC141BA9D9DA80CAFC8AC3F7 /* KeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardView.swift; sourceTree = "<group>"; };
+		B383741F7FE20C5D0917D328 /* KeyListPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyListPanel.swift; sourceTree = "<group>"; };
+		B77B3604047395E8C99BA99F /* CueSheet.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = CueSheet.icns; sourceTree = "<group>"; };
+		BE1AF2250BC51CF10D842D02 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		E77F3DE6649ABA109E101B51 /* WaveformView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaveformView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		014F0E30D813589DE0424C2B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AD7E78DE8EAB80CAB1CD7A73 /* CacaoSoundCuesCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1154B975E833EAC5A4186B6E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				02B866B345F905AC7A30BDDD /* CacaoSoundCues.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		157428D5E58BDEC5B3120957 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				3E26E58D95BA34DAFFC7A7F9 /* CacaoSoundCuesCore */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		19DBE5E5CFC42F116CEC6218 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				4EBC8D51D1CACA6E5929E65B /* Assets.xcassets */,
+				B77B3604047395E8C99BA99F /* CueSheet.icns */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		864451FDB69EB1D4E6ECBDDC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				1144C18B5CB38B346E8858AA /* InspectorView.swift */,
+				AC141BA9D9DA80CAFC8AC3F7 /* KeyboardView.swift */,
+				B383741F7FE20C5D0917D328 /* KeyListPanel.swift */,
+				4ACCD1B1F9EA9A45D2E67F61 /* MainView.swift */,
+				21D10A87B10FAA257572B71E /* SequencePanel.swift */,
+				38AC56E6F71ADA641E516409 /* SettingsView.swift */,
+				E77F3DE6649ABA109E101B51 /* WaveformView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		C0668152959E1242A28C3D2F /* CacaoSoundCues */ = {
+			isa = PBXGroup;
+			children = (
+				BE1AF2250BC51CF10D842D02 /* AppModel.swift */,
+				08AFA6614C72E4294887A8AD /* CacaoSoundCuesApp.swift */,
+				74CF3DC1F785BADAA220EA2B /* KeyboardLayout.swift */,
+				4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */,
+				682B3F49FA9AA5FE1BFB61E7 /* Theme.swift */,
+				19DBE5E5CFC42F116CEC6218 /* Resources */,
+				864451FDB69EB1D4E6ECBDDC /* Views */,
+			);
+			path = CacaoSoundCues;
+			sourceTree = "<group>";
+		};
+		CEC11BBCE00BDEE615AF8BA7 = {
+			isa = PBXGroup;
+			children = (
+				C0668152959E1242A28C3D2F /* CacaoSoundCues */,
+				157428D5E58BDEC5B3120957 /* Packages */,
+				1154B975E833EAC5A4186B6E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		9F842B1121A4933F4EB9221E /* CacaoSoundCues */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8C764D436186AEBA69DCB98 /* Build configuration list for PBXNativeTarget "CacaoSoundCues" */;
+			buildPhases = (
+				045765CA27E34AB88F281FFF /* Sources */,
+				E34B90A2DC285627E6246236 /* Resources */,
+				014F0E30D813589DE0424C2B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CacaoSoundCues;
+			packageProductDependencies = (
+				54D8CD158DCF18FE7C69BE48 /* CacaoSoundCuesCore */,
+			);
+			productName = CacaoSoundCues;
+			productReference = 02B866B345F905AC7A30BDDD /* CacaoSoundCues.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A0086CF776DDA1036861FEAC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					9F842B1121A4933F4EB9221E = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
+				};
+			};
+			buildConfigurationList = C5468AF88B8C9B8843B7A16E /* Build configuration list for PBXProject "CacaoSoundCues" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = CEC11BBCE00BDEE615AF8BA7;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				628D9911962C549816542B33 /* XCLocalSwiftPackageReference "Packages/CacaoSoundCuesCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 1154B975E833EAC5A4186B6E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				9F842B1121A4933F4EB9221E /* CacaoSoundCues */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E34B90A2DC285627E6246236 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1B6EC66BCF4E3807407A4C5D /* Assets.xcassets in Resources */,
+				A9103EAB31D08F2893F16024 /* CueSheet.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		045765CA27E34AB88F281FFF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D7E5078E901B19DB9437212 /* AppModel.swift in Sources */,
+				326F7DF48C4C9457D643DCC9 /* CacaoSoundCuesApp.swift in Sources */,
+				F9F65FEC1DDFD6DE5FD3B6A5 /* InspectorView.swift in Sources */,
+				74E94DFD24BEFCC0F18CFD9C /* KeyListPanel.swift in Sources */,
+				36EF72B2049C5F467EB720E9 /* KeyboardLayout.swift in Sources */,
+				75B82B375CF25E5BAAE7D77C /* KeyboardView.swift in Sources */,
+				57D6C8B31D990FAEBF12934E /* MainView.swift in Sources */,
+				4ECB59F851F9022DB4AEDB1A /* NewSoundDefaults.swift in Sources */,
+				4E76DEC3600508395716BC28 /* SequencePanel.swift in Sources */,
+				715E95ABB6186344B1CD9912 /* SettingsView.swift in Sources */,
+				0EB832F823C149862FD03ADD /* Theme.swift in Sources */,
+				1CF48BBE1A6B322BA929FD18 /* WaveformView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		2FE6F296D0F49F798CB1F3E4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		78659F4907BF6282289B6B56 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CacaoSoundCues/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ictcacao.CacaoSoundCues;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B558BBEC305E2AFDC27F74BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = CacaoSoundCues/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ictcacao.CacaoSoundCues;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		D59158B7DC2B108646124A62 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C5468AF88B8C9B8843B7A16E /* Build configuration list for PBXProject "CacaoSoundCues" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D59158B7DC2B108646124A62 /* Debug */,
+				2FE6F296D0F49F798CB1F3E4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E8C764D436186AEBA69DCB98 /* Build configuration list for PBXNativeTarget "CacaoSoundCues" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78659F4907BF6282289B6B56 /* Debug */,
+				B558BBEC305E2AFDC27F74BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		628D9911962C549816542B33 /* XCLocalSwiftPackageReference "Packages/CacaoSoundCuesCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/CacaoSoundCuesCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		54D8CD158DCF18FE7C69BE48 /* CacaoSoundCuesCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CacaoSoundCuesCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A0086CF776DDA1036861FEAC /* Project object */;
+}
