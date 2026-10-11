@@ -44,6 +44,14 @@ final class AppModel {
     /// 表示用のバージョン（3.0.1 から正式版。β は付けない）
     static let versionText = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
     static let colors: [Color] = [.gray, .red, .orange, .yellow, .green, .teal, .blue, .purple]
+    #if PRO
+    static let appName = "CacaoSoundCuesPro"
+    /// 台本のパネルを横に出すぶん広く
+    static let minWindowWidth: CGFloat = 1500
+    #else
+    static let minWindowWidth: CGFloat = 1180
+    static let appName = "CacaoSoundCues"
+    #endif
 
     var show = Show(name: L("新しいキューシート")) {
         didSet { if show != oldValue { dirty = true } }
@@ -73,6 +81,9 @@ final class AppModel {
     /// delete キーで消すもの（音量ラインで選んでいるマーク）。設定画面が選んだときに入れる
     @ObservationIgnored var deleteKeyAction: (() -> Void)?
     @ObservationIgnored private var pendingFiles: [UUID: URL] = [:]
+    /// 読み込み待ちの音と、いま読み込んでいる数
+    @ObservationIgnored private var loadQueue: [() -> Void] = []
+    @ObservationIgnored private var activeLoads = 0
     @ObservationIgnored private var nextToken: UInt64 = 0
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var keyMonitor: Any?
@@ -214,6 +225,10 @@ final class AppModel {
             moveCue(by: code == KeyboardLayout.upArrow ? -1 : 1)
             return true
         }
+        #if PRO
+        // Pro 版だけ: ← → で台本のページを送る
+        if ProModel.shared.handleKey(code) { return true }
+        #endif
         return false
     }
 
@@ -329,6 +344,9 @@ final class AppModel {
         output.mixer.send(.stopAll(fadeFrames: 0))
         run = nil
     }
+
+    /// キューシートの外の変更（Pro 版の台本の結びつきなど）で、未保存の印を付ける
+    func markDirty() { dirty = true }
 
     func applyMasterVolume() {
         output.mixer.send(.setMasterGain(Float(pow(10, show.masterVolumeDB / 20))))
@@ -558,12 +576,21 @@ final class AppModel {
             message = L("読み込めません: %@", url.lastPathComponent)
             return nil
         }
-        let s = SoundRef(fileName: url.lastPathComponent,
-                         displayName: url.deletingPathExtension().lastPathComponent, duration: duration)
+        // キューシートの Audio/ から持ってきたファイルは、名前の頭の「ID-」を外す
+        let fileName = Self.withoutIDPrefix(url.lastPathComponent)
+        let s = SoundRef(fileName: fileName,
+                         displayName: (fileName as NSString).deletingPathExtension, duration: duration)
         pendingFiles[s.id] = url
         show.sounds.append(s)
         load(s)
         return s
+    }
+
+    /// 「6C6F6F21-09F4-40DB-…-名前.aiff」のような、頭に ID が付いた名前から ID を外す
+    static func withoutIDPrefix(_ name: String) -> String {
+        guard name.count > 37, name[name.index(name.startIndex, offsetBy: 36)] == "-",
+              UUID(uuidString: String(name.prefix(36))) != nil else { return name }
+        return String(name.dropFirst(37))
     }
 
     private func load(_ sound: SoundRef) {
@@ -572,13 +599,29 @@ final class AppModel {
             return
         }
         loadStates[sound.id] = .loading
-        let sr = output.sampleRate
         let id = sound.id
-        Task {
-            let result = await Task.detached(priority: .userInitiated) {
-                Result { try AudioDecoder.decode(url: url, sampleRate: sr) }
-            }.value
-            finishLoad(id, result)
+        loadQueue.append { [weak self] in
+            guard let self else { return }
+            let sr = self.output.sampleRate
+            Task {
+                let result = await Task.detached(priority: .userInitiated) {
+                    Result { try AudioDecoder.decode(url: url, sampleRate: sr) }
+                }.value
+                self.activeLoads -= 1
+                self.finishLoad(id, result)
+                self.pumpLoads()
+            }
+        }
+        pumpLoads()
+    }
+
+    /// 一度に読み込む数。USB メモリなど遅い場所から何十ものファイルを同時に読むと、かえって遅くなるため
+    private static let maxLoads = 2
+
+    private func pumpLoads() {
+        while activeLoads < Self.maxLoads, !loadQueue.isEmpty {
+            activeLoads += 1
+            loadQueue.removeFirst()()
         }
     }
 
@@ -606,6 +649,7 @@ final class AppModel {
 
     private func reloadAllSounds() {
         for b in buffers.values { retire(b) }
+        loadQueue.removeAll()   // 前のキューシートの読み込み待ちは捨てる
         buffers = [:]
         show.sounds.forEach(load)
     }
@@ -830,6 +874,7 @@ final class AppModel {
         run = nil
         cuedStart = nil
         for b in buffers.values { retire(b) }
+        loadQueue.removeAll()   // 前のキューシートの読み込み待ちは捨てる
         buffers = [:]
         loadStates = [:]
         pendingFiles = [:]
@@ -838,6 +883,9 @@ final class AppModel {
         show = Show(name: L("新しいキューシート"))
         selectedSequenceID = nil
         dirty = false
+        #if PRO
+        ProModel.shared.reset()
+        #endif
         applyMasterVolume()
     }
 
@@ -860,6 +908,7 @@ final class AppModel {
             run = nil
             cuedStart = nil
             for b in buffers.values { retire(b) }
+            loadQueue.removeAll()   // 前のキューシートの読み込み待ちは捨てる
             buffers = [:]
             loadStates = [:]
             pendingFiles = [:]
@@ -871,6 +920,9 @@ final class AppModel {
             dirty = released
             applyMasterVolume()
             show.sounds.forEach(load)
+            #if PRO
+            ProModel.shared.load(from: url)
+            #endif
             if remember {
                 UserDefaults.standard.set(url.path, forKey: "lastShowPath")
                 NSDocumentController.shared.noteNewRecentDocumentURL(url)
@@ -903,6 +955,9 @@ final class AppModel {
         if sounds.count != show.sounds.count { show.sounds = sounds }
         do {
             let saved = try ShowPackage.save(show, to: url, source: { self.fileURL(for: $0) })
+            #if PRO
+            try ProModel.shared.save(to: url, from: showURL)
+            #endif
             show = saved
             showURL = url
             pendingFiles = [:]

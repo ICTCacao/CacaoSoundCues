@@ -49,7 +49,7 @@ footer: "CacaoSoundCues マニュアル ／ ICTCacao"
 # CacaoSoundCues マニュアル
 
 舞台のための、ポン出し音響アプリ
-バージョン 5.0.0 ／ 2026 年 10 月
+バージョン 5.0.1 ／ 2026 年 10 月
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. **CacaoSoundCues-5.0.0.dmg** をダブルクリック
+1. **CacaoSoundCues-5.0.1.dmg** をダブルクリック
 2. 左の **CacaoSoundCues** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 4. アプリケーション フォルダの CacaoSoundCues をダブルクリック
@@ -177,7 +177,7 @@ macOS 14：アプリを **右クリック →「開く」→「開く」**。一
 <div>
 
 **使えるキー**
-数字・英字・記号のキー。設定で **F1〜F12** と**テンキー**も使えます（上の帯の <kbd>☰</kbd> ボタン）。
+数字・英字・記号のキー。設定で **F1〜F12** と**テンキー**も使えます（上の帯の <kbd>☰</kbd> ボタン）。キーボードの大きさ（大・中・小）も、同じボタンで変えられます。
 
 **使えないキー（操作用）**
 

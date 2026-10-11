@@ -15,12 +15,17 @@ struct KeyboardView: View {
 
     @AppStorage("showFunctionKeys") private var showFunctionKeys = false
     @AppStorage("showKeypad") private var showKeypad = false
+    /// キーボードの大きさ（1 = いちばん大きい。設定のメニューで 大・中・小）
+    @AppStorage("keyboardScale") private var scale = 1.0
 
-    private var mainHeight: CGFloat { Self.keyHeight * 4 + Self.spacing * 3 }
+    private var keyHeight: CGFloat { (Self.keyHeight * scale).rounded() }
+    private var fnHeight: CGFloat { (Self.functionKeyHeight * scale).rounded() }
+
+    private var mainHeight: CGFloat { keyHeight * 4 + Self.spacing * 3 }
     private var showFnHint: Bool { showFunctionKeys && !KeyboardLayout.functionKeysAreStandard }
     private var totalHeight: CGFloat {
         mainHeight
-            + (showFunctionKeys ? Self.functionKeyHeight + Self.spacing * 2 : 0)
+            + (showFunctionKeys ? fnHeight + Self.spacing * 2 : 0)
             + (showFnHint ? 20 : 0)
     }
 
@@ -29,12 +34,12 @@ struct KeyboardView: View {
             // 横幅に収まるようにキーの大きさを決める（メイン 13 キー分 + テンキー 4 キー分）
             let columns: CGFloat = 13 + (showKeypad ? 4 : 0)
             let fixed = Self.spacing * (columns - 1) + (showKeypad ? Self.keypadGap : 0) + 40
-            let kw = min(Self.maxKeyWidth, max(44, (geo.size.width - fixed) / columns))
+            let kw = min(Self.maxKeyWidth * scale, max(44 * min(scale, 1), (geo.size.width - fixed) / columns))
             VStack(spacing: Self.spacing) {
                 if showFunctionKeys {
                     HStack(spacing: Self.spacing) {
                         ForEach(KeyboardLayout.functionRow, id: \.self) {
-                            KeyCapView(code: $0, width: kw, height: Self.functionKeyHeight)
+                            KeyCapView(code: $0, width: kw, height: fnHeight)
                         }
                     }
                     .padding(.bottom, Self.spacing)
@@ -61,7 +66,7 @@ struct KeyboardView: View {
         VStack(alignment: .leading, spacing: Self.spacing) {
             ForEach(Array(KeyboardLayout.rows.enumerated()), id: \.offset) { index, row in
                 HStack(spacing: Self.spacing) {
-                    ForEach(row, id: \.self) { KeyCapView(code: $0, width: kw) }
+                    ForEach(row, id: \.self) { KeyCapView(code: $0, width: kw, height: keyHeight) }
                 }
                 .padding(.leading, KeyboardLayout.rowIndent[index] * kw)
             }

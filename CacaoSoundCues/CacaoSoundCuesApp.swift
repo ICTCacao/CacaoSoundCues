@@ -22,17 +22,17 @@ struct CacaoSoundCuesApp: App {
     @AppStorage("showKeypad") private var showKeypad = false
 
     var body: some Scene {
-        Window("CacaoSoundCues", id: "main") {
+        Window(AppModel.appName, id: "main") {
             MainView()
                 .environment(model)
-                .frame(minWidth: 1180, minHeight: 760)
+                .frame(minWidth: AppModel.minWindowWidth, minHeight: 760)
         }
         Settings {
             SettingsView()
         }
         .commands {
             CommandGroup(replacing: .appInfo) {
-                Button(L("CacaoSoundCues について")) {
+                Button(L("%@ について", AppModel.appName)) {
                     NSApp.orderFrontStandardAboutPanel(options: [
                         .applicationVersion: AppModel.versionText,
                         .version: "",

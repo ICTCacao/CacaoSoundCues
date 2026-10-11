@@ -19,6 +19,8 @@ export const prefs = {
   showKeyboard: stored("showKeyboard", true),
   showFunctionKeys: stored("showFunctionKeys", false),
   showKeypad: stored("showKeypad", false),
+  /** キーボードの大きさ（1 = いちばん大きい） */
+  keyboardScale: stored("keyboardScale", 1),
   /** 本番モード（起動し直しても続く） */
   showMode: stored("showMode", false),
   /** キーボードの配列（auto は Windows の配列から決める） */

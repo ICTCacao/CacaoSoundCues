@@ -82,6 +82,10 @@ private struct KeyCueInspector: View {
             .labelsHidden()
             .fixedSize()
         }
+        #if PRO
+        // Pro 版だけ: 台本の行（きっかけ）との結びつき
+        ProCueLinkRow(cueID: cue.id)
+        #endif
         PlaySettingsEditor(settings: $cue.play, owner: cue.id)
     }
 }
@@ -114,6 +118,10 @@ private struct StepInspector: View {
             }
             .padding(4)
         }
+        #if PRO
+        // Pro 版だけ: 台本の行（きっかけ）との結びつき
+        ProCueLinkRow(cueID: step.id)
+        #endif
         PlaySettingsEditor(settings: $step.play, owner: step.id)
     }
 

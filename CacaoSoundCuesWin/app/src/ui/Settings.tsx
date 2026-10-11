@@ -63,6 +63,11 @@ export function Settings() {
             </div>
             <Toggle checked={prefs.showFunctionKeys.value} onChange={v => { prefs.showFunctionKeys.value = v; }}>{L("F キー（F1〜F12）の行を表示")}</Toggle>
             <Toggle checked={prefs.showKeypad.value} onChange={v => { prefs.showKeypad.value = v; }}>{L("テンキーを表示")}</Toggle>
+            <div class="form-row">
+              <span>{L("キーボードの大きさ")}</span>
+              <Segmented value={String(prefs.keyboardScale.value)} onChange={v => { prefs.keyboardScale.value = Number(v); }}
+                options={[{ value: "1", label: L("大") }, { value: "0.85", label: L("中") }, { value: "0.7", label: L("小") }]} />
+            </div>
           </section>
 
           <p class="sub">{L("音を追加したときの最初の設定です。追加したあとは、音ごとに変えられます。")}</p>

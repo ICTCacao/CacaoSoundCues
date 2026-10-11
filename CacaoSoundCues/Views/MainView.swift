@@ -15,6 +15,7 @@ struct MainView: View {
             TopBar(showKeyboard: $showKeyboard)
                 .background(model.showMode ? Color.red.opacity(0.22) : Theme.topBar)
             ThemeDivider()
+            VStack(spacing: 0) {
             if showKeyboard {
                 KeyboardView()
                     .padding(.vertical, 12)
@@ -43,6 +44,9 @@ struct MainView: View {
                         .frame(minWidth: 460)
                 }
             }
+            }
+            // Pro 版だけ: 台本のパネルを横に出す
+            .proScriptPanel()
         }
         .background(Theme.background)
         .id(language)
@@ -82,6 +86,7 @@ struct TopBar: View {
     @Binding var showKeyboard: Bool
     @AppStorage("showFunctionKeys") private var showFunctionKeys = false
     @AppStorage("showKeypad") private var showKeypad = false
+    @AppStorage("keyboardScale") private var keyboardScale = 1.0
 
     var body: some View {
         @Bindable var model = model
@@ -104,9 +109,17 @@ struct TopBar: View {
             }
             .toggleStyle(.button)
             .help(L("キーボードを隠すと、割り当てたキーだけを一覧で表示します"))
+            #if PRO
+            ProTopBarItems()
+            #endif
             Menu {
                 Toggle(L("F キー（F1〜F12）の行を表示"), isOn: $showFunctionKeys)
                 Toggle(L("テンキーを表示"), isOn: $showKeypad)
+                Picker(L("キーボードの大きさ"), selection: $keyboardScale) {
+                    Text(L("大")).tag(1.0)
+                    Text(L("中")).tag(0.85)
+                    Text(L("小")).tag(0.7)
+                }
             } label: {
                 Image(systemName: "slider.horizontal.3")
             }
@@ -145,5 +158,17 @@ struct TopBar: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
+    }
+}
+
+extension View {
+    /// Pro 版だけ: 台本のパネルを横に並べる（無料版ではそのまま）
+    @ViewBuilder
+    func proScriptPanel() -> some View {
+        #if PRO
+        ProScriptSplit { self }
+        #else
+        self
+        #endif
     }
 }

@@ -49,7 +49,7 @@ footer: "CacaoSoundCues Manual / ICTCacao"
 # CacaoSoundCues Manual
 
 A sound cue player for the stage
-Version 5.0.0 / October 2026
+Version 5.0.1 / October 2026
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. Double-click **CacaoSoundCues-5.0.0.dmg**
+1. Double-click **CacaoSoundCues-5.0.1.dmg**
 2. Drag **CacaoSoundCues** onto **Applications**
 3. Close the dmg (eject the disk icon on the desktop)
 4. Double-click CacaoSoundCues in the Applications folder
@@ -177,7 +177,7 @@ macOS 14: **right-click** the app → **Open** → **Open**. After the first tim
 <div>
 
 **Keys you can use**
-Number, letter and symbol keys. **F1–F12** and the **numeric keypad** can be turned on too (the <kbd>☰</kbd> button in the top bar).
+Number, letter and symbol keys. **F1–F12** and the **numeric keypad** can be turned on too (the <kbd>☰</kbd> button in the top bar). The same button changes the keyboard size (large, medium, small).
 
 **Reserved keys (controls)**
 

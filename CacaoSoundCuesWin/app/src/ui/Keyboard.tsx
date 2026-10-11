@@ -33,25 +33,28 @@ export function Keyboard() {
   }, []);
   const showFn = prefs.showFunctionKeys.value;
   const showPad = prefs.showKeypad.value;
+  const scale = prefs.keyboardScale.value;
+  const keyH = Math.round(KEY_HEIGHT * scale);
+  const fnH = Math.round(FUNCTION_KEY_HEIGHT * scale);
   // 横幅に収まるようにキーの大きさを決める（メイン 13 キー分 + テンキー 4 キー分）
   const columns = 13 + (showPad ? 4 : 0);
   const fixed = SPACING * (columns - 1) + (showPad ? KEYPAD_GAP : 0) + 40;
-  const kw = Math.min(MAX_KEY_WIDTH, Math.max(44, (width - fixed) / columns));
-  const mainHeight = KEY_HEIGHT * 4 + SPACING * 3;
+  const kw = Math.min(MAX_KEY_WIDTH * scale, Math.max(44 * Math.min(scale, 1), (width - fixed) / columns));
+  const mainHeight = keyH * 4 + SPACING * 3;
   const padH = (mainHeight - SPACING * 4) / 5;
 
   return (
     <div class="keyboard" ref={ref}>
       {showFn && (
         <div class="krow" style={{ marginBottom: `${SPACING}px` }}>
-          {FUNCTION_ROW.map(c => <KeyCap key={c} code={c} w={kw} h={FUNCTION_KEY_HEIGHT} />)}
+          {FUNCTION_ROW.map(c => <KeyCap key={c} code={c} w={kw} h={fnH} />)}
         </div>
       )}
       <div class="kmain" style={{ gap: `${KEYPAD_GAP}px` }}>
         <div class="kcol">
           {keyRows().map((row, i) => (
             <div key={i} class="krow" style={{ paddingLeft: `${ROW_INDENT[i] * kw}px` }}>
-              {row.map(c => <KeyCap key={c} code={c} w={kw} h={KEY_HEIGHT} />)}
+              {row.map(c => <KeyCap key={c} code={c} w={kw} h={keyH} />)}
             </div>
           ))}
         </div>

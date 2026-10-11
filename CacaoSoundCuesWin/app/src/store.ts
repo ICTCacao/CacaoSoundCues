@@ -473,7 +473,9 @@ async function addSound(path: string): Promise<SoundRef | null> {
     return null;
   }
   const duration = await invoke<number | null>("probe_sound", { path }).catch(() => null);
-  const s: SoundRef = { id: newId(), fileName: name, displayName: stripExt(name), duration: duration ?? 0 };
+  // キューシートの Audio/ から持ってきたファイルは、名前の頭の「ID-」を外す
+  const clean = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}-./.test(name) ? name.slice(37) : name;
+  const s: SoundRef = { id: newId(), fileName: clean, displayName: stripExt(clean), duration: duration ?? 0 };
   pendingFiles.set(s.id, path);
   edit(sh => sh.sounds.push(s));
   load(s);
