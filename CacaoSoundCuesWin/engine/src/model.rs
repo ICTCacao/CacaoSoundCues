@@ -388,3 +388,45 @@ pub fn save(show: &Show, package: &Path, source: impl Fn(&SoundRef) -> Option<Pa
     std::fs::rename(&tmp, package.join(SHOW_FILE)).map_err(|e| format!("保存できません: {e}"))?;
     Ok(out)
 }
+
+// MARK: - 鳴らす命令を作る（Mac 版 AppModel.makeSpec と同じ）
+
+/// 音の設定から、ミキサーに渡す再生の指定を作る。範囲が空なら None
+#[allow(clippy::too_many_arguments)]
+pub fn make_spec(
+    play: &PlaySettings,
+    buffer: std::sync::Arc<crate::mixer::SampleBuffer>,
+    token: u64,
+    owner: u128,
+    tag: u128,
+    follow: u64,
+    gap: f64,
+    crossfade: bool,
+) -> Option<crate::mixer::VoiceSpec> {
+    let sr = buffer.sample_rate;
+    let frames = buffer.frames() as i64;
+    let start = ((play.in_point * sr) as i64).clamp(0, frames);
+    let end = play.out_point.map(|o| (o * sr) as i64).unwrap_or(frames).min(frames);
+    if end <= start {
+        return None;
+    }
+    let mut s = crate::mixer::VoiceSpec::new(token, owner, tag, buffer, start, end);
+    s.looping = play.looping;
+    s.loop_count = play.loop_count;
+    s.gain = 10f32.powf(play.volume_db as f32 / 20.0);
+    // 重ねる（クロスフェード）とき、フェードインが 0 なら重なりの長さでフェードインする
+    let fade_in = if crossfade && play.fade_in == 0.0 { -gap } else { play.fade_in };
+    s.fade_in_frames = (fade_in * sr) as i64;
+    s.fade_out_frames = (play.fade_out * sr) as i64;
+    s.fade_out_at_end = play.fade_out_at_end;
+    s.curve = play.curve.into();
+    s.fade_in_bezier = play.bezier(true).simd();
+    s.fade_out_bezier = play.bezier(false).simd();
+    s.envelope = envelope(&play.volume_points, sr);
+    s.pan = play.pan as f32;
+    s.pan_envelope = envelope(&play.pan_points, sr);
+    s.follow = follow;
+    s.gap_frames = (gap * sr) as i64;
+    s.crossfade = crossfade;
+    Some(s)
+}

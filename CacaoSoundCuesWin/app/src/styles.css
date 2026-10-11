@@ -1,0 +1,27 @@
+/* Mac 版と同じ、薄いカカオ色（ライト）と標準の暗い色（ダーク） */
+:root {
+  --bg: #efe2d3; --topbar: #e2cdb8; --panel: #f6ede3; --key: #fbf6f0; --keyborder: #c2a189;
+  --text: #2b2320; --sub: #6b5a52; --accent: #8b5a3c;
+  font-family: "Yu Gothic UI", "Meiryo UI", "Hiragino Sans", system-ui, sans-serif; font-size: 14px;
+  color: var(--text); background: var(--bg);
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #1e1e1e; --topbar: #2a2a2a; --panel: #252525; --key: #2f2f2f; --keyborder: #555; --text: #eee; --sub: #aaa; --accent: #c8946a; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; user-select: none; }
+.topbar { display: flex; gap: 10px; align-items: center; padding: 8px 12px; background: var(--topbar); }
+.topbar .spacer { flex: 1; }
+.topbar .name { width: 220px; padding: 4px 8px; border: 1px solid var(--keyborder); border-radius: 6px; background: var(--key); color: var(--text); }
+button { padding: 5px 12px; border: 1px solid var(--keyborder); border-radius: 6px; background: var(--key); color: var(--text); cursor: pointer; }
+button.panic { background: #e53935; color: #fff; border-color: #c62828; font-weight: bold; }
+.info { font-size: 11px; color: var(--sub); text-align: right; }
+.keyboard { padding: 14px; display: flex; flex-direction: column; gap: 5px; align-items: center; }
+.row { display: flex; gap: 5px; }
+.key { position: relative; width: 78px; height: 66px; border: 1px solid var(--keyborder); border-radius: 7px; background: var(--key); padding: 5px; overflow: hidden; }
+.key .label { font: bold 14px ui-monospace, Consolas, monospace; }
+.key .name { font-size: 10px; line-height: 1.2; max-height: 24px; overflow: hidden; }
+.key .bar { position: absolute; left: 5px; right: 5px; bottom: 16px; height: 4px; border-radius: 2px; background: rgba(255,255,255,.5); }
+.key .bar > div { height: 100%; background: #fff; border-radius: 2px; }
+.key .time { position: absolute; left: 5px; bottom: 3px; font: 600 10px ui-monospace, Consolas, monospace; }
+.message { position: fixed; left: 0; right: 0; bottom: 0; padding: 6px 12px; font-size: 12px; color: var(--sub); }

@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"メインのウィンドウ","local":true,"windows":["main"],"permissions":["core:default","core:window:allow-set-title","core:window:allow-close","core:window:allow-destroy","opener:default","dialog:default","core:window:default","core:app:default"]}}

@@ -13,3 +13,4 @@ dist/.tmp-*.dmg
 # Windows 版（Rust）のビルド物
 target/
 node_modules/
+CacaoSoundCuesWin/app/dist/
