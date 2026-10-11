@@ -268,6 +268,23 @@ Turn on “Volume line” to draw the volume through the track. Click to add a p
 
 ---
 
+## 7. Lists and keys: which to use
+
+### The usual way
+- **Sound effects** (bells, phones, doors) go on **keys** → press the key on the cue
+- **Music** can go in a **list** or on a **key**
+  - Several tracks in a row (pre-show, intermission, post-show): a **list** → <kbd>return</kbd> moves to the next track
+  - One track brought in and out for a scene: a **key** → press it again to fade out
+
+### Running a whole show from one list
+If every sound — effects and music alike — finishes before the next one starts (nothing overlaps), you can **put all of them in one list, in show order**.
+Set each track to start “**On Return**”, and during the show you just press <kbd>return</kbd> again and again, all the way to the end.
+
+- The next sound is marked “**Standby**”, so you can check each cue before you go
+- If an effect has to play over music, put that effect on a key instead
+
+---
+
 ## 8. When each track starts
 
 Click a track to choose on the right.
