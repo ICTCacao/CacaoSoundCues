@@ -9,3 +9,7 @@ build/
 # 配布物: dmg と PDF は残し、.app と CLI バイナリはビルドで再生成する
 dist/*.app
 dist/.tmp-*.dmg
+
+# Windows 版（Rust）のビルド物
+target/
+node_modules/

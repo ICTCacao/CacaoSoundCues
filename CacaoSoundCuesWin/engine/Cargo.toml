@@ -1,0 +1,11 @@
+[package]
+name = "cacaosoundcues-engine"
+version = "0.1.0"
+edition = "2021"
+description = "CacaoSoundCues の音声エンジン（Mac 版 CueMixer の Rust 移植）"
+license = "MIT"
+
+[dependencies]
+rtrb = "0.3"
+
+[dev-dependencies]
