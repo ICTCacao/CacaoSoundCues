@@ -49,7 +49,7 @@ footer: "CacaoSoundCues Manual / ICTCacao"
 # CacaoSoundCues Manual
 
 A sound cue player for the stage
-Version β2.10.0 / October 2026
+Version 3.0.1 / October 2026
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. Double-click **CacaoSoundCues-2.10.0.dmg**
+1. Double-click **CacaoSoundCues-3.0.1.dmg**
 2. Drag **CacaoSoundCues** onto **Applications**
 3. Close the dmg (eject the disk icon on the desktop)
 4. Double-click CacaoSoundCues in the Applications folder
@@ -205,7 +205,8 @@ Number, letter and symbol keys. **F1–F12** and the **numeric keypad** can be t
 | Fade in / out | In seconds. **0 s = cut** |
 | Curve | Linear / Equal power / S-curve / Custom |
 | Repeat | Until stopped, or a set count |
-| Volume | In dB. “0dB” resets it |
+| Volume | In dB. “0dB” resets it. Works while playing |
+| Volume line | Change the volume during the track (e.g. quieter verse, louder chorus) |
 
 <span class="small">Use “Preview” to listen.</span>
 
@@ -246,6 +247,9 @@ During a fade, a yellow line and dot move along the fade shape.
 
 > You can also type fade times in the fields below. Press <kbd>return</kbd> to confirm.
 
+**Volume line**
+Turn on “Volume line” to draw the volume through the track. Click to add a point, drag to move, <kbd>⌥</kbd>-click to delete.
+
 </div>
 </div>
 
@@ -285,7 +289,7 @@ Click a track to choose on the right.
 | <kbd>return</kbd> | **Next track**. The current track stops with its own fade-out. Starts the list if it is stopped |
 | <kbd>return</kbd> twice | Skip the “wait n seconds” and play at once |
 | <kbd>space</kbd> | **End the current track early**. The next one follows its own timing |
-| <kbd>↑</kbd> <kbd>↓</kbd> / double-click | **Choose the next track** (does not play). It is marked “Next” |
+| <kbd>↑</kbd> <kbd>↓</kbd> / double-click | **Choose the next track** (does not play). It is marked **Standby** |
 | Start/stop key | Start / stop that list |
 | <kbd>esc</kbd> | **Fade out everything**. Press again to cut |
 
@@ -387,7 +391,7 @@ The starting fades and timing used when you add sounds to keys or lists.
 - ☐ The cue sheet is **saved** (the title does not say “Unsaved”)
 - ☐ Every sound was played on **the Mac and speakers used in the show**
 - ☐ Master volume and the Mac’s volume are set
-- ☐ **The first track of the list is marked “Next”**
+- ☐ **The first track of the list is double-clicked and shows Standby**
 - ☐ Notifications are off (Focus mode). The app prevents sleep itself
 - ☐ **Show Mode** is on
 - ☐ You know where <kbd>esc</kbd> (stop everything) is

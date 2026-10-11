@@ -56,6 +56,8 @@ public struct PlaySettings: Codable, Hashable, Sendable {
     /// curve が custom のときのフェードイン・フェードアウトの形
     public var fadeInBezier: FadeBezier? = nil
     public var fadeOutBezier: FadeBezier? = nil
+    /// 音量ライン（曲の中で音量を変える点。時間の順）。空なら曲の間ずっと同じ音量
+    public var volumePoints: [VolumePoint] = []
 
     public init(soundID: UUID) {
         self.soundID = soundID
@@ -63,7 +65,7 @@ public struct PlaySettings: Codable, Hashable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case soundID, inPoint, outPoint, fadeIn, fadeOut, fadeOutAtEnd, loop, loopCount, volumeDB, curve
-        case fadeInBezier, fadeOutBezier
+        case fadeInBezier, fadeOutBezier, volumePoints
     }
 
     /// 項目が足りない古いキューシートも開けるように、無い項目は既定値にする
@@ -81,6 +83,7 @@ public struct PlaySettings: Codable, Hashable, Sendable {
         curve = try c.decodeIfPresent(FadeCurve.self, forKey: .curve) ?? .equalPower
         fadeInBezier = try c.decodeIfPresent(FadeBezier.self, forKey: .fadeInBezier)
         fadeOutBezier = try c.decodeIfPresent(FadeBezier.self, forKey: .fadeOutBezier)
+        volumePoints = try c.decodeIfPresent([VolumePoint].self, forKey: .volumePoints) ?? []
     }
 
     /// 実際に使うフェードの形（custom 以外は決まった形のベジエ）
@@ -94,6 +97,42 @@ public struct PlaySettings: Codable, Hashable, Sendable {
         guard loop else { return 1 }
         return loopCount > 0 ? loopCount : nil
     }
+}
+
+/// 音量ラインの点。time は音ファイルの頭からの秒、db はその時点の音量（0 = 元の大きさ）。
+/// 次の点までは shape の形（ベジエ）でつなぐ。shape が無ければ S字
+public struct VolumePoint: Codable, Hashable, Sendable, Identifiable {
+    public var id = UUID()
+    public var time: Double
+    public var db: Double
+    public var shape: FadeBezier?
+
+    public init(time: Double, db: Double, shape: FadeBezier? = nil) {
+        self.time = time
+        self.db = db
+        self.shape = shape
+    }
+
+    /// 点と点をつなぐ最初の形（ゆっくり始まってゆっくり終わる S字）
+    public static let defaultShape = FadeBezier(0.42, 0, 0.58, 1)
+    /// 音量ラインで扱う範囲（dB）
+    public static let minDB: Double = -40
+    public static let maxDB: Double = 6
+}
+
+/// 音量ラインの、ある時刻（秒）の音量（dB）。点が無ければ 0
+public func volumeLineDB(_ points: [VolumePoint], at t: Double) -> Double {
+    guard let first = points.first else { return 0 }
+    if t <= first.time { return first.db }
+    for k in 0..<(points.count - 1) {
+        let a = points[k], b = points[k + 1]
+        if t < b.time {
+            let p = (t - a.time) / max(1e-9, b.time - a.time)
+            let s = (a.shape ?? VolumePoint.defaultShape).gain(at: p, rising: true)
+            return a.db + (b.db - a.db) * s
+        }
+    }
+    return points[points.count - 1].db
 }
 
 /// キューシートに取り込んだ音ファイル（実体は .ccsc パッケージの Audio/ にコピーする）

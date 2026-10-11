@@ -201,6 +201,12 @@
     "今すぐ起動し直しますか？": "Restart now?",
     "起動し直す": "Restart",
     "あとで": "Later",
-    "言語 / Language": "Language"
+    "言語 / Language": "Language",
+    "音量ライン": "Volume line",
+    "曲の中で音量を変える線を、波形の上で編集します": "Edit a line on the waveform that changes the volume during the track",
+    "点 %@ ／ %@ dB": "Point %@ / %@ dB",
+    "この点を消す": "Delete point",
+    "音量ラインを消す": "Clear volume line",
+    "水色の線が音量です。線をクリックで点を足す、点をドラッグで動かす、⌥クリックで消す。点と点の間をクリックすると、白い四角でつなぎの形（ベジエ曲線）を変えられます。フェードインは、最初の点の音量まで上がります。": "The light-blue line is the volume. Click the line to add a point, drag a point to move it, ⌥-click to delete it. Click between two points to shape the transition (Bézier curve) with the white squares. The fade-in rises to the level of the first point."
   }
 }

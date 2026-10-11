@@ -135,6 +135,10 @@ struct PlaySettingsEditor: View {
     @Environment(AppModel.self) private var model
     @Binding var settings: PlaySettings
     let owner: UUID
+    /// 音量ラインを編集中か（波形の操作を音量ラインに切り替える）
+    @State private var editingLine = false
+    @State private var selectedPoint: UUID?
+    @State private var selectedSegment: Int?
 
     var body: some View {
         let sound = model.sound(settings.soundID)
@@ -159,7 +163,7 @@ struct PlaySettingsEditor: View {
                 .disabled(buffer == nil)
             }
 
-            GroupBox(L("再生範囲")) {
+            GroupBox {
                 VStack(alignment: .leading, spacing: 6) {
                     WaveformView(peaks: buffer?.peaks ?? [], duration: duration,
                                  inPoint: $settings.inPoint, outPoint: $settings.outPoint,
@@ -174,7 +178,15 @@ struct PlaySettingsEditor: View {
                                  onSeek: { seconds in
                                      if let v = playingVoice { model.seek(token: v.token, to: seconds) }
                                  })
-                        .frame(height: 110)
+                        // 音量ライン。編集中はこちらが操作を受け取る
+                        .overlay {
+                            VolumeLineView(points: $settings.volumePoints, selectedPoint: $selectedPoint,
+                                           selectedSegment: $selectedSegment, duration: duration, editing: editingLine,
+                                           playhead: playhead(buffer: buffer), lineGain: playingVoice?.lineGain)
+                                .allowsHitTesting(editingLine)
+                        }
+                        .frame(height: editingLine ? 150 : 110)
+                    if editingLine { volumeLineControls }
                     HStack {
                         Text(L("開始")).fixedSize()
                         SecondsField(value: Binding(get: { settings.inPoint },
@@ -200,7 +212,19 @@ struct PlaySettingsEditor: View {
                         .foregroundStyle(.secondary)
                 }
                 .padding(4)
+            } label: {
+                HStack {
+                    Text(L("再生範囲"))
+                    Spacer()
+                    Toggle(isOn: $editingLine) {
+                        Label(L("音量ライン"), systemImage: "chart.line.uptrend.xyaxis")
+                    }
+                    .toggleStyle(.button)
+                    .help(L("曲の中で音量を変える線を、波形の上で編集します"))
+                }
             }
+            // 音量ラインを動かしたら、鳴っている音にもすぐ効かせる
+            .onChange(of: settings.volumePoints) { _, points in model.liveVolumeLine(owner, points: points) }
 
             GroupBox(L("フェード（0秒 = カット）")) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -248,6 +272,8 @@ struct PlaySettingsEditor: View {
                 Text(L("音量")).fixedSize()
                 Slider(value: $settings.volumeDB, in: -40...10)
                     .frame(minWidth: 120, maxWidth: 260)
+                    // 鳴っている音にもすぐ効かせる
+                    .onChange(of: settings.volumeDB) { _, db in model.liveVolume(owner, db: db) }
                 Text(String(format: "%+.1f dB", settings.volumeDB))
                     .monospacedDigit()
                     .frame(width: 64, alignment: .leading)
@@ -260,6 +286,34 @@ struct PlaySettingsEditor: View {
     private func originalFileName(_ s: SoundRef) -> String {
         let prefix = s.id.uuidString + "-"
         return s.fileName.hasPrefix(prefix) ? String(s.fileName.dropFirst(prefix.count)) : s.fileName
+    }
+
+    /// 音量ラインの編集中に、波形の下に出す説明と操作
+    @ViewBuilder
+    private var volumeLineControls: some View {
+        HStack(spacing: 10) {
+            if let id = selectedPoint, let i = settings.volumePoints.firstIndex(where: { $0.id == id }) {
+                Text(L("点 %@ ／ %@ dB", settings.volumePoints[i].time.timeText,
+                       String(format: "%+.1f", settings.volumePoints[i].db)))
+                    .monospacedDigit()
+                Button(role: .destructive) {
+                    settings.volumePoints.remove(at: i)
+                    selectedPoint = nil
+                    selectedSegment = nil
+                } label: { Label(L("この点を消す"), systemImage: "minus.circle") }
+            }
+            Spacer()
+            Button(role: .destructive) {
+                settings.volumePoints = []
+                selectedPoint = nil
+                selectedSegment = nil
+            } label: { Label(L("音量ラインを消す"), systemImage: "trash") }
+            .disabled(settings.volumePoints.isEmpty)
+        }
+        Text(L("水色の線が音量です。線をクリックで点を足す、点をドラッグで動かす、⌥クリックで消す。点と点の間をクリックすると、白い四角でつなぎの形（ベジエ曲線）を変えられます。フェードインは、最初の点の音量まで上がります。"))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     /// 試聴中か、この持ち主で鳴っている位置（秒）

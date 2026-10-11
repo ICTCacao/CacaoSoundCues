@@ -12,7 +12,7 @@ if [[ ! -f "$BG_PNG" || dmg/make-background.swift -nt "$BG_PNG" ]]; then
 fi
 [[ -d "$bundle" ]] || { echo "見つかりません: $bundle（先にビルドして dist に置いてください）"; exit 1; }
 version=$(defaults read "$PWD/$bundle/Contents/Info.plist" CFBundleShortVersionString)
-volname="$app β$version"
+volname="$app $version"
 dmg="dist/$app-$version.dmg"
 tmp="dist/.tmp-$app.dmg"
 staging=$(mktemp -d)
@@ -63,3 +63,10 @@ hdiutil detach "$mount" -quiet
 hdiutil convert "$tmp" -format UDZO -imagekey zlib-level=9 -ov -quiet -o "$dmg"
 rm -f "$tmp"
 echo "作成: $dmg ($(du -h "$dmg" | cut -f1))"
+
+# 5. 古い版の dmg は置かない方針なので、今作ったもの以外を消す（git で管理しているものは git rm）
+for old in dist/$app-*.dmg(N); do
+  [[ "$old" == "$dmg" ]] && continue
+  if git ls-files --error-unmatch "$old" >/dev/null 2>&1; then git rm -q "$old"; else rm -f "$old"; fi
+  echo "削除: $old（古い版）"
+done

@@ -223,4 +223,42 @@ final class CueMixerTests: XCTestCase {
         m2.send(.startNow(3))
         XCTAssertEqual(render(m2, total: 8)[5], 1, accuracy: 1e-6)
     }
+
+    /// 鳴っている途中で音量を変えると、次のサイクルから新しい音量になる（途中は滑らかに）
+    func testLiveGainChange() {
+        let m = CueMixer(sampleRate: 1000)
+        let ones = buffer([Float](repeating: 1, count: 1000))
+        let owner = UUID()
+        m.send(.play(spec(1, ones, start: 0, end: 1000, owner: owner)))
+        XCTAssertEqual(render(m, total: 16)[10], 1, accuracy: 1e-6)
+        m.send(.setGain(owner, 0.5))
+        let ramp = render(m, total: 16)
+        XCTAssertLessThan(ramp[15], 1)
+        XCTAssertEqual(ramp[15], 0.5, accuracy: 0.05, "サイクルの終わりには新しい音量")
+        XCTAssertEqual(render(m, total: 16)[8], 0.5, accuracy: 1e-6)
+    }
+
+    /// 音量ライン: 0 フレームで 0dB、100 フレームで -20dB（直線）なら、50 で約 -10dB、100 以降は 0.1 倍
+    func testVolumeLine() {
+        let m = CueMixer(sampleRate: 1000)
+        let ones = buffer([Float](repeating: 1, count: 1000))
+        var s = spec(1, ones, start: 0, end: 1000)
+        s.envelope = VolumeEnvelope(points: [
+            VolumePoint(time: 0, db: 0, shape: FadeBezier.preset(.linear, rising: true)),
+            VolumePoint(time: 0.1, db: -20),
+        ], sampleRate: 1000)
+        m.send(.play(s))
+        let out = render(m, total: 200, chunk: 16)
+        XCTAssertEqual(out[50], powf(10, -10.0 / 20), accuracy: 0.02)
+        XCTAssertEqual(out[150], 0.1, accuracy: 1e-4)
+    }
+
+    func testVolumeLineDBMatchesEnvelope() {
+        let points = [VolumePoint(time: 1, db: -6), VolumePoint(time: 3, db: -18)]
+        let env = VolumeEnvelope(points: points, sampleRate: 1000)
+        for t in [0.0, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0] {
+            let db = volumeLineDB(points, at: t)
+            XCTAssertEqual(Double(env.gain(at: Int(t * 1000))), pow(10, db / 20), accuracy: 0.01, "t=\(t)")
+        }
+    }
 }

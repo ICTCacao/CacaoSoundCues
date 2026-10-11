@@ -41,8 +41,8 @@ final class AppModel {
     static let shared = AppModel()
     /// インスペクタの試聴ボタン用の持ち主
     static let previewOwner = UUID()
-    /// 表示用のバージョン（ベータ版の間は β を付ける）
-    static let versionText = "β" + (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
+    /// 表示用のバージョン（3.0.1 から正式版。β は付けない）
+    static let versionText = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
     static let colors: [Color] = [.gray, .red, .orange, .yellow, .green, .teal, .blue, .purple]
 
     var show = Show(name: L("新しいキューシート")) {
@@ -263,6 +263,7 @@ final class AppModel {
                             follow: follow, gapFrames: Int(gap * sr), crossfade: crossfade)
         spec.fadeInBezier = p.bezier(rising: true).simd
         spec.fadeOutBezier = p.bezier(rising: false).simd
+        spec.envelope = VolumeEnvelope(points: p.volumePoints, sampleRate: sr)
         return spec
     }
 
@@ -274,6 +275,20 @@ final class AppModel {
         case .layer: output.mixer.send(.play(spec))
         case .ignore: output.mixer.send(.playIfIdle(spec))
         }
+    }
+
+    /// 再生中の音の音量を、設定を変えたその場で反映する（キーの音・リストの曲・試聴）
+    /// 再生中の音の音量ラインを、編集したその場で反映する
+    func liveVolumeLine(_ id: UUID, points: [VolumePoint]) {
+        let env = VolumeEnvelope(points: points, sampleRate: sampleRate)
+        output.mixer.send(.setEnvelope(id, env))
+        output.mixer.send(.setEnvelope(Self.previewOwner, env))
+    }
+
+    func liveVolume(_ id: UUID, db: Double) {
+        let gain = Float(pow(10, db / 20))
+        output.mixer.send(.setGain(id, gain))
+        output.mixer.send(.setGain(Self.previewOwner, gain))
     }
 
     /// 鳴っている音の再生位置を秒で移す

@@ -21,6 +21,7 @@
 		715E95ABB6186344B1CD9912 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AC56E6F71ADA641E516409 /* SettingsView.swift */; };
 		74E94DFD24BEFCC0F18CFD9C /* KeyListPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B383741F7FE20C5D0917D328 /* KeyListPanel.swift */; };
 		75B82B375CF25E5BAAE7D77C /* KeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC141BA9D9DA80CAFC8AC3F7 /* KeyboardView.swift */; };
+		80720A463D7D3068099310FA /* VolumeLineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F88892073B01364A71E0224 /* VolumeLineView.swift */; };
 		8D7E5078E901B19DB9437212 /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE1AF2250BC51CF10D842D02 /* AppModel.swift */; };
 		A340C9EE3F68123D6D2E5A71 /* en.json in Resources */ = {isa = PBXBuildFile; fileRef = 092047D9CF42BA88AE791881 /* en.json */; };
 		A9103EAB31D08F2893F16024 /* CueSheet.icns in Resources */ = {isa = PBXBuildFile; fileRef = B77B3604047395E8C99BA99F /* CueSheet.icns */; };
@@ -41,6 +42,7 @@
 		48CAD935537445A74E1C3F04 /* ShowModePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowModePanel.swift; sourceTree = "<group>"; };
 		4ACCD1B1F9EA9A45D2E67F61 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		4EBC8D51D1CACA6E5929E65B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4F88892073B01364A71E0224 /* VolumeLineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeLineView.swift; sourceTree = "<group>"; };
 		4FBECD378FCC35FEC6F97BDF /* NewSoundDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewSoundDefaults.swift; sourceTree = "<group>"; };
 		55C9ED6F074FDC41546190C8 /* LanguageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageManager.swift; sourceTree = "<group>"; };
 		629BC746C647E64733E5C8B3 /* LICENSE */ = {isa = PBXFileReference; path = LICENSE; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				21D10A87B10FAA257572B71E /* SequencePanel.swift */,
 				38AC56E6F71ADA641E516409 /* SettingsView.swift */,
 				48CAD935537445A74E1C3F04 /* ShowModePanel.swift */,
+				4F88892073B01364A71E0224 /* VolumeLineView.swift */,
 				E77F3DE6649ABA109E101B51 /* WaveformView.swift */,
 			);
 			path = Views;
@@ -235,6 +238,7 @@
 				715E95ABB6186344B1CD9912 /* SettingsView.swift in Sources */,
 				4F21778F7EBA41193D771533 /* ShowModePanel.swift in Sources */,
 				0EB832F823C149862FD03ADD /* Theme.swift in Sources */,
+				80720A463D7D3068099310FA /* VolumeLineView.swift in Sources */,
 				1CF48BBE1A6B322BA929FD18 /* WaveformView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -211,7 +211,14 @@ private struct StepRow: View {
                     .foregroundStyle(.orange)
             }
             if upcoming && voice == nil {
-                Text(L("次")).font(.caption.bold()).foregroundStyle(.orange)
+                // 舞台の言い方（きっかけ直前の「Standby」→「Go」）に合わせる。日本語の画面でも同じ
+                Text("Standby")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Capsule().fill(Color.orange))
+                    .fixedSize()
             }
             if let voice {
                 Text(voice.loop ? "∞" : "-" + (Double(voice.remainingFrames) / model.sampleRate).timeText)

@@ -23,6 +23,8 @@ public struct CueVoiceSpec: @unchecked Sendable {
     /// curve が custom のときのフェードイン／フェードアウトの形（ベジエの制御点 x1,y1,x2,y2）
     public var fadeInBezier: SIMD4<Float>
     public var fadeOutBezier: SIMD4<Float>
+    /// 音量ライン（曲の中で音量を変える）。空なら変えない
+    public var envelope = VolumeEnvelope()
     /// 0 以外なら、この token の音の終わりを待ってから鳴らす（リストの次の曲）
     public var follow: UInt64
     /// follow のとき、先の音の終わりからの間隔（フレーム）。マイナスなら重ねる
@@ -77,6 +79,10 @@ public enum MixerCommand: @unchecked Sendable {
     case seek(UInt64, frame: Int)
     /// 待っている音（delayFrames）を、待たずにすぐ鳴らす
     case startNow(UInt64)
+    /// 鳴っている音の音量を変える（持ち主か印が id の音すべて）。急に変わらないよう少しずつ近づける
+    case setGain(UUID, Float)
+    /// 鳴っている音の音量ラインを差し替える（持ち主か印が id の音すべて）
+    case setEnvelope(UUID, VolumeEnvelope)
 }
 
 public struct VoiceStatus: Sendable, Hashable {
@@ -107,6 +113,8 @@ public struct VoiceStatus: Sendable, Hashable {
     public var fadeTo: Float
     /// 待っている音が鳴り始めるまでの残りフレーム（待っていなければ -1）
     public var startsIn: Int
+    /// 音量ラインのいまの倍率（表示用）
+    public var lineGain: Float
 }
 
 private let silentSample: UnsafeMutablePointer<Float> = {
@@ -129,6 +137,12 @@ struct Voice {
     var endFading = false
     /// 次の曲が重なってくるとき、終わりのこの長さで自動フェードアウトする（クロスフェード）
     var crossfadeFrames = 0
+    /// いまの音量（spec.gain へ少しずつ近づける。再生中に音量を変えたときのプツッを防ぐ）
+    var gainNow: Float = 1
+    /// 音量ラインのいまの倍率と、次の区切りまでの1フレームあたりの変化（8 フレームごとに計算して、その間は直線でつなぐ）
+    var lineGain: Float = 1
+    var lineSlope: Float = 0
+    var lineBlock = 0
     /// 残りのくり返し回数。-1 は止めるまで
     var repeatsLeft = 0
     /// armed のとき、先の音が消えた後に鳴り始めるまでの残りフレーム
@@ -254,6 +268,15 @@ public final class CueMixer: @unchecked Sendable {
             }
         case .setMasterGain(let g):
             masterTarget = g
+        case .setEnvelope(let id, let envelope):
+            for i in 0..<Self.maxVoices where voices[i].inUse && (voices[i].spec.owner == id || voices[i].spec.tag == id) {
+                voices[i].spec.envelope = envelope
+                voices[i].lineBlock = 0
+            }
+        case .setGain(let id, let gain):
+            for i in 0..<Self.maxVoices where voices[i].inUse && (voices[i].spec.owner == id || voices[i].spec.tag == id) {
+                voices[i].spec.gain = gain
+            }
         case .startNow(let token):
             for i in 0..<Self.maxVoices where voices[i].inUse && voices[i].armed && voices[i].spec.token == token {
                 voices[i].countdown = 0
@@ -262,6 +285,8 @@ public final class CueMixer: @unchecked Sendable {
             for i in 0..<Self.maxVoices where voices[i].inUse && !voices[i].armed && voices[i].spec.token == token {
                 var v = voices[i]
                 v.pos = min(max(frame, v.spec.startFrame), v.spec.endFrame - 1)
+                v.lineGain = v.spec.envelope.gain(at: v.pos)
+                v.lineBlock = 0
                 v.endFading = false
                 // 飛んだ瞬間のプツッを防ぐため、2ms で立ち上げ直す（止めている途中ならそのまま）
                 if !v.stopping {
@@ -286,6 +311,8 @@ public final class CueMixer: @unchecked Sendable {
         v.spec = s
         v.pos = s.startFrame
         v.repeatsLeft = s.loop ? (s.loopCount > 0 ? s.loopCount - 1 : -1) : 0
+        v.gainNow = s.gain
+        v.lineGain = s.envelope.gain(at: s.startFrame)
         if s.follow != 0 {
             v.armed = true
         } else if s.delayFrames > 0 {
@@ -359,7 +386,9 @@ public final class CueMixer: @unchecked Sendable {
         var v = voices[i]
         let srcL = v.spec.left
         let srcR = v.spec.right
-        let gain = v.spec.gain
+        let gainTarget = v.spec.gain
+        // 音量が変わったら、このサイクルのあいだに滑らかに近づける
+        let gainStep = (gainTarget - v.gainNow) / Float(max(1, n - v.renderFrom))
         let curve = v.spec.curve
         let bIn = v.spec.fadeInBezier
         let bOut = v.spec.fadeOutBezier
@@ -369,6 +398,8 @@ public final class CueMixer: @unchecked Sendable {
             if v.pos >= v.spec.endFrame {
                 if v.repeatsLeft != 0 {
                     v.pos = v.spec.startFrame
+                    v.lineGain = v.spec.envelope.gain(at: v.pos)
+                    v.lineBlock = 0
                     if v.repeatsLeft > 0 { v.repeatsLeft -= 1 }
                 } else {
                     v.inUse = false
@@ -398,12 +429,23 @@ public final class CueMixer: @unchecked Sendable {
                 break
             }
             v.env = g
-            let a = g * gain
+            v.gainNow += gainStep
+            if !v.spec.envelope.isEmpty {
+                if v.lineBlock == 0 {
+                    let target = v.spec.envelope.gain(at: v.pos + 8)
+                    v.lineSlope = (target - v.lineGain) / 8
+                    v.lineBlock = 8
+                }
+                v.lineGain += v.lineSlope
+                v.lineBlock -= 1
+            }
+            let a = g * v.gainNow * v.lineGain
             L[f] += srcL[v.pos] * a
             R[f] += srcR[v.pos] * a
             v.pos += 1
             f += 1
         }
+        v.gainNow = gainTarget
         voices[i] = v
     }
 
@@ -431,7 +473,8 @@ public final class CueMixer: @unchecked Sendable {
                                          remainingFrames: remainingFrames(v),
                                          level: v.env, fading: v.envPos < v.envLen, fadingDown: v.envTo < v.envFrom,
                                          fadeElapsed: v.envPos, fadeLength: v.envLen, fadeFrom: v.envFrom, fadeTo: v.envTo,
-                                         startsIn: v.armed && v.countdown != Int.min ? v.countdown : -1))
+                                         startsIn: v.armed && v.countdown != Int.min ? v.countdown : -1,
+                                         lineGain: v.lineGain))
         }
     }
 }

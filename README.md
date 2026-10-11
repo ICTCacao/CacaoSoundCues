@@ -86,7 +86,7 @@ rm -rf dist/CacaoSoundCues.app && ditto build/Build/Products/Release/CacaoSoundC
 (cd Packages/CacaoSoundCuesCore && swift test)
 ```
 
-起動するアプリは `dist/CacaoSoundCues.app`。dist に置くビルドの前に `./bump-version.sh` でバージョンを上げる。ベータ版の間は 0.1.0 ずつ（β1.1.0 → β1.2.0）。
+起動するアプリは `dist/CacaoSoundCues.app`。dist に置くビルドの前に `./bump-version.sh` でバージョンを上げる。3.0.1 から正式版で、0.0.1 ずつ上げる（3.0.1 → 3.0.2）。
 
 ## ライセンス
 
