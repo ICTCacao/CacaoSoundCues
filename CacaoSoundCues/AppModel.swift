@@ -70,6 +70,8 @@ final class AppModel {
     }
 
     @ObservationIgnored let output = AudioOutput()
+    /// delete キーで消すもの（音量ラインで選んでいるマーク）。設定画面が選んだときに入れる
+    @ObservationIgnored var deleteKeyAction: (() -> Void)?
     @ObservationIgnored private var pendingFiles: [UUID: URL] = [:]
     @ObservationIgnored private var nextToken: UInt64 = 0
     @ObservationIgnored private var timer: Timer?
@@ -204,6 +206,11 @@ final class AppModel {
             if !event.isARepeat { advanceActiveSequence() }
             return true
         }
+        // delete キー: 音量ラインで選んでいるマークを消す
+        if code == 51 || code == 117, let action = deleteKeyAction, !showMode {
+            action()
+            return true
+        }
         if code == KeyboardLayout.upArrow || code == KeyboardLayout.downArrow {
             moveCue(by: code == KeyboardLayout.upArrow ? -1 : 1)
             return true
@@ -264,6 +271,8 @@ final class AppModel {
         spec.fadeInBezier = p.bezier(rising: true).simd
         spec.fadeOutBezier = p.bezier(rising: false).simd
         spec.envelope = VolumeEnvelope(points: p.volumePoints, sampleRate: sr)
+        spec.pan = Float(p.pan)
+        spec.panEnvelope = VolumeEnvelope(points: p.panPoints, sampleRate: sr)
         return spec
     }
 
@@ -283,6 +292,19 @@ final class AppModel {
         let env = VolumeEnvelope(points: points, sampleRate: sampleRate)
         output.mixer.send(.setEnvelope(id, env))
         output.mixer.send(.setEnvelope(Self.previewOwner, env))
+    }
+
+    /// 再生中の音の PANライン を、編集したその場で反映する
+    func livePanLine(_ id: UUID, points: [VolumePoint]) {
+        let env = VolumeEnvelope(points: points, sampleRate: sampleRate)
+        output.mixer.send(.setPanEnvelope(id, env))
+        output.mixer.send(.setPanEnvelope(Self.previewOwner, env))
+    }
+
+    /// 再生中の音の左右を、その場で反映する
+    func livePan(_ id: UUID, pan: Double) {
+        output.mixer.send(.setPan(id, Float(pan)))
+        output.mixer.send(.setPan(Self.previewOwner, Float(pan)))
     }
 
     func liveVolume(_ id: UUID, db: Double) {

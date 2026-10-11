@@ -220,6 +220,16 @@ private struct StepRow: View {
                     .background(Capsule().fill(Color.orange))
                     .fixedSize()
             }
+            if voice != nil {
+                // 再生中の曲（Standby と同じ形で、緑）
+                Text("Playing")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 1)
+                    .background(Capsule().fill(Color.green))
+                    .fixedSize()
+            }
             if let voice {
                 Text(voice.loop ? "∞" : "-" + (Double(voice.remainingFrames) / model.sampleRate).timeText)
                     .monospacedDigit()

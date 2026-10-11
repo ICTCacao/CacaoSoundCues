@@ -5,21 +5,36 @@ import SwiftUI
 /// 音量ライン（曲の中で音量を変える線）。波形の上に重ねる。
 /// 編集中は、線をクリックで点を足す・点をドラッグで動かす・⌥クリックで点を消す・
 /// 点と点の間をクリックしてその区間を選ぶと、白い四角でつなぎの形（ベジエ曲線）を変えられる
+/// 線の種類（音量ラインか PANライン か）。値の範囲・刻み・色・上下の向き
+struct LineKind {
+    var minValue: Double
+    var maxValue: Double
+    var step: Double
+    var color: Color
+    /// true なら上が minValue（PAN は上が L）
+    var topIsMin = false
+
+    static let volume = LineKind(minValue: VolumePoint.minDB, maxValue: VolumePoint.maxDB, step: 0.1,
+                                 color: Color(red: 0.35, green: 0.78, blue: 0.98))
+    static let pan = LineKind(minValue: -1, maxValue: 1, step: 0.01,
+                              color: Color(red: 1.0, green: 0.48, blue: 0.82), topIsMin: true)
+}
+
 struct VolumeLineView: View {
+    var kind: LineKind = .volume
     @Binding var points: [VolumePoint]
     @Binding var selectedPoint: UUID?
     @Binding var selectedSegment: Int?
     let duration: Double
     let editing: Bool
-    /// 再生中の位置（秒）と、いまの音量ラインの倍率
+    /// 再生中の位置（秒）と、いまの線の値（音量ラインなら dB、PANラインなら -1〜1）
     var playhead: Double?
-    var lineGain: Float?
+    var liveValue: Double?
 
     private enum Target { case point(Int), handle(segment: Int, second: Bool) }
     @State private var target: Target?
     @State private var moved = false
     private let grab: CGFloat = 10
-    private static let lineColor = Color(red: 0.35, green: 0.78, blue: 0.98)
 
     var body: some View {
         GeometryReader { geo in
@@ -36,12 +51,14 @@ struct VolumeLineView: View {
 
     private func x(_ t: Double, _ w: CGFloat) -> CGFloat { duration > 0 ? CGFloat(t / duration) * w : 0 }
     private func t(_ x: CGFloat, _ w: CGFloat) -> Double { min(max(0, Double(x / max(1, w)) * duration), duration) }
-    private func y(_ db: Double, _ h: CGFloat) -> CGFloat {
-        CGFloat((VolumePoint.maxDB - db) / (VolumePoint.maxDB - VolumePoint.minDB)) * h
+    private func y(_ v: Double, _ h: CGFloat) -> CGFloat {
+        let u = (v - kind.minValue) / (kind.maxValue - kind.minValue)
+        return CGFloat(kind.topIsMin ? u : 1 - u) * h
     }
     private func db(_ y: CGFloat, _ h: CGFloat) -> Double {
-        let v = VolumePoint.maxDB - Double(y / max(1, h)) * (VolumePoint.maxDB - VolumePoint.minDB)
-        return (min(max(v, VolumePoint.minDB), VolumePoint.maxDB) * 10).rounded() / 10
+        let u = Double(y / max(1, h))
+        let v = kind.minValue + (kind.topIsMin ? u : 1 - u) * (kind.maxValue - kind.minValue)
+        return (min(max(v, kind.minValue), kind.maxValue) / kind.step).rounded() * kind.step
     }
 
     /// 区間 k（点 k → 点 k+1）の、ベジエの制御点の画面上の位置
@@ -60,7 +77,7 @@ struct VolumeLineView: View {
     private func draw(_ ctx: GraphicsContext, _ size: CGSize) {
         let w = size.width, h = size.height
         guard duration > 0, w > 0 else { return }
-        // 0 dB の目安
+        // 0（音量なら 0dB、PAN なら中央）の目安
         if editing {
             var zero = Path()
             zero.move(to: CGPoint(x: 0, y: y(0, h)))
@@ -68,6 +85,10 @@ struct VolumeLineView: View {
             ctx.stroke(zero, with: .color(.white.opacity(0.35)), style: StrokeStyle(lineWidth: 1, dash: [4, 4]))
         }
         guard editing || !points.isEmpty else { return }
+        if editing && kind.topIsMin {
+            ctx.draw(Text("L").font(.caption2.bold()).foregroundStyle(kind.color), at: CGPoint(x: 8, y: 9))
+            ctx.draw(Text("R").font(.caption2.bold()).foregroundStyle(kind.color), at: CGPoint(x: 8, y: h - 9))
+        }
 
         // 線（1 ピクセルごとに音量ラインの値を取る）
         var line = Path()
@@ -77,7 +98,7 @@ struct VolumeLineView: View {
             let py = y(volumeLineDB(points, at: t(px, w)), h)
             if c == 0 { line.move(to: CGPoint(x: px, y: py)) } else { line.addLine(to: CGPoint(x: px, y: py)) }
         }
-        ctx.stroke(line, with: .color(Self.lineColor.opacity(editing ? 1 : 0.7)),
+        ctx.stroke(line, with: .color(kind.color.opacity(editing ? 1 : 0.7)),
                    style: StrokeStyle(lineWidth: editing ? 2.5 : 1.5, lineJoin: .round))
 
         // 選んだ区間のつなぎの形（白い四角と腕）
@@ -90,7 +111,7 @@ struct VolumeLineView: View {
             for c in [c1, c2] {
                 let r = CGRect(x: c.x - 5, y: c.y - 5, width: 10, height: 10)
                 ctx.fill(Path(r), with: .color(.white))
-                ctx.stroke(Path(r), with: .color(Self.lineColor), lineWidth: 1.5)
+                ctx.stroke(Path(r), with: .color(kind.color), lineWidth: 1.5)
             }
         }
 
@@ -99,14 +120,13 @@ struct VolumeLineView: View {
             let selected = p.id == selectedPoint
             let r: CGFloat = selected ? 7 : 5
             let rect = CGRect(x: x(p.time, w) - r, y: y(p.db, h) - r, width: r * 2, height: r * 2)
-            ctx.fill(Path(ellipseIn: rect), with: .color(selected ? .white : Self.lineColor))
-            ctx.stroke(Path(ellipseIn: rect), with: .color(selected ? Self.lineColor : .white), lineWidth: 1.5)
+            ctx.fill(Path(ellipseIn: rect), with: .color(selected ? .white : kind.color))
+            ctx.stroke(Path(ellipseIn: rect), with: .color(selected ? kind.color : .white), lineWidth: 1.5)
         }
 
         // 再生中の位置の音量
-        if let playhead, let lineGain, !points.isEmpty {
-            let dbNow = 20 * log10(Double(max(lineGain, 0.0001)))
-            let c = CGPoint(x: x(playhead, w), y: y(dbNow, h))
+        if let playhead, let liveValue, !points.isEmpty {
+            let c = CGPoint(x: x(playhead, w), y: y(liveValue, h))
             ctx.fill(Path(ellipseIn: CGRect(x: c.x - 5, y: c.y - 5, width: 10, height: 10)), with: .color(.yellow))
         }
     }

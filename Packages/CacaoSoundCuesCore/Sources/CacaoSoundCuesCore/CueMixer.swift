@@ -25,6 +25,10 @@ public struct CueVoiceSpec: @unchecked Sendable {
     public var fadeOutBezier: SIMD4<Float>
     /// 音量ライン（曲の中で音量を変える）。空なら変えない
     public var envelope = VolumeEnvelope()
+    /// 左右（-1〜1）。0 なら中央
+    public var pan: Float = 0
+    /// PANライン（値は -1〜1）。pan に足し合わせる。空なら変えない
+    public var panEnvelope = VolumeEnvelope()
     /// 0 以外なら、この token の音の終わりを待ってから鳴らす（リストの次の曲）
     public var follow: UInt64
     /// follow のとき、先の音の終わりからの間隔（フレーム）。マイナスなら重ねる
@@ -83,6 +87,10 @@ public enum MixerCommand: @unchecked Sendable {
     case setGain(UUID, Float)
     /// 鳴っている音の音量ラインを差し替える（持ち主か印が id の音すべて）
     case setEnvelope(UUID, VolumeEnvelope)
+    /// 鳴っている音の左右を変える（持ち主か印が id の音すべて）
+    case setPan(UUID, Float)
+    /// 鳴っている音の PANライン を差し替える
+    case setPanEnvelope(UUID, VolumeEnvelope)
 }
 
 public struct VoiceStatus: Sendable, Hashable {
@@ -115,6 +123,8 @@ public struct VoiceStatus: Sendable, Hashable {
     public var startsIn: Int
     /// 音量ラインのいまの倍率（表示用）
     public var lineGain: Float
+    /// いまの左右（PANライン込み、表示用）
+    public var panNow: Float
 }
 
 private let silentSample: UnsafeMutablePointer<Float> = {
@@ -139,6 +149,12 @@ struct Voice {
     var crossfadeFrames = 0
     /// いまの音量（spec.gain へ少しずつ近づける。再生中に音量を変えたときのプツッを防ぐ）
     var gainNow: Float = 1
+    /// 左右それぞれのいまの倍率（pan へ少しずつ近づける）
+    var panLNow: Float = 1
+    var panRNow: Float = 1
+    /// いまの左右（PANライン込み）と、次に PANライン を計算するまでのフレーム数
+    var panNow: Float = 0
+    var panBlock = 0
     /// 音量ラインのいまの倍率と、次の区切りまでの1フレームあたりの変化（8 フレームごとに計算して、その間は直線でつなぐ）
     var lineGain: Float = 1
     var lineSlope: Float = 0
@@ -268,6 +284,15 @@ public final class CueMixer: @unchecked Sendable {
             }
         case .setMasterGain(let g):
             masterTarget = g
+        case .setPanEnvelope(let id, let envelope):
+            for i in 0..<Self.maxVoices where voices[i].inUse && (voices[i].spec.owner == id || voices[i].spec.tag == id) {
+                voices[i].spec.panEnvelope = envelope
+                voices[i].panBlock = 0
+            }
+        case .setPan(let id, let pan):
+            for i in 0..<Self.maxVoices where voices[i].inUse && (voices[i].spec.owner == id || voices[i].spec.tag == id) {
+                voices[i].spec.pan = pan
+            }
         case .setEnvelope(let id, let envelope):
             for i in 0..<Self.maxVoices where voices[i].inUse && (voices[i].spec.owner == id || voices[i].spec.tag == id) {
                 voices[i].spec.envelope = envelope
@@ -312,6 +337,8 @@ public final class CueMixer: @unchecked Sendable {
         v.pos = s.startFrame
         v.repeatsLeft = s.loop ? (s.loopCount > 0 ? s.loopCount - 1 : -1) : 0
         v.gainNow = s.gain
+        v.panNow = min(max(s.pan + s.panEnvelope.value(at: s.startFrame), -1), 1)
+        (v.panLNow, v.panRNow) = panGains(v.panNow)
         v.lineGain = s.envelope.gain(at: s.startFrame)
         if s.follow != 0 {
             v.armed = true
@@ -387,6 +414,13 @@ public final class CueMixer: @unchecked Sendable {
         let srcL = v.spec.left
         let srcR = v.spec.right
         let gainTarget = v.spec.gain
+        // PANラインが無ければ、このサイクルのあいだに pan へ滑らかに近づける。あれば 8 フレームごとに計算する
+        let hasPanLine = !v.spec.panEnvelope.isEmpty
+        let (panLTarget, panRTarget) = panGains(v.spec.pan)
+        let panFrames = Float(max(1, n - v.renderFrom))
+        var panLStep = hasPanLine ? 0 : (panLTarget - v.panLNow) / panFrames
+        var panRStep = hasPanLine ? 0 : (panRTarget - v.panRNow) / panFrames
+        if !hasPanLine { v.panNow = v.spec.pan }
         // 音量が変わったら、このサイクルのあいだに滑らかに近づける
         let gainStep = (gainTarget - v.gainNow) / Float(max(1, n - v.renderFrom))
         let curve = v.spec.curve
@@ -440,13 +474,39 @@ public final class CueMixer: @unchecked Sendable {
                 v.lineBlock -= 1
             }
             let a = g * v.gainNow * v.lineGain
-            L[f] += srcL[v.pos] * a
-            R[f] += srcR[v.pos] * a
+            if hasPanLine {
+                if v.panBlock == 0 {
+                    let p = min(max(v.spec.pan + v.spec.panEnvelope.value(at: v.pos + 8), -1), 1)
+                    let (tl, tr) = panGains(p)
+                    panLStep = (tl - v.panLNow) / 8
+                    panRStep = (tr - v.panRNow) / 8
+                    v.panNow = p
+                    v.panBlock = 8
+                }
+                v.panBlock -= 1
+            }
+            v.panLNow += panLStep
+            v.panRNow += panRStep
+            L[f] += srcL[v.pos] * a * v.panLNow
+            R[f] += srcR[v.pos] * a * v.panRNow
             v.pos += 1
             f += 1
         }
         v.gainNow = gainTarget
+        if !hasPanLine {
+            v.panLNow = panLTarget
+            v.panRNow = panRTarget
+        }
         voices[i] = v
+    }
+
+    /// 左右の釣り合い（バランス）。中央は左右とも 1、片側に寄せると反対側が下がる（パワーが一定の曲線）
+    @inline(__always)
+    private func panGains(_ pan: Float) -> (Float, Float) {
+        let p = min(max(pan, -1), 1)
+        let l: Float = p <= 0 ? 1 : cosf(p * .pi / 2)
+        let r: Float = p >= 0 ? 1 : cosf(-p * .pi / 2)
+        return (l, r)
     }
 
     private func remainingFrames(_ v: Voice) -> Int {
@@ -474,7 +534,7 @@ public final class CueMixer: @unchecked Sendable {
                                          level: v.env, fading: v.envPos < v.envLen, fadingDown: v.envTo < v.envFrom,
                                          fadeElapsed: v.envPos, fadeLength: v.envLen, fadeFrom: v.envFrom, fadeTo: v.envTo,
                                          startsIn: v.armed && v.countdown != Int.min ? v.countdown : -1,
-                                         lineGain: v.lineGain))
+                                         lineGain: v.lineGain, panNow: v.panNow))
         }
     }
 }

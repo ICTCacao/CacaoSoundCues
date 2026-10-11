@@ -9,11 +9,11 @@ public struct EnvPoint: Sendable {
     public init() {}
 }
 
-/// 音量ライン（音声スレッド用）。メモリ確保をしないよう、点は決まった数（32）までを値の中に持つ
+/// 音量ライン（音声スレッド用）。メモリ確保をしないよう、点は決まった数（64）までを値の中に持つ
 public struct VolumeEnvelope: Sendable {
-    public static let capacity = 32
+    public static let capacity = 64
     public private(set) var count = 0
-    private var storage: (EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint) = (EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint())
+    private var storage: (EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint, EnvPoint) = (EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint(), EnvPoint())
 
     public init() {}
 
@@ -41,23 +41,30 @@ public struct VolumeEnvelope: Sendable {
         count += 1
     }
 
-    /// あるフレームでの音量（倍率）。点が無ければ 1
+    /// あるフレームでの線の値（音量ラインなら dB、PANラインなら -1〜1）。点が無ければ 0
     @inline(__always)
-    public func gain(at frame: Int) -> Float {
-        guard count > 0 else { return 1 }
+    public func value(at frame: Int) -> Float {
+        guard count > 0 else { return 0 }
         let first = self[0]
-        if frame <= first.frame { return dbToGain(first.gainDB) }
+        if frame <= first.frame { return first.gainDB }
         var k = 0
         while k < count - 1 {
             let a = self[k], b = self[k + 1]
             if frame < b.frame {
                 let p = Float(frame - a.frame) / Float(max(1, b.frame - a.frame))
                 let s = bezierGain(a.shape, rising: true, at: p)
-                return dbToGain(a.gainDB + (b.gainDB - a.gainDB) * s)
+                return a.gainDB + (b.gainDB - a.gainDB) * s
             }
             k += 1
         }
-        return dbToGain(self[count - 1].gainDB)
+        return self[count - 1].gainDB
+    }
+
+    /// あるフレームでの音量（倍率）。点が無ければ 1
+    @inline(__always)
+    public func gain(at frame: Int) -> Float {
+        guard count > 0 else { return 1 }
+        return dbToGain(value(at: frame))
     }
 
     @inline(__always)

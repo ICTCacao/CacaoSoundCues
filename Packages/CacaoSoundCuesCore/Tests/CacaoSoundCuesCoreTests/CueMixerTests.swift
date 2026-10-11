@@ -261,4 +261,47 @@ final class CueMixerTests: XCTestCase {
             XCTAssertEqual(Double(env.gain(at: Int(t * 1000))), pow(10, db / 20), accuracy: 0.01, "t=\(t)")
         }
     }
+
+    /// 左右: 右いっぱいにすると左は鳴らず、右はそのまま
+    func testPan() {
+        let m = CueMixer(sampleRate: 1000)
+        let ones = buffer([Float](repeating: 1, count: 1000))
+        var s = spec(1, ones, start: 0, end: 1000)
+        s.pan = 1
+        m.send(.play(s))
+        let l = UnsafeMutablePointer<Float>.allocate(capacity: 16)
+        let r = UnsafeMutablePointer<Float>.allocate(capacity: 16)
+        defer { l.deallocate(); r.deallocate() }
+        m.render(frames: 16, left: l, right: r)
+        XCTAssertEqual(l[10], 0, accuracy: 1e-4)
+        XCTAssertEqual(r[10], 1, accuracy: 1e-4)
+    }
+
+    /// 記録した細かい点は、直線に乗る点が消えて、曲がり角だけ残る
+    func testSimplifyVolumePoints() {
+        let linear = FadeBezier.preset(.linear, rising: true)
+        var pts: [VolumePoint] = []
+        for i in 0...20 { pts.append(VolumePoint(time: Double(i) * 0.1, db: -Double(i), shape: linear)) }   // 0〜2秒で 0→-20
+        for i in 1...20 { pts.append(VolumePoint(time: 2 + Double(i) * 0.1, db: -20, shape: linear)) }      // 2〜4秒は -20 のまま
+        let out = simplifyVolumePoints(pts)
+        XCTAssertEqual(out.map(\.time), [0, 2, 4], "始め・曲がり角・終わりだけ残る")
+        let many = (0..<200).map { VolumePoint(time: Double($0) * 0.1, db: $0 % 2 == 0 ? 0 : -10, shape: linear) }
+        XCTAssertLessThanOrEqual(simplifyVolumePoints(many).count, 64)
+    }
+
+    /// PANライン: 右いっぱい（1）の線なら、左は鳴らず右はそのまま
+    func testPanLine() {
+        let m = CueMixer(sampleRate: 1000)
+        let ones = buffer([Float](repeating: 1, count: 1000))
+        var s = spec(1, ones, start: 0, end: 1000)
+        s.panEnvelope = VolumeEnvelope(points: [VolumePoint(time: 0, db: 1)], sampleRate: 1000)
+        m.send(.play(s))
+        let l = UnsafeMutablePointer<Float>.allocate(capacity: 64)
+        let r = UnsafeMutablePointer<Float>.allocate(capacity: 64)
+        defer { l.deallocate(); r.deallocate() }
+        m.render(frames: 64, left: l, right: r)
+        XCTAssertEqual(l[40], 0, accuracy: 1e-3)
+        XCTAssertEqual(r[40], 1, accuracy: 1e-3)
+        XCTAssertEqual(m.snapshot().first?.panNow ?? 0, 1, accuracy: 1e-3)
+    }
 }

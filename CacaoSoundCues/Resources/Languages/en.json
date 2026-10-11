@@ -204,9 +204,18 @@
     "言語 / Language": "Language",
     "音量ライン": "Volume line",
     "曲の中で音量を変える線を、波形の上で編集します": "Edit a line on the waveform that changes the volume during the track",
-    "点 %@ ／ %@ dB": "Point %@ / %@ dB",
-    "この点を消す": "Delete point",
     "音量ラインを消す": "Clear volume line",
-    "水色の線が音量です。線をクリックで点を足す、点をドラッグで動かす、⌥クリックで消す。点と点の間をクリックすると、白い四角でつなぎの形（ベジエ曲線）を変えられます。フェードインは、最初の点の音量まで上がります。": "The light-blue line is the volume. Click the line to add a point, drag a point to move it, ⌥-click to delete it. Click between two points to shape the transition (Bézier curve) with the white squares. The fade-in rises to the level of the first point."
+    "左右（PAN）と、この音の基本の音量。ダブルクリックで中央／0dB に戻す": "Pan and the base volume of this sound. Double-click to reset to center / 0 dB",
+    "Playing": "Playing",
+    "マーク %@ ／ %@ dB": "Mark %@ / %@ dB",
+    "このマークを消す": "Delete mark",
+    "delete キーでも消せます": "You can also press delete",
+    "水色の線が音量です。線をクリックでマークを足す、マークをドラッグで動かす、⌥クリックか delete キーで消す。マークとマークの間をクリックすると、白い四角でつなぎの形（ベジエ曲線）を変えられます。フェードインは、最初のマークの音量まで上がります。": "The light-blue line is the volume. Click the line to add a mark, drag a mark to move it, ⌥-click or press delete to remove it. Click between two marks to shape the transition (Bézier curve) with the white squares. The fade-in rises to the level of the first mark.",
+    "いまの左右と音量（基本 ＋ PANライン・音量ライン）。再生中はラインに合わせて動き、ドラッグするとその場のラインを書き込む。止まっているときはライン全体を動かす": "Current pan and volume (base + pan line / volume line). Follows the lines during playback; drag to write the line at the playhead. When stopped, it moves the whole line",
+    "PANライン": "Pan line",
+    "曲の中で左右を変える線を、波形の上で編集します": "Edit a line on the waveform that changes the pan during the track",
+    "マーク %@ ／ %@": "Mark %@ / %@",
+    "PANラインを消す": "Clear pan line",
+    "ピンクの線が左右です（上が L、下が R、真ん中が中央）。左の PAN に足し合わせます。線をクリックでマークを足す、マークをドラッグで動かす、⌥クリックか delete キーで消す。マークとマークの間をクリックすると、白い四角でつなぎの形を変えられます。": "The pink line is the pan (top = L, bottom = R, middle = center). It is added to the pan on the left. Click the line to add a mark, drag a mark to move it, ⌥-click or press delete to remove it. Click between two marks to shape the transition with the white squares."
   }
 }

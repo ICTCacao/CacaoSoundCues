@@ -49,7 +49,7 @@ footer: "CacaoSoundCues Manual / ICTCacao"
 # CacaoSoundCues Manual
 
 A sound cue player for the stage
-Version 3.0.1 / October 2026
+Version 5.0.0 / October 2026
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. Double-click **CacaoSoundCues-3.0.1.dmg**
+1. Double-click **CacaoSoundCues-5.0.0.dmg**
 2. Drag **CacaoSoundCues** onto **Applications**
 3. Close the dmg (eject the disk icon on the desktop)
 4. Double-click CacaoSoundCues in the Applications folder
@@ -205,8 +205,9 @@ Number, letter and symbol keys. **F1–F12** and the **numeric keypad** can be t
 | Fade in / out | In seconds. **0 s = cut** |
 | Curve | Linear / Equal power / S-curve / Custom |
 | Repeat | Until stopped, or a set count |
-| Volume | In dB. “0dB” resets it. Works while playing |
-| Volume line | Change the volume during the track (e.g. quieter verse, louder chorus) |
+| Volume / Pan | Faders left of the waveform |
+| Volume line | Volume changes; record with the right fader |
+| Pan line | Pan changes; record with the right pan slider |
 
 <span class="small">Use “Preview” to listen.</span>
 

@@ -135,10 +135,20 @@ struct PlaySettingsEditor: View {
     @Environment(AppModel.self) private var model
     @Binding var settings: PlaySettings
     let owner: UUID
-    /// 音量ラインを編集中か（波形の操作を音量ラインに切り替える）
-    @State private var editingLine = false
+    /// 編集中の線（音量ラインか PANライン。波形の操作をその線に切り替える）
+    enum LineMode { case none, volume, pan }
+    @State private var lineMode: LineMode = .none
+    private var editingLine: Bool { lineMode != .none }
     @State private var selectedPoint: UUID?
     @State private var selectedSegment: Int?
+    /// 右のつまみで書き込み中の値（dB）と、最後に点を書いた時刻（秒）
+    @State private var writingDB: Double?
+    @State private var lastWriteTime: Double?
+    @State private var dragStartDB: Double = 0
+    /// 右の PAN スライダーで書き込み中の値と、最後に点を書いた時刻
+    @State private var writingPan: Double?
+    @State private var lastPanWriteTime: Double?
+    @State private var dragStartPan: Double = 0
 
     var body: some View {
         let sound = model.sound(settings.soundID)
@@ -165,6 +175,15 @@ struct PlaySettingsEditor: View {
 
             GroupBox {
                 VStack(alignment: .leading, spacing: 6) {
+                    // 左: PAN と基本の音量 ／ 真ん中: 波形と音量ライン ／ 右: いまの音量（音量ラインに合わせて自動で動く）
+                    HStack(alignment: .top, spacing: 8) {
+                    VStack(spacing: 4) {
+                        PanSlider(pan: $settings.pan, onChange: { model.livePan(owner, pan: $0) })
+                        Text(String(format: "%+.1f", settings.volumeDB)).font(.caption.monospacedDigit())
+                        FaderView(db: $settings.volumeDB, onChange: { model.liveVolume(owner, db: $0) })
+                    }
+                    .frame(width: 58, height: waveHeight)
+                    .help(L("左右（PAN）と、この音の基本の音量。ダブルクリックで中央／0dB に戻す"))
                     WaveformView(peaks: buffer?.peaks ?? [], duration: duration,
                                  inPoint: $settings.inPoint, outPoint: $settings.outPoint,
                                  playhead: playhead(buffer: buffer),
@@ -178,14 +197,39 @@ struct PlaySettingsEditor: View {
                                  onSeek: { seconds in
                                      if let v = playingVoice { model.seek(token: v.token, to: seconds) }
                                  })
-                        // 音量ライン。編集中はこちらが操作を受け取る
+                        // PANライン（ピンク）と音量ライン（水色）。編集中の線が操作を受け取る
                         .overlay {
-                            VolumeLineView(points: $settings.volumePoints, selectedPoint: $selectedPoint,
-                                           selectedSegment: $selectedSegment, duration: duration, editing: editingLine,
-                                           playhead: playhead(buffer: buffer), lineGain: playingVoice?.lineGain)
-                                .allowsHitTesting(editingLine)
+                            ZStack {
+                                VolumeLineView(kind: .pan, points: $settings.panPoints, selectedPoint: $selectedPoint,
+                                               selectedSegment: $selectedSegment, duration: duration, editing: lineMode == .pan,
+                                               playhead: playhead(buffer: buffer),
+                                               liveValue: playingVoice.map { Double($0.panNow) - settings.pan })
+                                    .allowsHitTesting(lineMode == .pan)
+                                    .zIndex(lineMode == .pan ? 1 : 0)
+                                VolumeLineView(kind: .volume, points: $settings.volumePoints, selectedPoint: $selectedPoint,
+                                               selectedSegment: $selectedSegment, duration: duration, editing: lineMode == .volume,
+                                               playhead: playhead(buffer: buffer),
+                                               liveValue: playingVoice.map { 20 * log10(Double(max($0.lineGain, 0.0001))) })
+                                    .allowsHitTesting(lineMode == .volume)
+                            }
                         }
-                        .frame(height: editingLine ? 150 : 110)
+                        .frame(height: waveHeight)
+                    VStack(spacing: 4) {
+                        // いまの左右。再生中はPANラインに合わせて動き、ドラッグするとPANラインを書き込む
+                        PanSlider(pan: Binding(get: { rightPan }, set: { rightPanChanged($0) }),
+                                  tint: livePan != nil || writingPan != nil ? .yellow : .accentColor,
+                                  onBegin: { beginPanWriting() }, onEnd: { endPanWriting() })
+                        Text(String(format: "%+.1f", rightDB)).font(.caption.monospacedDigit())
+                            .foregroundStyle(liveDB != nil || writingDB != nil ? Color.yellow : .primary)
+                        // 再生中にドラッグすると、その位置の音量ラインを書き込む。止まっているときは音量ライン全体を上下する
+                        FaderView(db: Binding(get: { rightDB }, set: { rightFaderChanged($0) }),
+                                  tint: .yellow,
+                                  onBegin: { beginWriting() },
+                                  onEnd: { endWriting() })
+                    }
+                    .frame(width: 58, height: waveHeight)
+                    .help(L("いまの左右と音量（基本 ＋ PANライン・音量ライン）。再生中はラインに合わせて動き、ドラッグするとその場のラインを書き込む。止まっているときはライン全体を動かす"))
+                    }
                     if editingLine { volumeLineControls }
                     HStack {
                         Text(L("開始")).fixedSize()
@@ -216,15 +260,31 @@ struct PlaySettingsEditor: View {
                 HStack {
                     Text(L("再生範囲"))
                     Spacer()
-                    Toggle(isOn: $editingLine) {
+                    Toggle(isOn: Binding(get: { lineMode == .volume }, set: { setLineMode($0 ? .volume : .none) })) {
                         Label(L("音量ライン"), systemImage: "chart.line.uptrend.xyaxis")
                     }
                     .toggleStyle(.button)
                     .help(L("曲の中で音量を変える線を、波形の上で編集します"))
+                    Toggle(isOn: Binding(get: { lineMode == .pan }, set: { setLineMode($0 ? .pan : .none) })) {
+                        Label(L("PANライン"), systemImage: "arrow.left.arrow.right")
+                    }
+                    .toggleStyle(.button)
+                    .help(L("曲の中で左右を変える線を、波形の上で編集します"))
                 }
+            }
+            // 選んだマークを delete キーで消せるようにする
+            .onChange(of: selectedPoint) { _, id in
+                model.deleteKeyAction = id == nil ? nil : { deleteSelectedPoint() }
+            }
+            .onDisappear { model.deleteKeyAction = nil }
+            // 右のつまみを押さえている間は、動かさなくても再生位置に書き続ける（DAW の「タッチ」）
+            .onReceive(Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()) { _ in
+                if let w = writingDB, playingVoice != nil { rightFaderChanged(w) }
+                if let p = writingPan, playingVoice != nil { rightPanChanged(p) }
             }
             // 音量ラインを動かしたら、鳴っている音にもすぐ効かせる
             .onChange(of: settings.volumePoints) { _, points in model.liveVolumeLine(owner, points: points) }
+            .onChange(of: settings.panPoints) { _, points in model.livePanLine(owner, points: points) }
 
             GroupBox(L("フェード（0秒 = カット）")) {
                 VStack(alignment: .leading, spacing: 6) {
@@ -268,17 +328,6 @@ struct PlaySettingsEditor: View {
                     }
                 }
             }
-            HStack {
-                Text(L("音量")).fixedSize()
-                Slider(value: $settings.volumeDB, in: -40...10)
-                    .frame(minWidth: 120, maxWidth: 260)
-                    // 鳴っている音にもすぐ効かせる
-                    .onChange(of: settings.volumeDB) { _, db in model.liveVolume(owner, db: db) }
-                Text(String(format: "%+.1f dB", settings.volumeDB))
-                    .monospacedDigit()
-                    .frame(width: 64, alignment: .leading)
-                Button { settings.volumeDB = 0 } label: { Label("0dB", systemImage: "arrow.uturn.backward") }
-            }
         }
     }
 
@@ -288,29 +337,171 @@ struct PlaySettingsEditor: View {
         return s.fileName.hasPrefix(prefix) ? String(s.fileName.dropFirst(prefix.count)) : s.fileName
     }
 
+    /// 右のつまみに出す値（書き込み中はつまみの値）
+    private var rightDB: Double { writingDB ?? currentDB }
+
+    private func beginWriting() {
+        dragStartDB = currentDB
+        lastWriteTime = nil
+        writingDB = currentDB
+    }
+
+    /// 右のつまみを動かした。再生中は再生位置に音量ラインの点を書き込む（DAW の「タッチ」のように）。
+    /// 止まっているときは、音量ライン全体（無ければ基本の音量）を同じだけ上下する
+    private func rightFaderChanged(_ newDB: Double) {
+        writingDB = newDB
+        if let v = playingVoice, let buffer = model.buffers[settings.soundID] {
+            let t = (Double(v.position) / buffer.sampleRate * 100).rounded() / 100
+            let lineDB = min(max(newDB - settings.volumeDB, VolumePoint.minDB), VolumePoint.maxDB)
+            settings.volumePoints = writeLinePoint(settings.volumePoints, value: (lineDB * 10).rounded() / 10,
+                                                   at: t, after: lastWriteTime)
+            lastWriteTime = t
+        } else {
+            let delta = newDB - dragStartDB
+            dragStartDB = newDB
+            if settings.volumePoints.isEmpty {
+                settings.volumeDB = min(max(settings.volumeDB + delta, FaderView.range.lowerBound), FaderView.range.upperBound)
+                model.liveVolume(owner, db: settings.volumeDB)
+            } else {
+                for i in settings.volumePoints.indices {
+                    settings.volumePoints[i].db = min(max(settings.volumePoints[i].db + delta, VolumePoint.minDB), VolumePoint.maxDB)
+                }
+            }
+        }
+    }
+
+    private func setLineMode(_ mode: LineMode) {
+        lineMode = mode
+        selectedPoint = nil
+        selectedSegment = nil
+    }
+
+    // MARK: - PANライン（右の PAN スライダー）
+
+    /// 再生中のいまの左右（PANラインがあるときだけ）
+    private var livePan: Double? {
+        guard !settings.panPoints.isEmpty, let v = playingVoice else { return nil }
+        return Double(v.panNow)
+    }
+
+    /// 右の PAN スライダーに出す値
+    private var rightPan: Double {
+        writingPan ?? livePan ?? min(max(settings.pan + volumeLineDB(settings.panPoints, at: settings.inPoint), -1), 1)
+    }
+
+    private func beginPanWriting() {
+        dragStartPan = rightPan
+        lastPanWriteTime = nil
+        writingPan = rightPan
+    }
+
+    /// 右の PAN スライダーを動かした。再生中は再生位置に PANライン の点を書き込む。
+    /// 止まっているときは、PANライン全体（無ければ基本の PAN）を同じだけ動かす
+    private func rightPanChanged(_ newPan: Double) {
+        writingPan = newPan
+        if let v = playingVoice, let buffer = model.buffers[settings.soundID] {
+            let t = (Double(v.position) / buffer.sampleRate * 100).rounded() / 100
+            let value = min(max(newPan - settings.pan, -1), 1)
+            settings.panPoints = writeLinePoint(settings.panPoints, value: (value * 100).rounded() / 100,
+                                                at: t, after: lastPanWriteTime)
+            lastPanWriteTime = t
+        } else {
+            let delta = newPan - dragStartPan
+            dragStartPan = newPan
+            if settings.panPoints.isEmpty {
+                settings.pan = min(max(settings.pan + delta, -1), 1)
+                model.livePan(owner, pan: settings.pan)
+            } else {
+                for i in settings.panPoints.indices {
+                    settings.panPoints[i].db = min(max(settings.panPoints[i].db + delta, -1), 1)
+                }
+            }
+        }
+    }
+
+    private func endPanWriting() {
+        if lastPanWriteTime != nil {
+            settings.panPoints = simplifyVolumePoints(settings.panPoints, tolerance: 0.02)
+        }
+        writingPan = nil
+        lastPanWriteTime = nil
+    }
+
+    /// 線に、時刻 t の点を書き込む。前に書いた時刻から t までの点は上書きする。
+    /// 最初の書き込みなら、それまでの値が変わらないよう始まりの点も置く
+    private func writeLinePoint(_ points: [VolumePoint], value: Double, at t: Double, after from: Double?) -> [VolumePoint] {
+        var pts = points
+        let linear = FadeBezier.preset(.linear, rising: true)
+        if pts.isEmpty, t > settings.inPoint + 0.05 {
+            pts.append(VolumePoint(time: settings.inPoint, db: 0, shape: linear))
+        }
+        if let from {
+            pts.removeAll { $0.time > from + 0.001 && $0.time <= t + 0.001 }
+        } else {
+            pts.removeAll { abs($0.time - t) < 0.001 }
+        }
+        pts.append(VolumePoint(time: t, db: value, shape: linear))
+        pts.sort { $0.time < $1.time }
+        return pts
+    }
+
+    private func deleteSelectedPoint() {
+        guard let id = selectedPoint else { return }
+        settings.volumePoints.removeAll { $0.id == id }
+        settings.panPoints.removeAll { $0.id == id }
+        selectedPoint = nil
+        selectedSegment = nil
+    }
+
+    /// 書き込みを終えたら、細かく記録した点を必要なものだけに減らす
+    private func endWriting() {
+        if lastWriteTime != nil {
+            settings.volumePoints = simplifyVolumePoints(settings.volumePoints)
+        }
+        writingDB = nil
+        lastWriteTime = nil
+    }
+
+    /// 波形の高さ（ラインを編集していないときも、編集するときと同じ高さ）
+    private var waveHeight: CGFloat { 220 }
+
+    /// 右のつまみに出す音量。再生中は今の値、止まっていれば開始位置での値
+    private var currentDB: Double {
+        liveDB ?? settings.volumeDB + volumeLineDB(settings.volumePoints, at: settings.inPoint)
+    }
+
+    /// 再生中のいまの音量（音の音量 ＋ 音量ライン、dB）。音量ラインが無いときや止まっているときは nil
+    private var liveDB: Double? {
+        guard !settings.volumePoints.isEmpty, let v = playingVoice else { return nil }
+        return settings.volumeDB + 20 * log10(Double(max(v.lineGain, 0.00001)))
+    }
+
     /// 音量ラインの編集中に、波形の下に出す説明と操作
     @ViewBuilder
     private var volumeLineControls: some View {
+        let pan = lineMode == .pan
+        let points = pan ? $settings.panPoints : $settings.volumePoints
         HStack(spacing: 10) {
-            if let id = selectedPoint, let i = settings.volumePoints.firstIndex(where: { $0.id == id }) {
-                Text(L("点 %@ ／ %@ dB", settings.volumePoints[i].time.timeText,
-                       String(format: "%+.1f", settings.volumePoints[i].db)))
+            if let id = selectedPoint, let i = points.wrappedValue.firstIndex(where: { $0.id == id }) {
+                let p = points.wrappedValue[i]
+                Text(pan ? L("マーク %@ ／ %@", p.time.timeText, PanSlider.label(p.db))
+                         : L("マーク %@ ／ %@ dB", p.time.timeText, String(format: "%+.1f", p.db)))
                     .monospacedDigit()
                 Button(role: .destructive) {
-                    settings.volumePoints.remove(at: i)
-                    selectedPoint = nil
-                    selectedSegment = nil
-                } label: { Label(L("この点を消す"), systemImage: "minus.circle") }
+                    deleteSelectedPoint()
+                } label: { Label(L("このマークを消す"), systemImage: "minus.circle") }
+                .help(L("delete キーでも消せます"))
             }
             Spacer()
             Button(role: .destructive) {
-                settings.volumePoints = []
+                points.wrappedValue = []
                 selectedPoint = nil
                 selectedSegment = nil
-            } label: { Label(L("音量ラインを消す"), systemImage: "trash") }
-            .disabled(settings.volumePoints.isEmpty)
+            } label: { Label(pan ? L("PANラインを消す") : L("音量ラインを消す"), systemImage: "trash") }
+            .disabled(points.wrappedValue.isEmpty)
         }
-        Text(L("水色の線が音量です。線をクリックで点を足す、点をドラッグで動かす、⌥クリックで消す。点と点の間をクリックすると、白い四角でつなぎの形（ベジエ曲線）を変えられます。フェードインは、最初の点の音量まで上がります。"))
+        Text(pan ? L("ピンクの線が左右です（上が L、下が R、真ん中が中央）。左の PAN に足し合わせます。線をクリックでマークを足す、マークをドラッグで動かす、⌥クリックか delete キーで消す。マークとマークの間をクリックすると、白い四角でつなぎの形を変えられます。")
+                 : L("水色の線が音量です。線をクリックでマークを足す、マークをドラッグで動かす、⌥クリックか delete キーで消す。マークとマークの間をクリックすると、白い四角でつなぎの形（ベジエ曲線）を変えられます。フェードインは、最初のマークの音量まで上がります。"))
             .font(.caption)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)

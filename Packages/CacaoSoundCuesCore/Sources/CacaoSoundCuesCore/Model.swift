@@ -58,6 +58,10 @@ public struct PlaySettings: Codable, Hashable, Sendable {
     public var fadeOutBezier: FadeBezier? = nil
     /// 音量ライン（曲の中で音量を変える点。時間の順）。空なら曲の間ずっと同じ音量
     public var volumePoints: [VolumePoint] = []
+    /// 左右（-1 = 左だけ、0 = 中央、1 = 右だけ）。ステレオの音は左右の釣り合い（バランス）として効く
+    public var pan: Double = 0
+    /// PANライン（曲の中で左右を変える点）。VolumePoint の db に左右の値（-1〜1）を入れる。左の PAN に足し合わせる
+    public var panPoints: [VolumePoint] = []
 
     public init(soundID: UUID) {
         self.soundID = soundID
@@ -65,7 +69,7 @@ public struct PlaySettings: Codable, Hashable, Sendable {
 
     private enum CodingKeys: String, CodingKey {
         case soundID, inPoint, outPoint, fadeIn, fadeOut, fadeOutAtEnd, loop, loopCount, volumeDB, curve
-        case fadeInBezier, fadeOutBezier, volumePoints
+        case fadeInBezier, fadeOutBezier, volumePoints, pan, panPoints
     }
 
     /// 項目が足りない古いキューシートも開けるように、無い項目は既定値にする
@@ -84,6 +88,8 @@ public struct PlaySettings: Codable, Hashable, Sendable {
         fadeInBezier = try c.decodeIfPresent(FadeBezier.self, forKey: .fadeInBezier)
         fadeOutBezier = try c.decodeIfPresent(FadeBezier.self, forKey: .fadeOutBezier)
         volumePoints = try c.decodeIfPresent([VolumePoint].self, forKey: .volumePoints) ?? []
+        pan = try c.decodeIfPresent(Double.self, forKey: .pan) ?? 0
+        panPoints = try c.decodeIfPresent([VolumePoint].self, forKey: .panPoints) ?? []
     }
 
     /// 実際に使うフェードの形（custom 以外は決まった形のベジエ）
@@ -118,6 +124,27 @@ public struct VolumePoint: Codable, Hashable, Sendable, Identifiable {
     /// 音量ラインで扱う範囲（dB）
     public static let minDB: Double = -40
     public static let maxDB: Double = 6
+}
+
+/// つまみで記録した細かい点を、形を保ったまま減らす。
+/// 両隣を直線で結んでも tolerance（dB）以内に収まる点から消していき、maxCount 以下にする
+public func simplifyVolumePoints(_ points: [VolumePoint], tolerance: Double = 0.5, maxCount: Int = 64) -> [VolumePoint] {
+    var pts = points.sorted { $0.time < $1.time }
+    func error(_ i: Int) -> Double {
+        let a = pts[i - 1], b = pts[i + 1], p = pts[i]
+        let u = (p.time - a.time) / max(1e-9, b.time - a.time)
+        return abs(p.db - (a.db + (b.db - a.db) * u))
+    }
+    while pts.count > 2 {
+        var best = 1, bestErr = Double.infinity
+        for i in 1..<(pts.count - 1) {
+            let e = error(i)
+            if e < bestErr { bestErr = e; best = i }
+        }
+        if bestErr > tolerance && pts.count <= maxCount { break }
+        pts.remove(at: best)
+    }
+    return pts
 }
 
 /// 音量ラインの、ある時刻（秒）の音量（dB）。点が無ければ 0

@@ -24,6 +24,8 @@ struct MainView: View {
                     SequencePanel()
                         .frame(minWidth: 400, idealWidth: 480)
                         .background(Theme.background)
+                        // 仕切りの位置を覚えておく（キーボードを出しているときの2分割）
+                        .background(SplitPersistence(key: "split.withKeyboard"))
                     rightPanel
                         .frame(minWidth: 480)
                 }
@@ -32,6 +34,8 @@ struct MainView: View {
                     KeyListPanel()
                         .frame(minWidth: 260, idealWidth: 320)
                         .background(Theme.background)
+                        // 仕切りの位置を覚えておく（キーボードを隠しているときの3分割）
+                        .background(SplitPersistence(key: "split.keyList"))
                     SequencePanel()
                         .frame(minWidth: 380, idealWidth: 460)
                         .background(Theme.background)
