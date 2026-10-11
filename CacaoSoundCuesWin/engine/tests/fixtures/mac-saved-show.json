@@ -1,0 +1,164 @@
+{
+  "formatVersion" : 1,
+  "keyCues" : [
+    {
+      "colorIndex" : 2,
+      "groupID" : "BDB75D3F-C75F-4A52-8793-8A2A38DD8143",
+      "id" : "86E27A37-E664-4A7F-9BE8-C6588D207972",
+      "keyCode" : 18,
+      "name" : "開演ベル",
+      "play" : {
+        "curve" : "custom",
+        "fadeIn" : 1,
+        "fadeInBezier" : {
+          "x1" : 0.1,
+          "x2" : 0.5,
+          "y1" : 0.9,
+          "y2" : 1
+        },
+        "fadeOut" : 2,
+        "fadeOutAtEnd" : true,
+        "fadeOutBezier" : {
+          "x1" : 0.4,
+          "x2" : 0.9,
+          "y1" : 1,
+          "y2" : 0.2
+        },
+        "inPoint" : 0.5,
+        "loop" : true,
+        "loopCount" : 3,
+        "outPoint" : 3,
+        "pan" : -0.3,
+        "panPoints" : [
+          {
+            "db" : 0.5,
+            "id" : "C603F281-7187-4E16-8B4A-A5463988870D",
+            "time" : 1
+          }
+        ],
+        "soundID" : "50384658-204C-47AD-A4E7-FF86244C3E5B",
+        "volumeDB" : -6,
+        "volumePoints" : [
+          {
+            "db" : 0,
+            "id" : "141B9D78-EFC2-482F-9A51-87F9A625139A",
+            "time" : 0.5
+          },
+          {
+            "db" : -12,
+            "id" : "9F446F9B-5018-419C-AB4F-601B1C4FEDB8",
+            "shape" : {
+              "x1" : 0.2,
+              "x2" : 0.8,
+              "y1" : 0,
+              "y2" : 1
+            },
+            "time" : 2
+          }
+        ]
+      },
+      "retrigger" : "restart"
+    },
+    {
+      "colorIndex" : 0,
+      "id" : "D974C496-AAC2-487C-877A-48EFBBD1DDC8",
+      "keyCode" : 122,
+      "name" : "F1の音",
+      "play" : {
+        "curve" : "equalPower",
+        "fadeIn" : 0,
+        "fadeOut" : 0,
+        "fadeOutAtEnd" : false,
+        "inPoint" : 0,
+        "loop" : false,
+        "loopCount" : 0,
+        "pan" : 0,
+        "panPoints" : [
+
+        ],
+        "soundID" : "50384658-204C-47AD-A4E7-FF86244C3E5B",
+        "volumeDB" : 0,
+        "volumePoints" : [
+
+        ]
+      },
+      "retrigger" : "fadeOut"
+    }
+  ],
+  "keyGroups" : [
+    {
+      "id" : "BDB75D3F-C75F-4A52-8793-8A2A38DD8143",
+      "name" : "第1幕"
+    }
+  ],
+  "masterVolumeDB" : -3,
+  "name" : "Mac で保存",
+  "panicFade" : 1.5,
+  "sequences" : [
+    {
+      "id" : "E6DF0F00-E6C2-42B1-A033-CFC876AC169C",
+      "loop" : true,
+      "name" : "幕間BGM",
+      "steps" : [
+        {
+          "id" : "C5F54DF7-78FE-42DD-B16B-480DF1FA756A",
+          "name" : "曲1",
+          "play" : {
+            "curve" : "equalPower",
+            "fadeIn" : 0,
+            "fadeOut" : 0,
+            "fadeOutAtEnd" : false,
+            "inPoint" : 0,
+            "loop" : false,
+            "loopCount" : 0,
+            "pan" : 0,
+            "panPoints" : [
+
+            ],
+            "soundID" : "50384658-204C-47AD-A4E7-FF86244C3E5B",
+            "volumeDB" : 0,
+            "volumePoints" : [
+
+            ]
+          },
+          "start" : "overlap",
+          "startSeconds" : 3
+        },
+        {
+          "id" : "F40EEEE1-8FAC-4D30-8809-F40B803F0394",
+          "name" : "曲2",
+          "play" : {
+            "curve" : "equalPower",
+            "fadeIn" : 0,
+            "fadeOut" : 0,
+            "fadeOutAtEnd" : false,
+            "inPoint" : 0,
+            "loop" : false,
+            "loopCount" : 0,
+            "pan" : 0,
+            "panPoints" : [
+
+            ],
+            "soundID" : "50384658-204C-47AD-A4E7-FF86244C3E5B",
+            "volumeDB" : 0,
+            "volumePoints" : [
+
+            ]
+          },
+          "start" : "returnKey",
+          "startSeconds" : 0
+        }
+      ],
+      "stopFade" : 2.5,
+      "toggleKey" : 46
+    }
+  ],
+  "sounds" : [
+    {
+      "displayName" : "ベル",
+      "duration" : 3.5,
+      "fileName" : "ABC-ベル.wav",
+      "id" : "50384658-204C-47AD-A4E7-FF86244C3E5B"
+    }
+  ]
+}

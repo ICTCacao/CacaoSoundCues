@@ -1,0 +1,337 @@
+{
+  "formatVersion": 1,
+  "name": "サンプル公演",
+  "sounds": [
+    {
+      "id": "DF052501-E682-4748-AE84-126315D055D8",
+      "fileName": "DF052501-E682-4748-AE84-126315D055D8-開演ベル.wav",
+      "displayName": "開演ベル",
+      "duration": 4.0
+    },
+    {
+      "id": "789FFAD8-6860-4A02-8739-E110EBC72FB2",
+      "fileName": "789FFAD8-6860-4A02-8739-E110EBC72FB2-電話.wav",
+      "displayName": "電話",
+      "duration": 4.0
+    },
+    {
+      "id": "9E11BCC8-0E10-415C-A46C-E94E6032CCF8",
+      "fileName": "9E11BCC8-0E10-415C-A46C-E94E6032CCF8-ドア.wav",
+      "displayName": "ドア",
+      "duration": 1.5
+    },
+    {
+      "id": "4D5F7EF8-FD18-4FBB-91F1-01164DE6561A",
+      "fileName": "4D5F7EF8-FD18-4FBB-91F1-01164DE6561A-足音.wav",
+      "displayName": "足音",
+      "duration": 4.0
+    },
+    {
+      "id": "2C5A77A1-683F-429A-9977-020E2792F267",
+      "fileName": "2C5A77A1-683F-429A-9977-020E2792F267-雨音.wav",
+      "displayName": "雨音",
+      "duration": 20.0
+    },
+    {
+      "id": "99FE3E82-85F1-4CEB-8DBB-66B54CBAD64A",
+      "fileName": "99FE3E82-85F1-4CEB-8DBB-66B54CBAD64A-雷.wav",
+      "displayName": "雷",
+      "duration": 5.0
+    },
+    {
+      "id": "10852F61-9D4E-43CD-888A-9036C33C45DF",
+      "fileName": "10852F61-9D4E-43CD-888A-9036C33C45DF-BGM1 森の朝.wav",
+      "displayName": "BGM1 森の朝",
+      "duration": 45.0
+    },
+    {
+      "id": "4F20E26F-E90A-41E3-9601-1D1BB012CBDD",
+      "fileName": "4F20E26F-E90A-41E3-9601-1D1BB012CBDD-BGM2 街の灯.wav",
+      "displayName": "BGM2 街の灯",
+      "duration": 40.0
+    },
+    {
+      "id": "50980371-C18A-40F7-8FD4-89D821E033A3",
+      "fileName": "50980371-C18A-40F7-8FD4-89D821E033A3-BGM3 旅立ち.wav",
+      "displayName": "BGM3 旅立ち",
+      "duration": 50.0
+    },
+    {
+      "id": "D4523D3E-5687-4F0D-9F8D-F21D1BEE506F",
+      "fileName": "D4523D3E-5687-4F0D-9F8D-F21D1BEE506F-BGM4 カーテンコール.wav",
+      "displayName": "BGM4 カーテンコール",
+      "duration": 35.0
+    }
+  ],
+  "keyCues": [
+    {
+      "id": "A6FA707D-BD7E-4B91-B94F-B44410A2CF2A",
+      "keyCode": 18,
+      "name": "開演ベル",
+      "colorIndex": 1,
+      "retrigger": "fadeOut",
+      "play": {
+        "soundID": "DF052501-E682-4748-AE84-126315D055D8",
+        "inPoint": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "fadeOutAtEnd": false,
+        "loop": false,
+        "loopCount": 0,
+        "volumeDB": 0,
+        "curve": "equalPower"
+      },
+      "groupID": "C7B78649-19AA-44B2-8059-9622C40B055F"
+    },
+    {
+      "id": "3B22BAF0-B57B-41AA-AA79-0C2CBD0604E2",
+      "keyCode": 19,
+      "name": "電話",
+      "colorIndex": 4,
+      "retrigger": "fadeOut",
+      "play": {
+        "soundID": "789FFAD8-6860-4A02-8739-E110EBC72FB2",
+        "inPoint": 0,
+        "fadeIn": 0,
+        "fadeOut": 0.5,
+        "fadeOutAtEnd": false,
+        "loop": true,
+        "loopCount": 0,
+        "volumeDB": 0,
+        "curve": "equalPower"
+      },
+      "groupID": "C7B78649-19AA-44B2-8059-9622C40B055F"
+    },
+    {
+      "id": "F396503A-DE92-499E-8182-7C54F0F7A8D6",
+      "keyCode": 12,
+      "name": "ドア",
+      "colorIndex": 6,
+      "retrigger": "fadeOut",
+      "play": {
+        "soundID": "9E11BCC8-0E10-415C-A46C-E94E6032CCF8",
+        "inPoint": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "fadeOutAtEnd": false,
+        "loop": false,
+        "loopCount": 0,
+        "volumeDB": 0,
+        "curve": "equalPower"
+      },
+      "groupID": "C7B78649-19AA-44B2-8059-9622C40B055F"
+    },
+    {
+      "id": "AD992A8A-9817-41C0-85E5-E72234B2F522",
+      "keyCode": 13,
+      "name": "足音",
+      "colorIndex": 5,
+      "retrigger": "fadeOut",
+      "play": {
+        "soundID": "4D5F7EF8-FD18-4FBB-91F1-01164DE6561A",
+        "inPoint": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "fadeOutAtEnd": false,
+        "loop": true,
+        "loopCount": 3,
+        "volumeDB": 0,
+        "curve": "equalPower"
+      },
+      "groupID": "9C336796-9F35-4F9D-BFE0-C35ED94F4A1A"
+    },
+    {
+      "id": "112DF2AC-5ABC-4BD5-88D0-688AF4A12E0A",
+      "keyCode": 0,
+      "name": "雨音",
+      "colorIndex": 6,
+      "retrigger": "fadeOut",
+      "play": {
+        "soundID": "2C5A77A1-683F-429A-9977-020E2792F267",
+        "inPoint": 1.5,
+        "fadeIn": 3,
+        "fadeOut": 4,
+        "fadeOutAtEnd": false,
+        "loop": true,
+        "loopCount": 0,
+        "volumeDB": 0,
+        "curve": "sCurve",
+        "outPoint": 17.0,
+        "volumePoints": [
+          {
+            "id": "4E06F91A-8A0F-4050-99DC-715062E0B777",
+            "time": 2,
+            "db": 0
+          },
+          {
+            "id": "F807CEE1-DDCB-4DA4-85BA-14672E952978",
+            "time": 6,
+            "db": -14
+          },
+          {
+            "id": "335ACA0D-CC94-46D7-85FE-2AAFBEC1826F",
+            "time": 10,
+            "db": -14
+          },
+          {
+            "id": "250DD2CC-F676-4E83-BDBA-F6D69250F01A",
+            "time": 14,
+            "db": -2
+          }
+        ],
+        "panPoints": [
+          {
+            "id": "F50C5D09-D952-4984-8968-38887781D63E",
+            "time": 2,
+            "db": -0.8
+          },
+          {
+            "id": "E454BC9F-9696-45DB-A61F-A4FB12298242",
+            "time": 9,
+            "db": 0.8
+          },
+          {
+            "id": "12D316BC-4E35-49D4-BB26-634112E470B2",
+            "time": 15,
+            "db": 0
+          }
+        ]
+      },
+      "groupID": "9C336796-9F35-4F9D-BFE0-C35ED94F4A1A"
+    },
+    {
+      "id": "5F48417D-3070-4B36-B8E1-77853382DA6F",
+      "keyCode": 1,
+      "name": "雷",
+      "colorIndex": 7,
+      "retrigger": "fadeOut",
+      "play": {
+        "soundID": "99FE3E82-85F1-4CEB-8DBB-66B54CBAD64A",
+        "inPoint": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "fadeOutAtEnd": false,
+        "loop": false,
+        "loopCount": 0,
+        "volumeDB": 0,
+        "curve": "equalPower"
+      },
+      "groupID": "9C336796-9F35-4F9D-BFE0-C35ED94F4A1A"
+    },
+    {
+      "id": "9D391859-A578-4C60-853D-55947674401A",
+      "keyCode": 6,
+      "name": "終演ベル",
+      "colorIndex": 1,
+      "retrigger": "fadeOut",
+      "play": {
+        "soundID": "DF052501-E682-4748-AE84-126315D055D8",
+        "inPoint": 0,
+        "fadeIn": 0,
+        "fadeOut": 0,
+        "fadeOutAtEnd": false,
+        "loop": false,
+        "loopCount": 0,
+        "volumeDB": 0,
+        "curve": "equalPower"
+      },
+      "groupID": "3D3E41F0-68D6-4B8D-BF42-0AF9FC3A7A4B"
+    }
+  ],
+  "keyGroups": [
+    {
+      "id": "C7B78649-19AA-44B2-8059-9622C40B055F",
+      "name": "第1幕"
+    },
+    {
+      "id": "9C336796-9F35-4F9D-BFE0-C35ED94F4A1A",
+      "name": "第2幕"
+    },
+    {
+      "id": "3D3E41F0-68D6-4B8D-BF42-0AF9FC3A7A4B",
+      "name": "カーテンコール"
+    }
+  ],
+  "sequences": [
+    {
+      "id": "CAE0A5FC-6C55-411E-987E-103BCEE5D961",
+      "name": "幕間BGM",
+      "toggleKey": 46,
+      "loop": true,
+      "stopFade": 3,
+      "steps": [
+        {
+          "id": "8B7DA121-14A8-42AE-A25D-C97360BBE880",
+          "name": "BGM1 森の朝",
+          "play": {
+            "soundID": "10852F61-9D4E-43CD-888A-9036C33C45DF",
+            "inPoint": 0,
+            "fadeIn": 2,
+            "fadeOut": 3,
+            "fadeOutAtEnd": false,
+            "loop": false,
+            "loopCount": 0,
+            "volumeDB": 0,
+            "curve": "equalPower"
+          },
+          "start": "returnKey",
+          "startSeconds": 0
+        },
+        {
+          "id": "784CF6C6-2BCC-44D4-8BBA-40BA1A16E340",
+          "name": "BGM2 街の灯",
+          "play": {
+            "soundID": "4F20E26F-E90A-41E3-9601-1D1BB012CBDD",
+            "inPoint": 0,
+            "fadeIn": 0,
+            "fadeOut": 3,
+            "fadeOutAtEnd": false,
+            "loop": false,
+            "loopCount": 0,
+            "volumeDB": 0,
+            "curve": "equalPower"
+          },
+          "start": "afterPrevious",
+          "startSeconds": 2
+        },
+        {
+          "id": "4B483146-D35C-4E8F-A3B4-93E452495EEF",
+          "name": "BGM3 旅立ち",
+          "play": {
+            "soundID": "50980371-C18A-40F7-8FD4-89D821E033A3",
+            "inPoint": 2.0,
+            "fadeIn": 0,
+            "fadeOut": 3,
+            "fadeOutAtEnd": false,
+            "loop": false,
+            "loopCount": 0,
+            "volumeDB": 0,
+            "curve": "equalPower",
+            "outPoint": 44.0
+          },
+          "start": "overlap",
+          "startSeconds": 4
+        },
+        {
+          "id": "D5EBFBF4-7372-40FD-AE2E-6C1EA8C22F48",
+          "name": "BGM4 カーテンコール",
+          "play": {
+            "soundID": "D4523D3E-5687-4F0D-9F8D-F21D1BEE506F",
+            "inPoint": 0,
+            "fadeIn": 1.5,
+            "fadeOut": 4,
+            "fadeOutAtEnd": true,
+            "loop": false,
+            "loopCount": 0,
+            "volumeDB": 0,
+            "curve": "equalPower"
+          },
+          "start": "returnKey",
+          "startSeconds": 3
+        }
+      ]
+    }
+  ],
+  "masterVolumeDB": 0,
+  "panicFade": 2
+}

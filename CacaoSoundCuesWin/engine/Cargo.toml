@@ -7,5 +7,15 @@ license = "MIT"
 
 [dependencies]
 rtrb = "0.3"
+# 音ファイルの読み込み（wav / aiff / mp3 / m4a(AAC・ALAC) / flac）
+symphonia = { version = "0.5", features = ["all"] }
+# サンプルレートの変換
+rubato = "0.16"
+# 音の出力（Windows は WASAPI、Mac は CoreAudio）
+cpal = "0.15"
+# キューシート（show.json）の読み書き。Mac 版と同じ形
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
 
 [dev-dependencies]
