@@ -14,3 +14,5 @@ dist/.tmp-*.dmg
 target/
 node_modules/
 CacaoSoundCuesWin/app/dist/
+# Windows 版の試験ビルド（インストーラー）は追跡しない
+CacaoSoundCuesWin/dist/

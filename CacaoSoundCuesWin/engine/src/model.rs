@@ -356,6 +356,25 @@ pub fn audio_path(sound: &SoundRef, package: &Path) -> PathBuf {
     package.join(AUDIO_FOLDER).join(&sound.file_name)
 }
 
+/// 音ファイルを探す。名前どおりに無ければ、先頭の「ID-」が同じファイルを探す
+/// （Mac で作った zip を Windows で展開すると、日本語の名前が化けることがあるため）
+pub fn find_audio(path: &Path) -> Option<PathBuf> {
+    if path.exists() {
+        return Some(path.to_path_buf());
+    }
+    let name = path.file_name()?.to_string_lossy().to_string();
+    let prefix: String = name.chars().take(37).collect();
+    if prefix.len() < 37 || Uuid::parse_str(&prefix[..36]).is_err() || !prefix.ends_with('-') {
+        return None;
+    }
+    let prefix = prefix.to_uppercase();
+    std::fs::read_dir(path.parent()?)
+        .ok()?
+        .flatten()
+        .map(|e| e.path())
+        .find(|p| p.file_name().map(|n| n.to_string_lossy().to_uppercase().starts_with(&prefix)).unwrap_or(false))
+}
+
 /// 保存する。まだパッケージに無い音は source から Audio/ にコピーし、使っていない音ファイルは消す。
 /// file_name を書き換えた Show を返す（Mac 版 ShowPackage.save と同じ）
 pub fn save(show: &Show, package: &Path, source: impl Fn(&SoundRef) -> Option<PathBuf>) -> Result<Show, String> {
@@ -367,8 +386,14 @@ pub fn save(show: &Show, package: &Path, source: impl Fn(&SoundRef) -> Option<Pa
         let prefix = format!("{}-", s.id);
         let name = if s.file_name.starts_with(&prefix) { s.file_name.clone() } else { format!("{prefix}{}", s.file_name) };
         let dest = audio_dir.join(&name);
+        // 名前が化けたファイル（zip の展開など）は、正しい名前に戻す
         if !dest.exists() {
-            let src = source(s).filter(|p| p.exists()).ok_or(format!("音ファイルが見つかりません: {}", s.display_name))?;
+            if let Some(found) = find_audio(&dest) {
+                let _ = std::fs::rename(&found, &dest);
+            }
+        }
+        if !dest.exists() {
+            let src = source(s).and_then(|p| find_audio(&p)).ok_or(format!("音ファイルが見つかりません: {}", s.display_name))?;
             std::fs::copy(&src, &dest).map_err(|e| format!("保存できません: {e}"))?;
         }
         s.file_name = name.clone();

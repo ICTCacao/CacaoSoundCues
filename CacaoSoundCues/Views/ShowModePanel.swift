@@ -131,7 +131,7 @@ struct ShowModePanel: View {
             hint("return", L("次の曲へ（待っている間にもう一度押すと、すぐ鳴る）"))
             hint("space", L("今の曲を途中で終える"))
             hint(L("↑↓・ダブルクリック"), L("次に鳴らす曲を選ぶ"))
-            hint("esc", L("全部フェードアウト（2度押しでカット）"))
+            hint("esc", L("全部の音をすぐ止める"))
         }
         .font(.callout)
     }

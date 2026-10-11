@@ -25,17 +25,41 @@ export const CODE_TO_MAC: Record<string, number> = Object.fromEntries(
 
 export const KEY = { escape: 53, space: 49, ret: 36, enter: 76, up: 126, down: 125 };
 
-/// 画面に出すキーの文字（日本語配列の見た目に合わせる）
-const LABELS: Record<string, string> = {
-  Equal: "^", Minus: "-", BracketRight: "[", BracketLeft: "@", Quote: ":", Semicolon: ";", Backslash: "]",
-  Comma: ",", Slash: "/", Period: ".", Backquote: "`", IntlYen: "¥", IntlRo: "_", Space: "space",
-  Escape: "esc", NumLock: "clear", Enter: "return", NumpadEnter: "enter",
+import { L } from "./i18n";
+
+/** キーボードの配列（日本語 JIS か 英語 US）。設定で「自動」なら Windows の配列から決める */
+export type Layout = "jis" | "us";
+let layout: Layout = "jis";
+export const currentLayout = () => layout;
+export function setLayout(l: Layout) { layout = l; }
+
+/** Windows の配列を調べる（^ のキーがあれば JIS） */
+export async function detectLayout(): Promise<Layout> {
+  try {
+    const kb = (navigator as unknown as { keyboard?: { getLayoutMap(): Promise<Map<string, string>> } }).keyboard;
+    const map = await kb?.getLayoutMap();
+    if (map) return map.get("Equal") === "^" || map.get("BracketLeft") === "@" ? "jis" : "us";
+  } catch { /* 調べられなければ JIS */ }
+  return "jis";
+}
+
+/** 画面に出すキーの文字 */
+const COMMON_LABELS: Record<string, string> = {
+  Minus: "-", Semicolon: ";", Comma: ",", Slash: "/", Period: ".", Space: "space",
+  Escape: "esc", NumLock: "clear", Enter: "return", NumpadEnter: "enter", Backquote: "`",
+};
+const JIS_LABELS: Record<string, string> = {
+  Equal: "^", BracketRight: "[", BracketLeft: "@", Quote: ":", Backslash: "]", IntlYen: "¥", IntlRo: "_",
+};
+const US_LABELS: Record<string, string> = {
+  Equal: "=", BracketRight: "]", BracketLeft: "[", Quote: "'", Backslash: "\\", IntlYen: "¥", IntlRo: "_",
 };
 
 export function keyLabel(mac: number): string {
   const code = MAC_TO_CODE[mac];
   if (!code) return `#${mac}`;
-  if (LABELS[code]) return LABELS[code];
+  const own = (layout === "jis" ? JIS_LABELS : US_LABELS)[code] ?? COMMON_LABELS[code];
+  if (own) return own;
   if (code.startsWith("Key")) return code.slice(3);
   if (code.startsWith("Digit")) return code.slice(5);
   if (code.startsWith("Numpad")) {
@@ -46,12 +70,40 @@ export function keyLabel(mac: number): string {
   return code;
 }
 
-/// 画面のキーボード（日本語配列）。Mac 版と同じ並び
-export const KEY_ROWS: number[][] = [
+/** 画面のキーボード。Mac 版と同じ並び（キーは Mac のキーコード） */
+const JIS_ROWS: number[][] = [
   [18, 19, 20, 21, 23, 22, 26, 28, 25, 29, 27, 24, 93],
   [12, 13, 14, 15, 17, 16, 32, 34, 31, 35, 33, 30],
   [0, 1, 2, 3, 5, 4, 38, 40, 37, 41, 39, 42],
   [6, 7, 8, 9, 11, 45, 46, 43, 47, 44, 94],
 ];
+const US_ROWS: number[][] = [
+  [50, 18, 19, 20, 21, 23, 22, 26, 28, 25, 29, 27, 24],
+  [12, 13, 14, 15, 17, 16, 32, 34, 31, 35, 33, 30, 42],
+  [0, 1, 2, 3, 5, 4, 38, 40, 37, 41, 39],
+  [6, 7, 8, 9, 11, 45, 46, 43, 47, 44],
+];
+export const keyRows = () => (layout === "jis" ? JIS_ROWS : US_ROWS);
+/** 行ごとの左のずれ（キー幅に対する割合） */
 export const ROW_INDENT = [0, 0.5, 0.75, 1.25];
 export const FUNCTION_ROW = [122, 120, 99, 118, 96, 97, 98, 100, 101, 109, 103, 111];
+
+/** テンキー。上の3段は4列、下の2段は「1 2 3 / 0(2列分) .」と縦長の enter */
+export const KEYPAD_TOP_ROWS = [[71, 81, 75, 67], [89, 91, 92, 78], [86, 87, 88, 69]];
+export const KEYPAD_ROW123 = [83, 84, 85];
+export const KEYPAD_ZERO = 82;
+export const KEYPAD_DECIMAL = 65;
+const KEYPAD_KEYS = [...KEYPAD_TOP_ROWS.flat(), ...KEYPAD_ROW123, KEYPAD_ZERO, KEYPAD_DECIMAL];
+
+/** 音やリストを割り当てられるキー（どちらの配列のキーも。Mac で作ったキューシートを開けるように） */
+export const ALL_KEYS = new Set<number>([...JIS_ROWS.flat(), ...US_ROWS.flat(), ...FUNCTION_ROW, ...KEYPAD_KEYS]);
+
+/** 操作用に固定していて割り当てられないキーなら、その理由 */
+export function reservedReason(code: number): string | null {
+  switch (code) {
+    case KEY.ret: case KEY.enter: return L("Enter キーは「リストの次の曲へ」に使うため割り当てられません");
+    case KEY.space: return L("スペースキーは「リストの曲を途中で終える」に使うため割り当てられません");
+    case KEY.escape: return L("Esc キーは「全停止」に使うため割り当てられません");
+    default: return null;
+  }
+}

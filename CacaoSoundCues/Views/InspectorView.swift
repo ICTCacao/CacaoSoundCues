@@ -47,7 +47,7 @@ struct InspectorView: View {
             Text(L("・リスト（幕間 BGM など）は1つずつ鳴る。Return で次の曲へ進む（鳴っていなければ選んでいるリストを開始）"))
             Text(L("・リストの曲をダブルクリックすると、その曲が「次」になる。Return で鳴る"))
             Text(L("・スペースでリストの今の曲を途中で終える（次の曲はその曲のタイミング設定どおりに続く）"))
-            Text(L("・Esc で全部フェードアウト、続けてもう一度 Esc でカット"))
+            Text(L("・Esc で全部の音をすぐ止める（フェードなし）"))
         }
         .foregroundStyle(.secondary)
     }

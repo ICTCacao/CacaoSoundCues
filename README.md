@@ -3,6 +3,9 @@
 舞台専用のポン出しソフト（macOS 14 以降・Swift）。Soundplant の「キーを押せば即鳴る」に、
 幕間 BGM などの **シーケンシャル再生リスト** を加えたもの。MacBook だけで完結する。
 
+**Windows 版**（Windows 10 / 11）もある（`CacaoSoundCuesWin/`）。キューシート（`.ccsc`）は Mac 版と共通で、
+Mac で作ったものを Windows でそのまま開ける（その逆も）。操作は同じで、Mac の Return は Windows では Enter。
+
 ## できること（v0.1）
 
 - 音ファイル（wav / aiff / mp3 / m4a など macOS で再生できるもの）をキーにドラッグして割り当て
@@ -29,7 +32,7 @@
   （今の曲と残り時間・次の曲・鳴っているキー）。終了には確認が出る
 - **言語の切り替え**（設定 ⌘,）: 日本語／English。ほかの言語は、翻訳用のひな形（英語の JSON）を書き出して
   訳し、`~/Library/Application Support/CacaoSoundCues/Languages/` に置くと選べる（訳の無い言葉は英語）
-- Esc で全部フェードアウト、1 秒以内にもう一度 Esc でカット（文字入力中でも効く）
+- Esc で全部の音をすぐ止める（フェードなし。文字入力中でも効く）
 - 保存は `.ccsc` パッケージ（`show.json` と `Audio/` に音ファイルのコピー）。フォルダごと持ち運べる
 - 前回のキューシートを起動時に自動で開く。再生中・未保存の終了は確認する。スリープ・App Nap を抑止
 
@@ -49,6 +52,24 @@ project.yml                     XcodeGen（xcodegen generate で .xcodeproj を�
 Packages/CacaoSoundCuesCore     データ・ミキサー・デコーダ・保存（UI なし、swift test で検証）
 CacaoSoundCues/                 アプリ（SwiftUI）
 ```
+
+## Windows 版
+
+```
+CacaoSoundCuesWin/engine   音声エンジン（Rust。CueMixer の移植。cargo test で Mac 版と同じ動きを確かめる）
+CacaoSoundCuesWin/app      アプリ（Tauri 2。画面は TypeScript + Preact、音と保存は Rust）
+```
+
+Mac でクロスビルドする（cargo-xwin と llvm が必要）:
+
+```sh
+cd CacaoSoundCuesWin/app
+PATH="/opt/homebrew/opt/llvm/bin:$PATH" npm run tauri build -- --runner cargo-xwin --target x86_64-pc-windows-msvc --bundles nsis
+```
+
+- 音は WASAPI（cpal）で、できるだけ 128 フレームのバッファで鳴らす
+- Mac で作った zip を Windows で展開して日本語のファイル名が化けても、ファイル名の先頭の ID で音を見つける
+- 本番中は Windows のスリープを抑止する
 
 ## 配布用 dmg
 

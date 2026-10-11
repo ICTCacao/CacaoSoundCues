@@ -77,7 +77,6 @@ final class AppModel {
     @ObservationIgnored private var timer: Timer?
     @ObservationIgnored private var keyMonitor: Any?
     @ObservationIgnored private var activity: NSObjectProtocol?
-    @ObservationIgnored private var lastEscape = Date.distantPast
     @ObservationIgnored private var started = false
 
     private init() {}
@@ -325,13 +324,9 @@ final class AppModel {
         output.mixer.send(.toggle(spec))
     }
 
-    /// Esc: 全部フェードアウト。1秒以内にもう一度押すとカット
+    /// Esc: 全部の音をすぐ止める（フェードなし。プツッと鳴らないよう、ミキサーが数ミリ秒だけ絞る）
     func panic() {
-        let now = Date()
-        let cut = now.timeIntervalSince(lastEscape) < 1
-        lastEscape = now
-        let fade = cut ? 0 : Int(show.panicFade * sampleRate)
-        output.mixer.send(.stopAll(fadeFrames: fade))
+        output.mixer.send(.stopAll(fadeFrames: 0))
         run = nil
     }
 

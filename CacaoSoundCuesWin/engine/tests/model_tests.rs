@@ -88,3 +88,17 @@ fn line_value_matches_envelope() {
         assert!((env.gain((t * 1000.0) as i64) as f64 - want).abs() < 0.01, "t={t}");
     }
 }
+
+/// Mac の zip を Windows で展開して日本語の名前が化けても、先頭の ID で見つける
+#[test]
+fn finds_audio_with_garbled_name() {
+    use cacaosoundcues_engine::model::find_audio;
+    let dir = std::env::temp_dir().join(format!("csc-find-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let id = "02D94AFD-6D13-4795-B779-F1F196D083D9";
+    std::fs::write(dir.join(format!("{id}-縺｡縺ｯ繧.m4a")), b"x").unwrap();
+    let found = find_audio(&dir.join(format!("{id}-ちはる.m4a"))).unwrap();
+    assert!(found.file_name().unwrap().to_string_lossy().starts_with(id));
+    assert!(find_audio(&dir.join("no-id.m4a")).is_none());
+    std::fs::remove_dir_all(&dir).unwrap();
+}

@@ -292,7 +292,7 @@ Click a track to choose on the right.
 | <kbd>space</kbd> | **End the current track early**. The next one follows its own timing |
 | <kbd>↑</kbd> <kbd>↓</kbd> / double-click | **Choose the next track** (does not play). It is marked **Standby** |
 | Start/stop key | Start / stop that list |
-| <kbd>esc</kbd> | **Fade out everything**. Press again to cut |
+| <kbd>esc</kbd> | **Stop all sounds at once** (no fade) |
 
 > Example: when the curtain falls, press <kbd>space</kbd> to end the music → after the blackout, press <kbd>return</kbd> for the next track.
 
@@ -422,7 +422,7 @@ The starting fades and timing used when you add sounds to keys or lists.
 | <kbd>return</kbd> | Next track in the list (twice: skip the wait) |
 | <kbd>space</kbd> | End the current list track |
 | <kbd>↑</kbd> <kbd>↓</kbd> | Choose the next list track |
-| <kbd>esc</kbd> | Fade out everything (twice: cut) |
+| <kbd>esc</kbd> | Stop all sounds at once |
 | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>L</kbd> | Show Mode on / off |
 | <kbd>⌘</kbd><kbd>S</kbd> / <kbd>⌘</kbd><kbd>O</kbd> / <kbd>⌘</kbd><kbd>N</kbd> | Save / Open / New |
 | <kbd>⌘</kbd><kbd>,</kbd> | Settings |

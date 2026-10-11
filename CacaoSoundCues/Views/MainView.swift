@@ -133,7 +133,7 @@ struct TopBar: View {
             }
             .tint(.red)
             .buttonStyle(.borderedProminent)
-            .help(L("全部フェードアウト。1秒以内にもう一度 Esc でカット"))
+            .help(L("全部の音をすぐ止める（フェードなし）"))
 
             VStack(alignment: .trailing, spacing: 1) {
                 Text("\(AppModel.versionText) ・ \(model.output.deviceName)  \(String(format: "%.1f", model.sampleRate / 1000))kHz")
