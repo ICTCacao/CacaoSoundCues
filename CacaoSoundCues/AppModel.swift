@@ -116,10 +116,18 @@ final class AppModel {
             if rateChanged { self.reloadAllSounds() }
         }
         #if PRO
-        // Pro 版だけ: 出力の系統（機器とチャンネル）を当てる
-        ProOutputs.shared.apply()
-        // バックアップ機との同時運転
-        ProSync.shared.startUp()
+        #if DEBUG
+        // マニュアルの画面写真を撮るときは、出力の系統と同時運転を始めない（このMacの出力や役の設定に触らない）
+        let screenshotRun = Self.isScreenshotRun
+        #else
+        let screenshotRun = false
+        #endif
+        if !screenshotRun {
+            // Pro 版だけ: 出力の系統（機器とチャンネル）を当てる
+            ProOutputs.shared.apply()
+            // バックアップ機との同時運転
+            ProSync.shared.startUp()
+        }
         #endif
         applyMasterVolume()
 

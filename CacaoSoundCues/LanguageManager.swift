@@ -51,6 +51,12 @@ enum LanguageManager {
             return
         }
         Lang.english = bundledEnglish.flatMap(read)?.strings ?? [:]
+        #if PRO
+        // Pro 版だけ: Pro の機能の言葉の英訳（en-pro.json）を重ねる
+        if let pro = Bundle.main.url(forResource: "en-pro", withExtension: "json").flatMap(read)?.strings {
+            Lang.english.merge(pro) { _, new in new }
+        }
+        #endif
         if code == "en" {
             Lang.table = Lang.english
         } else {

@@ -120,6 +120,7 @@
     "本番モードを終了して、編集できるようにする": "Leave Show Mode to edit again",
     "編集を止めて、キー操作と再生だけにする": "Lock editing; only keys and playback work",
     "キーボード": "Keyboard",
+    "全停止": "Stop All",
     "音源設定": "Inspector",
     "右側の音源設定（本番モードでは本番用の表示）を出す・隠す": "Show or hide the inspector on the right (the show panel in Show Mode)",
     "キーボードを隠すと、割り当てたキーだけを一覧で表示します": "Hide the keyboard to show only assigned keys as a list",
