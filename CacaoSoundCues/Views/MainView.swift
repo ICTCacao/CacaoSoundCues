@@ -110,15 +110,29 @@ struct TopBar: View {
     @AppStorage("keyboardScale") private var keyboardScale = 1.0
 
     var body: some View {
+        // 窓が狭い（ノートの画面など）ときは、ボタンを絵だけにし、それでも入らなければ右端の機器の表示を省く
+        ViewThatFits(in: .horizontal) {
+            bar(compact: false, info: true)
+            bar(compact: true, info: true)
+            bar(compact: true, info: false)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+    }
+
+    private func bar(compact: Bool, info: Bool) -> some View {
         @Bindable var model = model
-        HStack(spacing: 14) {
+        return HStack(spacing: compact ? 8 : 14) {
             TextField(L("キューシート名"), text: $model.show.name)
                 .textFieldStyle(.roundedBorder)
-                .frame(width: 220)
+                .frame(width: compact ? 160 : 220)
                 .disabled(model.showMode)
+            Group {
             Button { model.openPanel() } label: { Label(L("開く…"), systemImage: "folder") }
                 .disabled(model.showMode)
+                .help(L("開く…"))
             Button { model.save() } label: { Label(L("保存"), systemImage: "square.and.arrow.down") }
+                .help(L("保存"))
             Button { model.toggleShowMode() } label: {
                 Label(model.showMode ? L("本番モード中") : L("本番モード"), systemImage: model.showMode ? "lock.fill" : "lock.open")
             }
@@ -153,8 +167,10 @@ struct TopBar: View {
             .menuStyle(.borderlessButton)
             .fixedSize()
             .help(L("キーボードに出すキーの設定（この Mac に保存）"))
+            }
+            .labelStyle(compact ? AnyLabelStyle(.iconOnly) : AnyLabelStyle(.titleAndIcon))
 
-            Spacer()
+            Spacer(minLength: 8)
 
             HStack(spacing: 6) {
                 Image(systemName: "speaker.wave.2")
@@ -169,12 +185,13 @@ struct TopBar: View {
             Button {
                 model.panic()
             } label: {
-                Label(L("全停止（Esc）"), systemImage: "stop.fill")
+                Label(compact ? L("全停止") : L("全停止（Esc）"), systemImage: "stop.fill")
             }
             .tint(.red)
             .buttonStyle(.borderedProminent)
             .help(L("全部の音をすぐ止める（フェードなし）"))
 
+            if info {
             VStack(alignment: .trailing, spacing: 1) {
                 Text("\(AppModel.versionText) ・ \(model.output.deviceName)  \(String(format: "%.1f", model.sampleRate / 1000))kHz")
                 Text(L("バッファ %d（%.1fms）・メモリ %dMB", Int(model.output.bufferFrames), model.output.latencyMilliseconds, model.memoryBytes / 1_048_576))
@@ -182,10 +199,16 @@ struct TopBar: View {
             .font(.caption)
             .foregroundStyle(.secondary)
             .monospacedDigit()
+            }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 8)
     }
+}
+
+/// ラベルの出し方を、狭いときと広いときで切り替える
+struct AnyLabelStyle: LabelStyle {
+    private let make: (Configuration) -> AnyView
+    init<S: LabelStyle>(_ style: S) { make = { AnyView(style.makeBody(configuration: $0)) } }
+    func makeBody(configuration: Configuration) -> some View { make(configuration) }
 }
 
 extension View {

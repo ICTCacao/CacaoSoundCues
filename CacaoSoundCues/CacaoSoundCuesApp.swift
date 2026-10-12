@@ -25,7 +25,9 @@ struct CacaoSoundCuesApp: App {
         Window(AppModel.appName, id: "main") {
             MainView()
                 .environment(model)
-                .frame(minWidth: AppModel.minWindowWidth, minHeight: 760)
+                // 画面が狭い Mac（ノートなど）では、画面の幅までに抑える（窓が画面からはみ出さないように）
+                .frame(minWidth: min(AppModel.minWindowWidth, (NSScreen.main?.visibleFrame.width ?? 1500) - 20),
+                       minHeight: min(760, (NSScreen.main?.visibleFrame.height ?? 900) - 40))
         }
         Settings {
             SettingsView()

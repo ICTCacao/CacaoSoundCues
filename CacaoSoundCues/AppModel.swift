@@ -118,6 +118,8 @@ final class AppModel {
         #if PRO
         // Pro 版だけ: 出力の系統（機器とチャンネル）を当てる
         ProOutputs.shared.apply()
+        // バックアップ機との同時運転
+        ProSync.shared.startUp()
         #endif
         applyMasterVolume()
 
@@ -299,6 +301,11 @@ final class AppModel {
     }
 
     func trigger(_ cue: KeyCue) {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.trigger(cue.id)) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         guard let spec = makeSpec(cue.play, owner: cue.id, tag: cue.id) else { return }
         switch cue.retrigger {
         case .fadeOut: output.mixer.send(.toggle(spec))
@@ -349,6 +356,11 @@ final class AppModel {
 
     /// Esc: 全部の音をすぐ止める（フェードなし。プツッと鳴らないよう、ミキサーが数ミリ秒だけ絞る）
     func panic() {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.panic) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         output.mixer.send(.stopAll(fadeFrames: 0))
         run = nil
     }
@@ -357,6 +369,11 @@ final class AppModel {
     func markDirty() { dirty = true }
 
     func applyMasterVolume() {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.masterVolume(show.masterVolumeDB)) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         output.mixer.send(.setMasterGain(Float(pow(10, show.masterVolumeDB / 20))))
     }
 
@@ -376,6 +393,11 @@ final class AppModel {
     var activeSequenceID: UUID? { run?.sequenceID ?? selectedSequenceID ?? show.sequences.first?.id }
 
     func toggleSequence(_ id: UUID) {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.toggleSequence(id)) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         if isRunning(id) { stopSequence(id) } else { startSequence(id, from: cuedIndex(id) ?? 0) }
     }
 
@@ -399,6 +421,11 @@ final class AppModel {
     /// ダブルクリック: 次に鳴らす曲をこの曲にする（鳴らさない）。Return で鳴る。
     /// リストが鳴っていれば、今の曲の後はこの曲へ（この曲のタイミング設定どおりに）続く
     func cueStep(_ id: UUID, index: Int) {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.cueStep(id, index)) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         Self.endEditing()
         guard let seq = show.sequences.first(where: { $0.id == id }), seq.steps.indices.contains(index) else { return }
         selectedSequenceID = id
@@ -421,6 +448,11 @@ final class AppModel {
     }
 
     func startSequence(_ id: UUID, from index: Int = 0) {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.startSequence(id, index)) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         guard let seq = show.sequences.first(where: { $0.id == id }) else { return }
         // 別のリストが鳴っていたら停止フェードで止める。
         // 同じリストの中で曲を移るとき（ダブルクリック）は、今の曲をその曲のフェードアウトで止める
@@ -437,6 +469,11 @@ final class AppModel {
     }
 
     func stopSequence(_ id: UUID) {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.stopSequence(id)) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         guard isRunning(id), let seq = show.sequences.first(where: { $0.id == id }) else { return }
         output.mixer.send(.stopOwner(id, fadeFrames: Int(seq.stopFade * sampleRate)))
         run = nil
@@ -445,6 +482,11 @@ final class AppModel {
     /// Return: 再生中のリストの次の曲をすぐ鳴らす。今の曲はその曲のフェードアウト設定で止める。
     /// どのリストも鳴っていなければ、選んでいるリストを開始する
     func advanceActiveSequence() {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.advance) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         // 鳴っていないリストでダブルクリックして位置を決めてあれば、そのリストをそこから始める
         if let cued = cuedStart, run?.sequenceID != cued.sequence {
             startSequence(cued.sequence, from: cued.index)
@@ -473,6 +515,11 @@ final class AppModel {
     /// スペース: リストの今の曲を途中で終える（その曲のフェードアウトで）。
     /// 次の曲は、その曲のタイミング設定どおりに続く（「Return キーを押したとき」なら待機）
     func endCurrentSequenceSong() {
+        #if PRO
+        // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
+        guard ProSync.shared.begin(.endSong) else { return }
+        defer { ProSync.shared.end() }
+        #endif
         guard let current = run?.currentToken else { return }
         output.mixer.send(.stopToken(current, fadeFrames: -1))
     }
