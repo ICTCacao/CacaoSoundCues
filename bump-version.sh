@@ -14,7 +14,8 @@ fi
 sed -i '' "s/\"$cur\"/\"$new\"/" project.yml
 [[ -f CacaoSoundCues/Resources/Info.plist ]] && sed -i '' "s|<string>$cur</string>|<string>$new</string>|" CacaoSoundCues/Resources/Info.plist
 month="$(date +%Y) 年 $(( $(date +%m) )) 月"
-sed -i '' -E "s/バージョン β?[0-9.]+ ／ [0-9]+ 年 [0-9]+ 月/バージョン $new ／ $month/" manual/CacaoSoundCues-マニュアル.md
+sed -i '' -E "s/バージョン β?[0-9.]+ ／ [0-9]+ 年 [0-9]+ 月/バージョン $new ／ $month/" manual/CacaoSoundCues-マニュアル.md manual/CacaoSoundCues-マニュアル-Windows.md
+sed -i '' -E "s/CacaoSoundCues-[0-9.]+-Windows-x64/CacaoSoundCues-$new-Windows-x64/g" manual/CacaoSoundCues-マニュアル-Windows.md
 month_en="$(LC_ALL=en_US.UTF-8 date +'%B %Y')"
 sed -i '' -E "s/^Version β?[0-9.]+ \/ .*/Version $new \/ $month_en/" manual/CacaoSoundCues-Manual-en.md
 sed -i '' "s/CacaoSoundCues-[0-9.]*\.dmg/CacaoSoundCues-$new.dmg/" manual/CacaoSoundCues-マニュアル.md manual/CacaoSoundCues-Manual-en.md

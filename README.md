@@ -82,14 +82,14 @@ dmg を開くと矢印付きの背景に「アプリ → Applications」が並�
 
 ## マニュアル
 
-`manual/CacaoSoundCues-マニュアル.md`（日本語）と `manual/CacaoSoundCues-Manual-en.md`（英語）。Marp、白背景のスライド。
-`manual/build.sh` で両方の PDF を作り `dist/` にも置く
+`manual/CacaoSoundCues-マニュアル.md`（日本語・Mac 版）、`manual/CacaoSoundCues-マニュアル-Windows.md`（日本語・Windows 版。Mac 版を元に、インストール・キー表記・メニュー・設定を Windows に合わせたもの）、`manual/CacaoSoundCues-Manual-en.md`（英語）。Marp、白背景のスライド。
+`manual/build.sh` で全部の PDF を作り `dist/` にも置く
 （要 `brew install marp-cli` と Google Chrome）。画面写真は `manual/img/`。
 版を上げると（`./bump-version.sh`）表紙のバージョンと日付、dmg のファイル名も書き換わる（日本語版・英語版とも）。
 英語版の画面写真（`img/en-*.png`）は、英語の名前のサンプルを `-language en` で撮る。
 
 画面写真は開発版（Debug）を起動引数で撮る（本物の公演データを写さないよう、作った音のサンプルを使う）:
-`-debugOpen <.ccsc のパス> -debugSelectKey <キーコード> -debugSelectStep <番号> -debugSettings YES`
+`-debugOpen <.ccsc のパス> -debugSelectKey <キーコード> -debugSelectStep <番号> -debugSettings YES -debugLineMode volume|pan`
 （このときは最近使ったキューシートやアプリの言語の記録を変えない）
 
 ## アイコン

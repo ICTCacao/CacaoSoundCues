@@ -392,6 +392,16 @@ struct PlaySettingsEditor: View {
                     .help(L("曲の中で左右を変える線を、波形の上で編集します"))
                 }
             }
+            #if DEBUG
+            // 開発版だけ: マニュアルの画面写真用に、起動引数でラインの編集を開く（-debugLineMode volume|pan）
+            .onAppear {
+                switch UserDefaults.standard.string(forKey: "debugLineMode") {
+                case "volume": lineMode = .volume
+                case "pan": lineMode = .pan
+                default: break
+                }
+            }
+            #endif
             // 選んだマークを delete キーで消せるようにする
             .onChange(of: selectedPoint) { _, id in
                 model.deleteKeyAction = id == nil ? nil : { deleteSelectedPoint() }

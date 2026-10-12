@@ -158,7 +158,8 @@ final class AppModel {
 
     #if DEBUG
     /// 開発版だけ: マニュアルの画面写真用に、起動引数でキューシートを開いて選ぶ
-    /// （-debugOpen パス -debugSelectKey キーコード -debugSelectStep 番号 -debugSettings YES）。
+    /// （-debugOpen パス -debugSelectKey キーコード -debugSelectStep 番号 -debugSettings YES、
+    /// 音源設定のライン編集は -debugLineMode volume|pan）。
     /// 最近使ったキューシートの記録は変えない
     static var isScreenshotRun: Bool { UserDefaults.standard.string(forKey: "debugOpen") != nil }
 
