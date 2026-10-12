@@ -23,18 +23,23 @@ struct MainView: View {
                     .padding(.vertical, 12)
                     .background(Theme.background)
                 ThemeDivider()
-                HSplitView {
-                    SequencePanel()
-                        .frame(minWidth: 400, idealWidth: 480)
-                        .background(Theme.background)
-                        // 仕切りの位置を覚えておく（キーボードを出しているときの2分割）
-                        .background(SplitPersistence(key: "split.withKeyboard"))
-                    if showInspector {
+                // 音源設定を出す・隠すで分割の数が変わるので、別々の分割画面にして仕切りの位置も別に覚える
+                if showInspector {
+                    HSplitView {
+                        SequencePanel()
+                            .frame(minWidth: 400, idealWidth: 480)
+                            .background(Theme.background)
+                            // 仕切りの位置を覚えておく（キーボードを出しているときの2分割）
+                            .background(SplitPersistence(key: "split.withKeyboard"))
                         rightPanel
                             .frame(minWidth: 480)
                     }
+                } else {
+                    SequencePanel()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Theme.background)
                 }
-            } else {
+            } else if showInspector {
                 HSplitView {
                     KeyListPanel()
                         .frame(minWidth: 260, idealWidth: 320)
@@ -44,10 +49,19 @@ struct MainView: View {
                     SequencePanel()
                         .frame(minWidth: 380, idealWidth: 460)
                         .background(Theme.background)
-                    if showInspector {
-                        rightPanel
-                            .frame(minWidth: 460)
-                    }
+                    rightPanel
+                        .frame(minWidth: 460)
+                }
+            } else {
+                HSplitView {
+                    KeyListPanel()
+                        .frame(minWidth: 260, idealWidth: 320)
+                        .background(Theme.background)
+                        // 仕切りの位置を覚えておく（キーボードと音源設定を隠しているときの2分割）
+                        .background(SplitPersistence(key: "split.keyList.noInspector"))
+                    SequencePanel()
+                        .frame(minWidth: 380, idealWidth: 460)
+                        .background(Theme.background)
                 }
             }
             }
@@ -111,6 +125,10 @@ struct TopBar: View {
             .buttonStyle(.borderedProminent)
             .tint(model.showMode ? .red : .gray)
             .help(model.showMode ? L("本番モードを終了して、編集できるようにする") : L("編集を止めて、キー操作と再生だけにする"))
+            // 並びは 台本（Pro 版だけ）・キーボード・音源設定
+            #if PRO
+            ProTopBarItems()
+            #endif
             Toggle(isOn: $showKeyboard) {
                 Label(L("キーボード"), systemImage: "keyboard")
             }
@@ -121,9 +139,6 @@ struct TopBar: View {
             }
             .toggleStyle(.button)
             .help(L("右側の音源設定（本番モードでは本番用の表示）を出す・隠す"))
-            #if PRO
-            ProTopBarItems()
-            #endif
             Menu {
                 Toggle(L("F キー（F1〜F12）の行を表示"), isOn: $showFunctionKeys)
                 Toggle(L("テンキーを表示"), isOn: $showKeypad)
