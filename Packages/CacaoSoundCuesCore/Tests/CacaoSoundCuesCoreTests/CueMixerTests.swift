@@ -43,6 +43,42 @@ final class CueMixerTests: XCTestCase {
         return out
     }
 
+    /// 出口（Pro 版の系統）ごとに書き分ける。出口の数を超えた出口の音はメインへ。
+    /// 前の曲の終わりを待つ次の曲は、出口が違ってもぴったり続く
+    func testBuses() {
+        let m = CueMixer(sampleRate: 1000, buses: 2)
+        let ones = buffer([Float](repeating: 1, count: 100))
+        var a = spec(1, ones, start: 0, end: 10)
+        a.bus = 1
+        var b = spec(2, ones, start: 0, end: 10, follow: 1)
+        b.bus = 0
+        var c = spec(3, ones, start: 0, end: 5)
+        c.bus = 7
+        m.send(.play(a))
+        m.send(.play(b))
+        m.send(.play(c))
+        let n = 30
+        let ls = (0..<2).map { _ in UnsafeMutablePointer<Float>.allocate(capacity: n) }
+        let rs = (0..<2).map { _ in UnsafeMutablePointer<Float>.allocate(capacity: n) }
+        defer { (ls + rs).forEach { $0.deallocate() } }
+        let pl = UnsafeMutablePointer<UnsafeMutablePointer<Float>>.allocate(capacity: 2)
+        let pr = UnsafeMutablePointer<UnsafeMutablePointer<Float>>.allocate(capacity: 2)
+        defer { pl.deallocate(); pr.deallocate() }
+        for k in 0..<2 { pl[k] = ls[k]; pr[k] = rs[k] }
+        m.render(frames: n, busLeft: pl, busRight: pr, buses: 2)
+        // 鳴り始めはプツッと鳴らないよう 2 フレームでフェードするので、少しあとを見る
+        // 出口 1: a だけ（0〜9）
+        XCTAssertEqual(ls[1][5], 1, accuracy: 1e-6)
+        XCTAssertEqual(ls[1][9], 1, accuracy: 1e-6)
+        XCTAssertEqual(ls[1][10], 0, accuracy: 1e-6)
+        // 出口 0: c（出口 7 はメインへ。0〜4）と、a の終わりを待った b（10〜19）
+        XCTAssertEqual(ls[0][3], 1, accuracy: 1e-6)
+        XCTAssertEqual(ls[0][5], 0, accuracy: 1e-6)
+        XCTAssertEqual(ls[0][15], 1, accuracy: 1e-6)
+        XCTAssertEqual(ls[0][19], 1, accuracy: 1e-6)
+        XCTAssertEqual(ls[0][20], 0, accuracy: 1e-6)
+    }
+
     func testFadeInLinear() {
         let m = CueMixer(sampleRate: 1000)
         let ones = buffer([Float](repeating: 1, count: 1000))

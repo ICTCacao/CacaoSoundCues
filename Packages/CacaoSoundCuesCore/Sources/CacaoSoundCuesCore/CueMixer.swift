@@ -37,6 +37,8 @@ public struct CueVoiceSpec: @unchecked Sendable {
     public var crossfade: Bool
     /// follow が 0 のとき、このフレーム数だけ待ってから鳴らす（Return を押してから n 秒）
     public var delayFrames: Int = 0
+    /// 出口（Pro 版の系統）。0 がメイン。ミキサーの出口の数を超えたらメインに出す
+    public var bus: Int = 0
 
     public init(token: UInt64, owner: UUID, tag: UUID,
                 left: UnsafePointer<Float>, right: UnsafePointer<Float>,
@@ -177,6 +179,8 @@ public final class CueMixer: @unchecked Sendable {
     public static let maxVoices = 32
 
     public let sampleRate: Double
+    /// 出口（ステレオ）の数。無料版は 1
+    public let busCount: Int
     private let lock: UnsafeMutablePointer<os_unfair_lock>
     private var pending: [MixerCommand] = []
     private var published: [VoiceStatus] = []
@@ -186,8 +190,9 @@ public final class CueMixer: @unchecked Sendable {
     /// カット時のクリック防止（2ms）
     private let minFade: Int
 
-    public init(sampleRate: Double) {
+    public init(sampleRate: Double, buses: Int = 1) {
         self.sampleRate = sampleRate
+        busCount = max(1, buses)
         lock = .allocate(capacity: 1)
         lock.initialize(to: os_unfair_lock())
         pending.reserveCapacity(1024)
@@ -222,26 +227,43 @@ public final class CueMixer: @unchecked Sendable {
 
     // MARK: - 音声スレッド側
 
+    /// 出口が 1 つのとき（無料版）。どの出口の音もここに出す
     public func render(frames n: Int, left L: UnsafeMutablePointer<Float>, right R: UnsafeMutablePointer<Float>) {
+        var l = L, r = R
+        render(frames: n, busLeft: &l, busRight: &r, buses: 1)
+    }
+
+    /// 出口ごとに書く（Pro 版の系統）。busLeft[k]・busRight[k] が出口 k の左右。
+    /// 出口の数（buses）より大きい出口の音は、メイン（0）に出す
+    public func render(frames n: Int, busLeft: UnsafeMutablePointer<UnsafeMutablePointer<Float>>,
+                       busRight: UnsafeMutablePointer<UnsafeMutablePointer<Float>>, buses: Int) {
         if os_unfair_lock_trylock(lock) {
             for i in 0..<pending.count { apply(pending[i]) }
             pending.removeAll(keepingCapacity: true)
             os_unfair_lock_unlock(lock)
         }
 
-        L.update(repeating: 0, count: n)
-        R.update(repeating: 0, count: n)
+        for b in 0..<buses {
+            busLeft[b].update(repeating: 0, count: n)
+            busRight[b].update(repeating: 0, count: n)
+        }
 
         activateArmed(frames: n)
         for i in 0..<Self.maxVoices where voices[i].inUse && !voices[i].armed {
-            renderVoice(i, frames: n, L, R)
+            let b = voices[i].spec.bus
+            let k = b >= 0 && b < buses ? b : 0
+            renderVoice(i, frames: n, busLeft[k], busRight[k])
         }
 
         let step = (masterTarget - masterCurrent) / Float(n)
-        for f in 0..<n {
-            masterCurrent += step
-            L[f] *= masterCurrent
-            R[f] *= masterCurrent
+        for b in 0..<buses {
+            let L = busLeft[b], R = busRight[b]
+            var m = masterCurrent
+            for f in 0..<n {
+                m += step
+                L[f] *= m
+                R[f] *= m
+            }
         }
         masterCurrent = masterTarget
 

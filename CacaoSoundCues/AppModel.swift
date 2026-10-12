@@ -115,6 +115,10 @@ final class AppModel {
             self.applyMasterVolume()
             if rateChanged { self.reloadAllSounds() }
         }
+        #if PRO
+        // Pro 版だけ: 出力の系統（機器とチャンネル）を当てる
+        ProOutputs.shared.apply()
+        #endif
         applyMasterVolume()
 
         // 本番中にスリープ・App Nap で音が途切れないようにする
@@ -287,6 +291,10 @@ final class AppModel {
         spec.envelope = VolumeEnvelope(points: p.volumePoints, sampleRate: sr)
         spec.pan = Float(p.pan)
         spec.panEnvelope = VolumeEnvelope(points: p.panPoints, sampleRate: sr)
+        #if PRO
+        // Pro 版だけ: キー・曲ごとに選んだ出力の系統
+        spec.bus = ProOutputs.shared.bus(for: tag)
+        #endif
         return spec
     }
 
