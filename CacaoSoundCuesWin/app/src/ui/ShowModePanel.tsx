@@ -83,9 +83,9 @@ export function ShowModePanel() {
       </section>
       <hr />
       <section class="hint-list">
-        <Hint k="Enter" text={L("次の曲へ（待っている間にもう一度押すと、すぐ鳴る）")} />
+        <Hint k="Enter" text={L("Standby を再生（待っている間にもう一度押すと、すぐ鳴る）")} />
         <Hint k="space" text={L("今の曲を途中で終える")} />
-        <Hint k={L("↑↓・ダブルクリック")} text={L("次に鳴らす曲を選ぶ")} />
+        <Hint k={L("↑↓・ダブルクリック")} text={L("Standby にする")} />
         <Hint k="esc" text={L("全部の音をすぐ止める")} />
       </section>
     </div>

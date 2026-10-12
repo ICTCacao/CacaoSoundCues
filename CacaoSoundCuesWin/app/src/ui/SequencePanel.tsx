@@ -107,8 +107,8 @@ function SequenceEditor({ seq }: { seq: CueSequence }) {
       {/* 操作キーの説明（スペースは画面のキーボードに出さないため、ここで案内する） */}
       <div class="hints">
         <KeyHint k="space" text={L("今の曲を途中で終える")} />
-        <KeyHint k="Enter" text={L("次の曲へ")} />
-        <KeyHint k={L("↑↓・ダブルクリック")} text={L("次に鳴らす曲を選ぶ")} />
+        <KeyHint k="Enter" text={L("Standby を再生")} />
+        <KeyHint k={L("↑↓・ダブルクリック")} text={L("Standby にする")} />
       </div>
 
       <div class="hrow">

@@ -59,28 +59,20 @@ private struct SequenceEditor: View {
                 TextField(L("リスト名"), text: $seq.name).textFieldStyle(.roundedBorder)
                 Toggle(L("最後まで行ったら先頭へ"), isOn: $seq.loop)
             }
-            HStack {
-                Text(L("開始／停止キー")).fixedSize()
-                Button {
-                    model.capturingSequenceKey = seq.id
-                } label: {
-                    Label(model.capturingSequenceKey == seq.id
-                          ? L("キーを押してください…")
-                          : (seq.toggleKey.map { KeyboardLayout.label($0) } ?? L("未設定")),
-                          systemImage: "keyboard")
-                        .font(.body.monospaced())
+            // 狭いときは停止フェードを次の行へ
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    toggleKeyRow
+                    Spacer()
+                    stopFadeRow
                 }
-                if seq.toggleKey != nil {
-                    Button { seq.toggleKey = nil } label: { Label(L("解除"), systemImage: "xmark") }
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack { toggleKeyRow; Spacer() }
+                    HStack { stopFadeRow; Spacer() }
                 }
-                Spacer()
-                Text(L("停止フェード")).fixedSize()
-                SecondsField(value: $seq.stopFade).frame(width: 60)
-                Text(L("秒"))
             }
             }
             .disabled(model.showMode)
-
             ScrollViewReader { proxy in
             List(selection: selectionBinding) {
                 ForEach(Array(seq.steps.enumerated()), id: \.element.id) { index, step in
@@ -128,10 +120,10 @@ private struct SequenceEditor: View {
             }
 
             // 操作キーの説明（スペースは画面のキーボードに出さないため、ここで案内する）
-            HStack(spacing: 14) {
-                KeyHint(key: "space", text: L("今の曲を途中で終える"))
-                KeyHint(key: "return", text: L("次の曲へ"))
-                KeyHint(key: L("↑↓・ダブルクリック"), text: L("次に鳴らす曲を選ぶ"))
+            // 狭いときは縦に並べる
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 14) { keyHints }
+                VStack(alignment: .leading, spacing: 4) { keyHints }
             }
             .font(.caption)
             .foregroundStyle(.secondary)
@@ -148,7 +140,11 @@ private struct SequenceEditor: View {
                 Button {
                     if running { model.advanceActiveSequence() } else { model.startSequence(seq.id) }
                 } label: {
-                    Label(L("次の曲へ（Return）"), systemImage: "return")
+                    // 狭いときは（Return）を省く
+                    ViewThatFits(in: .horizontal) {
+                        Label(L("次の曲へ（Return）"), systemImage: "return")
+                        Label(L("次の曲へ"), systemImage: "return")
+                    }
                 }
                 if let r = model.run, r.sequenceID == seq.id, r.isWaiting {
                     Text(L("Return 待ち"))
@@ -159,8 +155,45 @@ private struct SequenceEditor: View {
                 Text(L("%d 曲・%@", seq.steps.count, totalDuration.timeText))
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
             }
         }
+    }
+
+    @ViewBuilder
+    private var keyHints: some View {
+        KeyHint(key: "space", text: L("今の曲を途中で終える"))
+        KeyHint(key: "return", text: L("Standby を再生"))
+        KeyHint(key: L("↑↓・ダブルクリック"), text: L("Standby にする"))
+    }
+
+    /// 開始／停止キーの設定
+    @ViewBuilder
+    private var toggleKeyRow: some View {
+        Text(L("開始／停止キー")).fixedSize()
+        Button {
+            model.capturingSequenceKey = seq.id
+        } label: {
+            Label(model.capturingSequenceKey == seq.id
+                  ? L("キーを押してください…")
+                  : (seq.toggleKey.map { KeyboardLayout.label($0) } ?? L("未設定")),
+                  systemImage: "keyboard")
+                .font(.body.monospaced())
+        }
+        .fixedSize()
+        if seq.toggleKey != nil {
+            Button { seq.toggleKey = nil } label: { Label(L("解除"), systemImage: "xmark") }
+                .fixedSize()
+        }
+    }
+
+    /// 停止フェード
+    @ViewBuilder
+    private var stopFadeRow: some View {
+        Text(L("停止フェード")).fixedSize()
+        SecondsField(value: $seq.stopFade).frame(width: 60)
+        Text(L("秒")).fixedSize()
     }
 
     private var selectionBinding: Binding<UUID?> {

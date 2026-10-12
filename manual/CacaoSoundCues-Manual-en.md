@@ -304,10 +304,10 @@ Click a track to choose on the right.
 
 | Key | Action |
 |---|---|
-| <kbd>return</kbd> | **Next track**. The current track stops with its own fade-out. Starts the list if it is stopped |
+| <kbd>return</kbd> | **Play Standby** (next track). The current track stops with its own fade-out. Starts the list if it is stopped |
 | <kbd>return</kbd> twice | Skip the “wait n seconds” and play at once |
 | <kbd>space</kbd> | **End the current track early**. The next one follows its own timing |
-| <kbd>↑</kbd> <kbd>↓</kbd> / double-click | **Choose the next track** (does not play). It is marked **Standby** |
+| <kbd>↑</kbd> <kbd>↓</kbd> / double-click | **Set as Standby** (does not play). It is marked **Standby** |
 | Start/stop key | Start / stop that list |
 | <kbd>esc</kbd> | **Stop all sounds at once** (no fade) |
 
@@ -438,7 +438,7 @@ The starting fades and timing used when you add sounds to keys or lists.
 | Assigned key | Play / press again to stop |
 | <kbd>return</kbd> | Next track in the list (twice: skip the wait) |
 | <kbd>space</kbd> | End the current list track |
-| <kbd>↑</kbd> <kbd>↓</kbd> | Choose the next list track |
+| <kbd>↑</kbd> <kbd>↓</kbd> | Choose the Standby track in the list |
 | <kbd>esc</kbd> | Stop all sounds at once |
 | <kbd>⇧</kbd><kbd>⌘</kbd><kbd>L</kbd> | Show Mode on / off |
 | <kbd>⌘</kbd><kbd>S</kbd> / <kbd>⌘</kbd><kbd>O</kbd> / <kbd>⌘</kbd><kbd>N</kbd> | Save / Open / New |
