@@ -128,6 +128,8 @@ final class AppModel {
             // バックアップ機との同時運転
             ProSync.shared.startUp()
         }
+        // MIDI コントロール
+        ProMIDI.shared.startUp()
         #endif
         applyMasterVolume()
 
@@ -316,6 +318,12 @@ final class AppModel {
         defer { ProSync.shared.end() }
         #endif
         guard let spec = makeSpec(cue.play, owner: cue.id, tag: cue.id) else { return }
+        #if PRO
+        // Pro 版だけ: 鳴り始めるとき、照明卓などへ MIDI を送る（鳴っている間に押して止める・何もしないときは送らない）
+        if playing(owner: cue.id) == nil || cue.retrigger == .restart || cue.retrigger == .layer {
+            ProMIDI.shared.played(cue.id)
+        }
+        #endif
         switch cue.retrigger {
         case .fadeOut: output.mixer.send(.toggle(spec))
         case .restart: output.mixer.send(.restart(spec))
@@ -547,6 +555,10 @@ final class AppModel {
             spec.delayFrames = Int(step.startSeconds * sampleRate)
         }
         output.mixer.send(.play(spec))
+        #if PRO
+        // Pro 版だけ: 曲が鳴り始めるとき、照明卓などへ MIDI を送る
+        ProMIDI.shared.played(step.id, delay: Double(spec.delayFrames) / sampleRate)
+        #endif
         run = SequenceRun(sequenceID: seq.id, currentToken: spec.token, currentIndex: i)
         followPlaying(seq.id, i)
         scheduleNext()
