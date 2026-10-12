@@ -27,17 +27,28 @@ export function App() {
   void languageVersion.value;   // 言語が変わったら全体を描き直す
   const showMode = prefs.showMode.value;
   const right = <div class="panel">{showMode ? <ShowModePanel /> : <Inspector />}</div>;
+  const inspector = prefs.showInspector.value;
   return (
     <div class="app">
       <TopBar />
       {prefs.showKeyboard.value ? <>
         <Keyboard />
-        <Split fractions={prefs.splitWithKeyboard} mins={[400, 480]}>
-          {[<div class="panel bg"><SequencePanel /></div>, right]}
-        </Split>
-      </> : (
+        {inspector ? (
+          <Split fractions={prefs.splitWithKeyboard} mins={[400, 480]}>
+            {[<div class="panel bg"><SequencePanel /></div>, right]}
+          </Split>
+        ) : (
+          <Split fractions={prefs.splitKeyListNoInspector} mins={[400]}>
+            {[<div class="panel bg"><SequencePanel /></div>]}
+          </Split>
+        )}
+      </> : inspector ? (
         <Split fractions={prefs.splitKeyList} mins={[260, 380, 460]}>
           {[<div class="panel bg"><KeyList /></div>, <div class="panel bg"><SequencePanel /></div>, right]}
+        </Split>
+      ) : (
+        <Split fractions={prefs.splitKeyListNoInspector} mins={[260, 380]}>
+          {[<div class="panel bg"><KeyList /></div>, <div class="panel bg"><SequencePanel /></div>]}
         </Split>
       )}
       <Settings />
@@ -73,6 +84,8 @@ function TopBar() {
       </button>
       <ToggleButton on={prefs.showKeyboard.value} icon="keyboard" onClick={() => { prefs.showKeyboard.value = !prefs.showKeyboard.value; }}
         title={L("キーボードを隠すと、割り当てたキーだけを一覧で表示します")}>{L("キーボード")}</ToggleButton>
+      <ToggleButton on={prefs.showInspector.value} icon="sidebarRight" onClick={() => { prefs.showInspector.value = !prefs.showInspector.value; }}
+        title={L("右側の音源設定（本番モードでは本番用の表示）を出す・隠す")}>{L("音源設定")}</ToggleButton>
       <button class="ibtn" title={L("設定") + "（Ctrl+,）"} onClick={() => { settingsOpen.value = true; }}><Icon name="gear" /></button>
       <span class="spacer" />
       <span class="master">

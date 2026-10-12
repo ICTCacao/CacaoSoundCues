@@ -915,9 +915,12 @@ final class AppModel {
             showURL = url
             selection = .none
             show = loaded
+            // 名前を付けずに保存した古いキューシートは、ファイル名を名前にする
+            let renamed = Self.isUntitled(show.name)
+            if renamed { show.name = url.deletingPathExtension().lastPathComponent }
             let released = releaseReservedKeys()
             selectedSequenceID = loaded.sequences.first?.id
-            dirty = released
+            dirty = released || renamed
             applyMasterVolume()
             show.sounds.forEach(load)
             #if PRO
@@ -944,7 +947,15 @@ final class AppModel {
         panel.allowedContentTypes = [.cacaoSoundCuesShow]
         panel.nameFieldStringValue = show.name
         guard panel.runModal() == .OK, let url = panel.url else { return false }
+        // 保存のときに付けたファイル名を、キューシートの名前にする
+        show.name = url.deletingPathExtension().lastPathComponent
         return write(to: url)
+    }
+
+    /// 「新しいキューシート」のまま（どの言語で作ったものでも）
+    private static func isUntitled(_ name: String) -> Bool {
+        let n = name.trimmingCharacters(in: .whitespaces)
+        return n.isEmpty || n == "新しいキューシート" || n == "New Cue Sheet" || n == L("新しいキューシート")
     }
 
     private func write(to url: URL) -> Bool {

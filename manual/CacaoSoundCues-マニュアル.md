@@ -49,7 +49,7 @@ footer: "CacaoSoundCues マニュアル ／ ICTCacao"
 # CacaoSoundCues マニュアル
 
 舞台のための、ポン出し音響アプリ
-バージョン 5.0.1 ／ 2026 年 10 月
+バージョン 5.0.2 ／ 2026 年 10 月
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. **CacaoSoundCues-5.0.1.dmg** をダブルクリック
+1. **CacaoSoundCues-5.0.2.dmg** をダブルクリック
 2. 左の **CacaoSoundCues** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 4. アプリケーション フォルダの CacaoSoundCues をダブルクリック
@@ -327,7 +327,7 @@ macOS 14：アプリを **右クリック →「開く」→「開く」**。一
 - 右クリック →「グループへ移動」
 - 音ファイルを一覧にドラッグ → 割り当てたいキーを押す
 
-<span class="small">リスト中心の公演では、こちらの画面が見やすくなります。</span>
+<span class="small">リスト中心の公演では、こちらの画面が見やすくなります。右側の設定も、上の帯の **「音源設定」** で隠せます。</span>
 
 </div>
 <div class="shot">

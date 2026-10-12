@@ -49,7 +49,7 @@ footer: "CacaoSoundCues Manual / ICTCacao"
 # CacaoSoundCues Manual
 
 A sound cue player for the stage
-Version 5.0.1 / October 2026
+Version 5.0.2 / October 2026
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. Double-click **CacaoSoundCues-5.0.1.dmg**
+1. Double-click **CacaoSoundCues-5.0.2.dmg**
 2. Drag **CacaoSoundCues** onto **Applications**
 3. Close the dmg (eject the disk icon on the desktop)
 4. Double-click CacaoSoundCues in the Applications folder
@@ -327,7 +327,7 @@ Click **“Keyboard”** in the top bar to hide the keyboard and show **only the
 - Right-click → “Move to group”
 - Drag an audio file onto the list → press the key to assign
 
-<span class="small">For list-centered shows, this view is easier to read.</span>
+<span class="small">For list-centered shows, this view is easier to read. The panel on the right can also be hidden with **“Inspector”** in the top bar.</span>
 
 </div>
 <div class="shot">

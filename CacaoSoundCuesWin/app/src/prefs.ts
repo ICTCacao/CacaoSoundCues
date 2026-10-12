@@ -17,6 +17,8 @@ function stored<T>(key: string, initial: T): Signal<T> {
 
 export const prefs = {
   showKeyboard: stored("showKeyboard", true),
+  /** 右側の音源設定（本番モードでは本番用の表示）を出すか */
+  showInspector: stored("showInspector", true),
   showFunctionKeys: stored("showFunctionKeys", false),
   showKeypad: stored("showKeypad", false),
   /** キーボードの大きさ（1 = いちばん大きい） */
@@ -29,6 +31,8 @@ export const prefs = {
   /** 分割画面の仕切りの位置（割合） */
   splitWithKeyboard: stored<number[]>("split.withKeyboard", [0.45]),
   splitKeyList: stored<number[]>("split.keyList", [0.24, 0.6]),
+  /** 音源設定を隠しているとき（キーの一覧とリストの2分割） */
+  splitKeyListNoInspector: stored<number[]>("split.keyList.noInspector", [0.4]),
 };
 
 /** 音を追加したときの最初の設定（設定画面で変更） */

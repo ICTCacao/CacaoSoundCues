@@ -742,10 +742,13 @@ export async function openShow(path: string, evenInShowMode = false, quiet = fal
   if (!evenInShowMode && lockedForShow()) return;
   try {
     const loadedShow = normalizeShow(await invoke<Show>("open_show", { path }));
+    // 名前を付けずに保存した古いキューシートは、ファイル名を名前にする
+    const renamed = isUntitled(loadedShow.name);
+    if (renamed) loadedShow.name = nameFromPath(path);
     reset(loadedShow, path);
     const released = releaseReservedKeys();
     show.value = { ...show.peek() };
-    dirty.value = released;
+    dirty.value = released || renamed;
     applyMasterVolume();
     show.peek().sounds.forEach(load);
     prefs.lastShowPath.value = path;
@@ -756,6 +759,18 @@ export async function openShow(path: string, evenInShowMode = false, quiet = fal
       ? String(e)
       : L("キューシート（.ccsc のフォルダ）を選んでください") + "\n" + path;
   }
+}
+
+/** ファイルの場所から、拡張子を除いた名前 */
+function nameFromPath(path: string): string {
+  const base = path.replace(/[\\/]+$/, "").split(/[\\/]/).pop() ?? path;
+  return base.replace(/\.ccsc$/i, "");
+}
+
+/** 「新しいキューシート」のまま（どの言語で作ったものでも） */
+function isUntitled(name: string): boolean {
+  const n = name.trim();
+  return n === "" || n === "新しいキューシート" || n === "New Cue Sheet" || n === L("新しいキューシート");
 }
 
 export async function save(): Promise<boolean> {
@@ -770,6 +785,8 @@ export async function saveAs(): Promise<boolean> {
   });
   if (!path) return false;
   if (!path.toLowerCase().endsWith(".ccsc")) path += ".ccsc";
+  // 保存のときに付けたファイル名を、キューシートの名前にする
+  show.peek().name = nameFromPath(path);
   return write(path);
 }
 

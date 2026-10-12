@@ -5,6 +5,8 @@ struct MainView: View {
     @Environment(AppModel.self) private var model
     /// キーボードを表示するか（隠すと、割り当て済みキーの一覧を左に出す）
     @AppStorage("showKeyboard") private var showKeyboard = true
+    /// 右側の音源設定（本番モードでは本番用の表示）を出すか
+    @AppStorage("showInspector") private var showInspector = true
     /// 言語が変わったら画面全体を作り直す
     @AppStorage(LanguageManager.storageKey) private var language = LanguageManager.defaultCode
     @Environment(\.openSettings) private var openSettings
@@ -12,7 +14,7 @@ struct MainView: View {
     var body: some View {
         @Bindable var model = model
         VStack(spacing: 0) {
-            TopBar(showKeyboard: $showKeyboard)
+            TopBar(showKeyboard: $showKeyboard, showInspector: $showInspector)
                 .background(model.showMode ? Color.red.opacity(0.22) : Theme.topBar)
             ThemeDivider()
             VStack(spacing: 0) {
@@ -27,8 +29,10 @@ struct MainView: View {
                         .background(Theme.background)
                         // 仕切りの位置を覚えておく（キーボードを出しているときの2分割）
                         .background(SplitPersistence(key: "split.withKeyboard"))
-                    rightPanel
-                        .frame(minWidth: 480)
+                    if showInspector {
+                        rightPanel
+                            .frame(minWidth: 480)
+                    }
                 }
             } else {
                 HSplitView {
@@ -40,8 +44,10 @@ struct MainView: View {
                     SequencePanel()
                         .frame(minWidth: 380, idealWidth: 460)
                         .background(Theme.background)
-                    rightPanel
-                        .frame(minWidth: 460)
+                    if showInspector {
+                        rightPanel
+                            .frame(minWidth: 460)
+                    }
                 }
             }
             }
@@ -84,6 +90,7 @@ extension MainView {
 struct TopBar: View {
     @Environment(AppModel.self) private var model
     @Binding var showKeyboard: Bool
+    @Binding var showInspector: Bool
     @AppStorage("showFunctionKeys") private var showFunctionKeys = false
     @AppStorage("showKeypad") private var showKeypad = false
     @AppStorage("keyboardScale") private var keyboardScale = 1.0
@@ -109,6 +116,11 @@ struct TopBar: View {
             }
             .toggleStyle(.button)
             .help(L("キーボードを隠すと、割り当てたキーだけを一覧で表示します"))
+            Toggle(isOn: $showInspector) {
+                Label(L("音源設定"), systemImage: "sidebar.right")
+            }
+            .toggleStyle(.button)
+            .help(L("右側の音源設定（本番モードでは本番用の表示）を出す・隠す"))
             #if PRO
             ProTopBarItems()
             #endif

@@ -5,6 +5,7 @@ const P: Record<string, string> = {
   lock: "M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 7 0v3",
   lockOpen: "M6 11h12v9H6zM8.5 11V8a3.5 3.5 0 0 1 6.8-1.2",
   keyboard: "M3 7h18v11H3zM6.5 10.5h1M10.5 10.5h1M14.5 10.5h1M8 14.5h8",
+  sidebarRight: "M3 5h18v14H3zM15 5v14M17 9h2M17 12h2",
   sliders: "M4 7h9M17 7h3M4 17h3M11 17h9M15 5v4M9 15v4",
   speaker: "M4 10h3l5-4v12l-5-4H4zM15.5 9.5a3.5 3.5 0 0 1 0 5M18 7a7 7 0 0 1 0 10",
   stop: "M7 7h10v10H7z",
