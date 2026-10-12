@@ -19,8 +19,6 @@
     "バッファ 自動・メモリ %dMB": "Buffer auto · Memory %dMB",
     "ピンクの線が左右です（上が L、下が R、真ん中が中央）。左の PAN に足し合わせます。線をクリックでマークを足す、マークをドラッグで動かす、Alt+クリックか Delete キーで消す。マークとマークの間をクリックすると、白い四角でつなぎの形を変えられます。": "The pink line is the pan (top = L, bottom = R, middle = center). It is added to the pan on the left. Click the line to add a mark, drag a mark to move it, ⌥-click or press Delete to remove it. Click between two marks to shape the transition with the white squares.",
     "ファイル": "File",
-    "・リストの曲をダブルクリックすると、その曲が「次」になる。Enter で鳴る": "• Double-click a track to make it “next”. Enter plays it",
-    "・リスト（幕間 BGM など）は1つずつ鳴る。Enter で次の曲へ進む（鳴っていなければ選んでいるリストを開始）": "• Lists (e.g. intermission music) play one at a time. Enter goes to the next track (or starts the selected list)",
     "日本語（JIS）": "Japanese (JIS)",
     "曲のファイルを選んで、リストの最後に足す": "Choose track files and add them to the end of the list",
     "曲を追加…": "Add Tracks…",

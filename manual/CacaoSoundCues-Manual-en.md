@@ -49,7 +49,7 @@ footer: "CacaoSoundCues Manual / ICTCacao"
 # CacaoSoundCues Manual
 
 A sound cue player for the stage
-Version 5.0.2 / October 2026
+Version 5.0.3 / October 2026
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. Double-click **CacaoSoundCues-5.0.2.dmg**
+1. Double-click **CacaoSoundCues-5.0.3.dmg**
 2. Drag **CacaoSoundCues** onto **Applications**
 3. Close the dmg (eject the disk icon on the desktop)
 4. Double-click CacaoSoundCues in the Applications folder

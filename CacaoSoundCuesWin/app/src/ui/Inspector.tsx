@@ -7,7 +7,7 @@ import {
 } from "../model";
 import { keyLabel } from "../keymap";
 import {
-  COLORS, PREVIEW_OWNER, colorOf, cueForKey, edit, endEditing, liveUpdate, loadStates, loaded, playingOwner, playingTag,
+  COLORS, PREVIEW_OWNER, addSequence, panic, colorOf, cueForKey, edit, endEditing, liveUpdate, loadStates, loaded, playingOwner, playingTag,
   preview, seek, selection, sequenceForKey, setDeleteKeyAction, show, soundOf, writeLinePoint,
 } from "../store";
 import { SecondsField, Segmented, Select, Slider, Toggle, ToggleButton } from "./common";
@@ -54,18 +54,60 @@ export function Inspector() {
   return <div class="inspector">{body}</div>;
 }
 
+// 何も選んでいないときの「使い方」。はじめての人（中学生でも）がこの順にやれば鳴らせるように書く。
+// ボタン・キーは画面にあるものと同じ見た目で描く（「リストを作る」「全停止」は押せばそのまま動く）
 function Placeholder() {
   return (
-    <div class="sub howto">
-      <h3>{L("使い方")}</h3>
-      <p>{L("・音ファイル（wav / aiff / mp3 / m4a など）をキーにドラッグして割り当てる")}</p>
-      <p>{L("・キーを押すと鳴る。鳴っている間にもう一度押すとフェードアウト（0秒ならカットアウト）")}</p>
-      <p>{L("・キーをクリックすると、ここで再生範囲・フェード・リピートを設定できる")}</p>
-      <p>{L("・リスト（幕間 BGM など）は1つずつ鳴る。Enter で次の曲へ進む（鳴っていなければ選んでいるリストを開始）")}</p>
-      <p>{L("・リストの曲をダブルクリックすると、その曲が「次」になる。Enter で鳴る")}</p>
-      <p>{L("・スペースでリストの今の曲を途中で終える（次の曲はその曲のタイミング設定どおりに続く）")}</p>
-      <p>{L("・Esc で全部の音をすぐ止める（フェードなし）")}</p>
+    <div class="howto">
+      <h2>{L("使い方（はじめての人へ）")}</h2>
+
+      <Step n={1} title={L("音を用意する")}>
+        <p>{L("BGM（音楽）や効果音のファイルを、パソコンの中に用意します。")}</p>
+        <p class="sub">{L("使えるファイル: wav・mp3・m4a・aiff など")}</p>
+      </Step>
+
+      <Step n={2} title={L("上のキーボードにドラッグする")}>
+        <p class="hrow top"><span class="arrow-up"><Icon name="up" size={22} /></span>
+          {L("音のファイルを、上にあるキーボードの好きなキーの上にドラッグします（マウスでつかんで、運んで、はなす）。")}</p>
+        <p class="hrow orange"><Icon name="warning" />{L("この「使い方」の上にドラッグしても入りません。")}</p>
+        <p class="hrow"><kbd class="cap">A</kbd>{L("パソコンのキーボードでそのキーを押して、音が出たら OK！")}</p>
+        <p>{L("画面のキーをクリックすると、この右側で、その音の設定（どこから鳴らすか・音の大きさ・だんだん小さくする など）ができます。")}</p>
+        <p>{L("いろいろな音を、ほかのキーにもドラッグしてみましょう。")}</p>
+      </Step>
+
+      <Step n={3} title={L("順番に流す BGM のリストを作る")}>
+        <p>{L("左下の「リストを作る」をクリックします。幕間の BGM など、曲を順番に流せます。")}</p>
+        <p><button class="btn" onClick={addSequence}><Icon name="list" />{L("リストを作る")}</button></p>
+      </Step>
+
+      <Step n={4} title={L("リストに曲をドラッグする")}>
+        <p>{L("音のファイルを、左下のリストに何曲かドラッグします。上から順番に流れます。")}</p>
+        <p>{L("リストの曲をクリックすると、この右側で、その曲の設定ができます。")}</p>
+      </Step>
+
+      <Step n={5} title={L("リストを鳴らしてみる")}>
+        <p class="hrow wrap">{L("リストの曲をダブルクリックすると")}<span class="capsule orange-bg">Standby</span>{L("になります。")}</p>
+        <p class="sub">{L("（Standby ＝ 次に鳴る準備ができた、という意味です）")}</p>
+        <p class="hrow"><kbd class="cap">Enter</kbd>{L("キーを押して、曲が流れたら OK！")}</p>
+      </Step>
+
+      <hr />
+      <h3>{L("おぼえておくと便利")}</h3>
+      <p class="hrow"><kbd class="cap">Space</kbd>{L("リストの今の曲を途中で終える")}</p>
+      <p class="hrow wrap"><kbd class="cap">Esc</kbd>{L("または")}
+        <button class="btn prominent red" onClick={panic}><Icon name="stop" />{L("全停止（Esc）")}</button>
+        {L("すべての音をすぐ止める")}</p>
+      <p>{L("鳴っているキーをもう一度押すと、その音が止まります。")}</p>
     </div>
+  );
+}
+
+function Step({ n, title, children }: { n: number; title: string; children: preact.ComponentChildren }) {
+  return (
+    <section class="step">
+      <div class="hrow"><span class="stepno">STEP {n}</span><h3>{title}</h3></div>
+      <div class="stepbody">{children}</div>
+    </section>
   );
 }
 

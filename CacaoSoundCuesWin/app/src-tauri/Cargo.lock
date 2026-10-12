@@ -410,7 +410,7 @@ dependencies = [
 
 [[package]]
 name = "cacaosoundcueswin"
-version = "5.0.2"
+version = "5.0.3"
 dependencies = [
  "cacaosoundcues-engine",
  "serde",

@@ -39,17 +39,129 @@ struct InspectorView: View {
     }
 
     private var placeholder: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(L("使い方")).font(.headline)
-            Text(L("・音ファイル（wav / aiff / mp3 / m4a など）をキーにドラッグして割り当てる"))
-            Text(L("・キーを押すと鳴る。鳴っている間にもう一度押すとフェードアウト（0秒ならカットアウト）"))
-            Text(L("・キーをクリックすると、ここで再生範囲・フェード・リピートを設定できる"))
-            Text(L("・リスト（幕間 BGM など）は1つずつ鳴る。Return で次の曲へ進む（鳴っていなければ選んでいるリストを開始）"))
-            Text(L("・リストの曲をダブルクリックすると、その曲が「次」になる。Return で鳴る"))
-            Text(L("・スペースでリストの今の曲を途中で終える（次の曲はその曲のタイミング設定どおりに続く）"))
-            Text(L("・Esc で全部の音をすぐ止める（フェードなし）"))
+        HowToView()
+    }
+}
+
+/// 何も選んでいないときの「使い方」。はじめての人（中学生でも）がこの順にやれば鳴らせるように書く。
+/// ボタン・キーは画面にあるものと同じ見た目で描く（「リストを作る」「全停止」は押せばそのまま動く）
+private struct HowToView: View {
+    @Environment(AppModel.self) private var model
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(L("使い方（はじめての人へ）")).font(.title3.bold())
+
+            step(1, L("音を用意する")) {
+                Text(L("BGM（音楽）や効果音のファイルを、パソコンの中に用意します。"))
+                Text(L("使えるファイル: wav・mp3・m4a・aiff など")).foregroundStyle(.secondary)
+            }
+
+            step(2, L("上のキーボードにドラッグする")) {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "arrow.up").font(.title2.bold()).foregroundStyle(Color.accentColor)
+                    Text(L("音のファイルを、上にあるキーボードの好きなキーの上にドラッグします（マウスでつかんで、運んで、はなす）。"))
+                }
+                Label(L("この「使い方」の上にドラッグしても入りません。"), systemImage: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                HStack(spacing: 6) {
+                    KeyCap(label: "A")
+                    Text(L("パソコンのキーボードでそのキーを押して、音が出たら OK！"))
+                }
+                Text(L("画面のキーをクリックすると、この右側で、その音の設定（どこから鳴らすか・音の大きさ・だんだん小さくする など）ができます。"))
+                Text(L("いろいろな音を、ほかのキーにもドラッグしてみましょう。"))
+            }
+
+            step(3, L("順番に流す BGM のリストを作る")) {
+                Text(L("左下の「リストを作る」をクリックします。幕間の BGM など、曲を順番に流せます。"))
+                Button { model.addSequence() } label: { Label(L("リストを作る"), systemImage: "music.note.list") }
+            }
+
+            step(4, L("リストに曲をドラッグする")) {
+                Text(L("音のファイルを、左下のリストに何曲かドラッグします。上から順番に流れます。"))
+                Text(L("リストの曲をクリックすると、この右側で、その曲の設定ができます。"))
+            }
+
+            step(5, L("リストを鳴らしてみる")) {
+                HStack(spacing: 6) {
+                    Text(L("リストの曲をダブルクリックすると"))
+                    StandbyBadge()
+                    Text(L("になります。"))
+                }
+                Text(L("（Standby ＝ 次に鳴る準備ができた、という意味です）")).foregroundStyle(.secondary)
+                HStack(spacing: 6) {
+                    KeyCap(label: "return")
+                    Text(L("キーを押して、曲が流れたら OK！"))
+                }
+            }
+
+            ThemeDivider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text(L("おぼえておくと便利")).font(.headline)
+                HStack(spacing: 6) {
+                    KeyCap(label: "space")
+                    Text(L("リストの今の曲を途中で終える"))
+                }
+                HStack(spacing: 6) {
+                    KeyCap(label: "esc")
+                    Text(L("または"))
+                    Button { model.panic() } label: { Label(L("全停止（Esc）"), systemImage: "stop.fill") }
+                        .tint(.red)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                    Text(L("すべての音をすぐ止める"))
+                }
+                Text(L("鳴っているキーをもう一度押すと、その音が止まります。"))
+            }
         }
-        .foregroundStyle(.secondary)
+    }
+
+    private func step(_ number: Int, _ title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Text("STEP \(number)")
+                    .font(.caption.bold())
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 2)
+                    .background(Capsule().fill(Color.accentColor))
+                Text(title).font(.headline)
+            }
+            VStack(alignment: .leading, spacing: 6) {
+                content()
+            }
+            .padding(.leading, 4)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+/// 使い方の中に出すキーの絵（キーボードのキーと同じ色と枠）
+private struct KeyCap: View {
+    let label: String
+
+    var body: some View {
+        Text(label)
+            .font(.system(.body, design: .monospaced).bold())
+            .padding(.horizontal, 8)
+            .frame(minWidth: 30, minHeight: 28)
+            .background(RoundedRectangle(cornerRadius: 6).fill(Theme.keyEmpty))
+            .overlay(RoundedRectangle(cornerRadius: 6).strokeBorder(Theme.keyBorder))
+            .fixedSize()
+    }
+}
+
+/// リストの曲に出る「Standby」と同じ絵
+private struct StandbyBadge: View {
+    var body: some View {
+        Text("Standby")
+            .font(.caption.bold())
+            .foregroundStyle(.white)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 1)
+            .background(Capsule().fill(Color.orange))
+            .fixedSize()
     }
 }
 

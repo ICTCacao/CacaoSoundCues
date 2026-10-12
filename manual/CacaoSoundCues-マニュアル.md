@@ -49,7 +49,7 @@ footer: "CacaoSoundCues マニュアル ／ ICTCacao"
 # CacaoSoundCues マニュアル
 
 舞台のための、ポン出し音響アプリ
-バージョン 5.0.2 ／ 2026 年 10 月
+バージョン 5.0.3 ／ 2026 年 10 月
 
 ---
 
@@ -101,7 +101,7 @@ https://github.com/ICTCacao/CacaoSoundCues</span>
 <div class="cols">
 <div>
 
-1. **CacaoSoundCues-5.0.2.dmg** をダブルクリック
+1. **CacaoSoundCues-5.0.3.dmg** をダブルクリック
 2. 左の **CacaoSoundCues** を右の **Applications** へドラッグ
 3. dmg を閉じる（デスクトップの取り出しアイコンを取り出す）
 4. アプリケーション フォルダの CacaoSoundCues をダブルクリック
