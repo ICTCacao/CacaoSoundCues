@@ -377,6 +377,8 @@ final class AppModel {
         // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
         guard ProSync.shared.begin(.panic) else { return }
         defer { ProSync.shared.end() }
+        // 台本進行も解除し、台本から Standby を消す
+        ProModel.shared.panicked()
         #endif
         output.mixer.send(.stopAll(fadeFrames: 0))
         run = nil
@@ -406,6 +408,24 @@ final class AppModel {
 
     func isRunning(_ id: UUID) -> Bool { run?.sequenceID == id }
 
+    /// Pro 版の台本進行中か（リストは音源設定だけになり、続けて鳴らさない）。無料版はいつも false
+    var scriptRun: Bool {
+        #if PRO
+        return ProModel.shared.scriptRun
+        #else
+        return false
+        #endif
+    }
+
+    /// Pro 版の台本進行の Standby（キーかリストの曲の ID）。無料版はいつも nil
+    var scriptStandbyID: UUID? {
+        #if PRO
+        return ProModel.shared.scriptRun ? ProModel.shared.scriptStandby : nil
+        #else
+        return nil
+        #endif
+    }
+
     /// Return の対象になるリスト（再生中のもの、無ければ画面で選んでいるもの）
     var activeSequenceID: UUID? { run?.sequenceID ?? selectedSequenceID ?? show.sequences.first?.id }
 
@@ -414,6 +434,8 @@ final class AppModel {
         // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
         guard ProSync.shared.begin(.toggleSequence(id)) else { return }
         defer { ProSync.shared.end() }
+        // 台本進行中は、リストを続けて鳴らさない（開始／停止キーは効かない）
+        if ProModel.shared.scriptRun { return }
         #endif
         if isRunning(id) { stopSequence(id) } else { startSequence(id, from: cuedIndex(id) ?? 0) }
     }
@@ -424,6 +446,10 @@ final class AppModel {
 
     /// ↑↓: リストの「次に鳴らす曲」を1つ上下に動かす（ダブルクリックと同じ扱い）
     func moveCue(by delta: Int) {
+        #if PRO
+        // Pro 版だけ: 台本進行中は、台本の前・次のきっかけへ
+        if ProModel.shared.scriptRun { return ProModel.shared.moveStandby(by: delta) }
+        #endif
         guard let id = activeSequenceID, let seq = show.sequences.first(where: { $0.id == id }),
               !seq.steps.isEmpty else { return }
         var base = upcomingIndex(id)
@@ -447,6 +473,10 @@ final class AppModel {
         guard let seq = show.sequences.first(where: { $0.id == id }), seq.steps.indices.contains(index) else { return }
         selectedSequenceID = id
         selection = .step(sequence: id, step: seq.steps[index].id)
+        #if PRO
+        // Pro 版だけ: 台本進行中は、台本進行の Standby にする（台本に結びついている曲だけ）
+        if ProModel.shared.scriptRun { return ProModel.shared.cueFromList(seq.steps[index].id) }
+        #endif
         if var r = run, r.sequenceID == id {
             if let armed = r.armedToken { output.mixer.send(.stopToken(armed, fadeFrames: 0)) }
             r.armedToken = nil
@@ -469,6 +499,7 @@ final class AppModel {
         // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
         guard ProSync.shared.begin(.startSequence(id, index)) else { return }
         defer { ProSync.shared.end() }
+        if ProModel.shared.scriptRun { return }
         #endif
         guard let seq = show.sequences.first(where: { $0.id == id }) else { return }
         // 別のリストが鳴っていたら停止フェードで止める。
@@ -503,6 +534,8 @@ final class AppModel {
         // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
         guard ProSync.shared.begin(.advance) else { return }
         defer { ProSync.shared.end() }
+        // 台本進行中は、台本の Standby を鳴らして次のきっかけへ
+        if ProModel.shared.scriptRun { return ProModel.shared.scriptGo() }
         #endif
         // 鳴っていないリストでダブルクリックして位置を決めてあれば、そのリストをそこから始める
         if let cued = cuedStart, run?.sequenceID != cued.sequence {
@@ -536,6 +569,8 @@ final class AppModel {
         // Pro 版だけ: バックアップ機へ同じ操作を送る（バックアップ機では、引き継ぐまで手の操作を受けない）
         guard ProSync.shared.begin(.endSong) else { return }
         defer { ProSync.shared.end() }
+        // 台本進行中は、いちばん後に鳴らし始めた音を止める
+        if ProModel.shared.scriptRun { return ProModel.shared.scriptStop() }
         #endif
         guard let current = run?.currentToken else { return }
         output.mixer.send(.stopToken(current, fadeFrames: -1))
@@ -546,6 +581,27 @@ final class AppModel {
         if let r = run, r.sequenceID == id { return r.pendingIndex ?? r.armedIndex }
         return cuedIndex(id)
     }
+
+    #if PRO
+    /// Pro 版の台本進行: リストの曲を 1 曲だけ鳴らす（リストとしては進めない）。
+    /// タイミングが「Return キーを押したとき」で秒数があれば、その秒数だけ待ってから鳴らす
+    func playStepAlone(_ stepID: UUID) {
+        guard let step = show.sequences.lazy.compactMap({ $0.steps.first { $0.id == stepID } }).first,
+              var spec = makeSpec(step.play, owner: step.id, tag: step.id) else { return }
+        if step.start == .returnKey, step.startSeconds > 0 {
+            spec.delayFrames = Int(step.startSeconds * sampleRate)
+        }
+        output.mixer.send(.restart(spec))
+        ProMIDI.shared.played(step.id, delay: Double(spec.delayFrames) / sampleRate)
+    }
+
+    /// Pro 版の台本進行に切り替えたとき: リストの続きをやめる（鳴っている曲はそのまま最後まで）
+    func releaseSequenceRun() {
+        if let armed = run?.armedToken { output.mixer.send(.stopToken(armed, fadeFrames: 0)) }
+        run = nil
+        cuedStart = nil
+    }
+    #endif
 
     /// タイミングが「Return キーを押したとき」で秒数があれば、その秒数だけ待ってから鳴らす
     private func playStep(_ seq: CueSequence, _ i: Int) {

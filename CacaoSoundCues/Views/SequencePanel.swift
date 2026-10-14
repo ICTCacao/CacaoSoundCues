@@ -91,7 +91,9 @@ private struct SequenceEditor: View {
             // ダブルクリックで「次に鳴らす曲」をこの曲にする（鳴らすのは Return）
             .contextMenu(forSelectionType: UUID.self) { ids in
                 if let id = ids.first, let index = seq.steps.firstIndex(where: { $0.id == id }) {
-                    Button { model.cueStep(seq.id, index: index) } label: { Label(L("次に鳴らす曲にする（Return で再生）"), systemImage: "return") }
+                    Button { model.cueStep(seq.id, index: index) } label: {
+                        Label(model.scriptRun ? L("台本進行の Standby にする") : L("次に鳴らす曲にする（Return で再生）"), systemImage: "return")
+                    }
                     if !model.showMode {
                         Button(role: .destructive) { model.removeStep(id, from: seq.id) } label: { Label(L("削除"), systemImage: "trash") }
                     }
@@ -119,6 +121,22 @@ private struct SequenceEditor: View {
             }
             }
 
+            if model.scriptRun {
+                // Pro 版の台本進行中: リストは曲（音源設定）の置き場所だけ。鳴らすのは台本の順に Enter で
+                HStack(spacing: 6) {
+                    Image(systemName: "text.book.closed")
+                    Text(L("台本進行中は、リストを続けて鳴らしません（曲の音源設定だけ使います）。ダブルクリックで、その曲を台本進行の Standby にします。"))
+                        .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                    Text(L("%d 曲・%@", seq.steps.count, totalDuration.timeText))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            } else {
             // 操作キーの説明（スペースは画面のキーボードに出さないため、ここで案内する）
             // 狭いときは縦に並べる
             ViewThatFits(in: .horizontal) {
@@ -157,6 +175,7 @@ private struct SequenceEditor: View {
                     .monospacedDigit()
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
+            }
             }
         }
     }
@@ -224,7 +243,8 @@ private struct StepRow: View {
 
     var body: some View {
         let voice = model.playing(tag: step.id)
-        let upcoming = model.upcomingIndex(sequenceID) == index
+        // Pro 版の台本進行中は、台本進行の Standby の曲
+        let upcoming = model.scriptRun ? model.scriptStandbyID == step.id : model.upcomingIndex(sequenceID) == index
         let full = model.sound(step.play.soundID)?.duration ?? 0
         let length = max(0, (step.play.outPoint ?? full) - step.play.inPoint) * Double(step.play.plays ?? 1)
         HStack {
