@@ -46,8 +46,11 @@ let para = NSMutableParagraphStyle(); para.alignment = .center
 let title = "\(appName) をインストール ／ Install \(appName)"
 let body = "左のアプリを右の Applications フォルダへドラッグしてください\nDrag the app onto the Applications folder"
 let note = "初回起動時に警告が出たら、Applications 内のアプリを右クリック →「開く」\nIf a warning appears on first launch, right-click the app in Applications → Open"
+// 名前が長いと 2 行に折れて下の行と重なるので、1 行に収まるまで文字を小さくする
+var titleSize: CGFloat = 20
+while titleSize > 12, (title as NSString).size(withAttributes: [.font: NSFont.boldSystemFont(ofSize: titleSize)]).width > 570 { titleSize -= 1 }
 (title as NSString).draw(in: NSRect(x: 0, y: 400 - 70, width: 600, height: 40),
-    withAttributes: [.font: NSFont.boldSystemFont(ofSize: 20), .foregroundColor: NSColor(calibratedWhite: 0.2, alpha: 1), .paragraphStyle: para])
+    withAttributes: [.font: NSFont.boldSystemFont(ofSize: titleSize), .foregroundColor: NSColor(calibratedWhite: 0.2, alpha: 1), .paragraphStyle: para])
 (body as NSString).draw(in: NSRect(x: 0, y: 400 - 116, width: 600, height: 40),
     withAttributes: [.font: NSFont.systemFont(ofSize: 14), .foregroundColor: NSColor(calibratedWhite: 0.35, alpha: 1), .paragraphStyle: para])
 (note as NSString).draw(in: NSRect(x: 0, y: 46, width: 600, height: 36),
