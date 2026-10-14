@@ -169,9 +169,9 @@ macOS 14: **right-click** the app → **Open** → **Open**. After the first tim
 3. Press the key to play. **Press again to stop**
 
 **Changing assignments**
-- **Drag** an assigned key **onto another key** to move it
-- If the other key is assigned too, they **swap**
-- To remove: right-click the key → “Remove assignment”
+- **Drag** a key **onto another key** to move it (assigned keys swap)
+- <kbd>option</kbd>-drag onto an **empty key** to **copy** it (e.g. for another volume)
+- To remove: right-click → “Remove assignment”
 
 </div>
 <div>
