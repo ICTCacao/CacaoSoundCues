@@ -60,9 +60,7 @@
     "画面のキーをクリックすると、この右側で、その音の設定（どこから鳴らすか・音の大きさ・だんだん小さくする など）ができます。": "Click a key on the screen to set up its sound here on the right (where it starts, volume, fade out and more).",
     "いろいろな音を、ほかのキーにもドラッグしてみましょう。": "Try dragging more sounds onto other keys.",
     "順番に流す BGM のリストを作る": "Make a list of music to play in order",
-    "左下の「リストを作る」をクリックします。幕間の BGM など、曲を順番に流せます。": "Click “Create List” at the bottom left. A list plays tracks in order, like intermission music.",
     "リストに曲をドラッグする": "Drag tracks into the list",
-    "音のファイルを、左下のリストに何曲かドラッグします。上から順番に流れます。": "Drag a few sound files into the list at the bottom left. They play from top to bottom.",
     "リストの曲をクリックすると、この右側で、その曲の設定ができます。": "Click a track in the list to set it up here on the right.",
     "リストを鳴らしてみる": "Play the list",
     "リストの曲をダブルクリックすると": "Double-click a track in the list and it shows",
@@ -244,6 +242,8 @@
     "曲の中で左右を変える線を、波形の上で編集します": "Edit a line on the waveform that changes the pan during the track",
     "マーク %@ ／ %@": "Mark %@ / %@",
     "PANラインを消す": "Clear pan line",
-    "ピンクの線が左右です（上が L、下が R、真ん中が中央）。左の PAN に足し合わせます。線をクリックでマークを足す、マークをドラッグで動かす、⌥クリックか delete キーで消す。マークとマークの間をクリックすると、白い四角でつなぎの形を変えられます。": "The pink line is the pan (top = L, bottom = R, middle = center). It is added to the pan on the left. Click the line to add a mark, drag a mark to move it, ⌥-click or press delete to remove it. Click between two marks to shape the transition with the white squares."
+    "ピンクの線が左右です（上が L、下が R、真ん中が中央）。左の PAN に足し合わせます。線をクリックでマークを足す、マークをドラッグで動かす、⌥クリックか delete キーで消す。マークとマークの間をクリックすると、白い四角でつなぎの形を変えられます。": "The pink line is the pan (top = L, bottom = R, middle = center). It is added to the pan on the left. Click the line to add a mark, drag a mark to move it, ⌥-click or press delete to remove it. Click between two marks to shape the transition with the white squares.",
+    "下の「リストを作る」をクリックします。幕間の BGM など、曲を順番に流せます（リストの欄が出ます）。": "Click “Create List” below. A list plays tracks in order, like intermission music (the list area appears).",
+    "音のファイルを、出てきたリストに何曲かドラッグします。上から順番に流れます。": "Drag a few sound files into the list that appeared. They play from top to bottom."
   }
 }

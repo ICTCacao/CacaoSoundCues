@@ -6,7 +6,7 @@
 **Windows 版**（Windows 10 / 11）もある（`CacaoSoundCuesWin/`）。キューシート（`.ccsc`）は Mac 版と共通で、
 Mac で作ったものを Windows でそのまま開ける（その逆も）。操作は同じで、Mac の Return は Windows では Enter。
 
-**Pro 版**（Mac だけ・無料・MIT）は [CacaoSoundCuesPro](https://github.com/ICTCacao/CacaoSoundCuesPro)。台本連動・台本進行・出力の系統・
+このリポジトリは **Simple 版**（Mac・Windows）。**Pro 版**（Mac だけ・無料・MIT）は [CacaoSoundCuesPro](https://github.com/ICTCacao/CacaoSoundCuesPro)。台本連動・台本進行・出力の系統・
 バックアップ機との同時運転・MIDI コントロールを足したもの。このリポジトリのソースの中の `#if PRO` が、Pro の機能の差し込み口。
 
 ## できること（v0.1）

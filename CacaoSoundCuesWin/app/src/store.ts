@@ -674,6 +674,21 @@ export function addSequence() {
   const seq: CueSequence = { id: newId(), name: L("リスト%d", show.peek().sequences.length + 1), steps: [], loop: true, stopFade: 3 };
   edit(sh => sh.sequences.push(seq));
   selectedSequenceID.value = seq.id;
+  // 「使い方」などから作ったときも、リストの欄を出す
+  prefs.showList.value = true;
+}
+
+/** リストが無いのに「リスト」ボタンで出した（リストを作るための空の欄。キューシートを開き直すと消える） */
+export const emptyListRequested = signal(false);
+
+/** リストの欄をいま出しているか（リストがあるとき、か「リスト」ボタンで出したとき） */
+export const listVisible = computed(() =>
+  prefs.showList.value && (show.value.sequences.length > 0 || emptyListRequested.value));
+
+/** 「リスト」ボタン。リストが無いときに出すと、「リストを作る」の空の欄を出す */
+export function setListVisible(on: boolean) {
+  prefs.showList.value = on;
+  emptyListRequested.value = on && show.peek().sequences.length === 0;
 }
 
 export function removeSequence(id: Id) {
@@ -741,6 +756,7 @@ function reset(sh: Show, path: string | null) {
   selection.value = { kind: "none" };
   show.value = sh;
   selectedSequenceID.value = sh.sequences[0]?.id ?? null;
+  emptyListRequested.value = false;
 }
 
 export async function newShowFile() {

@@ -3,8 +3,8 @@ import { L, languageVersion } from "../i18n";
 import { signed } from "../model";
 import { prefs } from "../prefs";
 import {
-  applyMasterVolume, dirty, edit, memoryBytes, message, newShowFile, openPanel, output, panic, save, saveAs, settingsOpen,
-  show, toggleShowMode,
+  applyMasterVolume, dirty, edit, listVisible, memoryBytes, message, newShowFile, openPanel, output, panic, save, saveAs,
+  setListVisible, settingsOpen, show, toggleShowMode,
 } from "../store";
 import { ContextMenuView, Slider, ToggleButton, openMenu, Split } from "./common";
 import { Icon } from "./icons";
@@ -28,28 +28,32 @@ export function App() {
   const showMode = prefs.showMode.value;
   const right = <div class="panel">{showMode ? <ShowModePanel /> : <Inspector />}</div>;
   const inspector = prefs.showInspector.value;
+  // リストの欄は、リストがあるとき（か「リスト」ボタンで出したとき）だけ
+  const list = listVisible.value;
+  const seqPanel = <div class="panel bg"><SequencePanel /></div>;
+  const keyList = <div class="panel bg"><KeyList /></div>;
   return (
     <div class="app">
       <TopBar />
       {prefs.showKeyboard.value ? <>
         <Keyboard />
-        {inspector ? (
-          <Split fractions={prefs.splitWithKeyboard} mins={[400, 480]}>
-            {[<div class="panel bg"><SequencePanel /></div>, right]}
-          </Split>
+        {inspector && list ? (
+          <Split fractions={prefs.splitWithKeyboard} mins={[400, 480]}>{[seqPanel, right]}</Split>
+        ) : inspector ? (
+          <Split fractions={prefs.splitKeyListNoInspector} mins={[480]}>{[right]}</Split>
+        ) : list ? (
+          <Split fractions={prefs.splitKeyListNoInspector} mins={[400]}>{[seqPanel]}</Split>
         ) : (
-          <Split fractions={prefs.splitKeyListNoInspector} mins={[400]}>
-            {[<div class="panel bg"><SequencePanel /></div>]}
-          </Split>
+          <div class="panel bg" style={{ flex: 1 }} />
         )}
-      </> : inspector ? (
-        <Split fractions={prefs.splitKeyList} mins={[260, 380, 460]}>
-          {[<div class="panel bg"><KeyList /></div>, <div class="panel bg"><SequencePanel /></div>, right]}
-        </Split>
+      </> : inspector && list ? (
+        <Split fractions={prefs.splitKeyList} mins={[260, 380, 460]}>{[keyList, seqPanel, right]}</Split>
+      ) : inspector ? (
+        <Split fractions={prefs.splitKeyListNoList} mins={[260, 460]}>{[keyList, right]}</Split>
+      ) : list ? (
+        <Split fractions={prefs.splitKeyListNoInspector} mins={[260, 380]}>{[keyList, seqPanel]}</Split>
       ) : (
-        <Split fractions={prefs.splitKeyListNoInspector} mins={[260, 380]}>
-          {[<div class="panel bg"><KeyList /></div>, <div class="panel bg"><SequencePanel /></div>]}
-        </Split>
+        <Split fractions={prefs.splitKeyListNoInspector} mins={[260]}>{[keyList]}</Split>
       )}
       <Settings />
       <ModalView />
@@ -84,6 +88,8 @@ function TopBar() {
       </button>
       <ToggleButton on={prefs.showKeyboard.value} icon="keyboard" onClick={() => { prefs.showKeyboard.value = !prefs.showKeyboard.value; }}
         title={L("キーボードを隠すと、割り当てたキーだけを一覧で表示します")}>{L("キーボード")}</ToggleButton>
+      <ToggleButton on={listVisible.value} icon="musicList" onClick={() => setListVisible(!listVisible.value)}
+        title={L("リスト（曲を順番に流す）の欄を出す・隠す。リストが 1 つも無いときは隠れます")}>{L("リスト")}</ToggleButton>
       <ToggleButton on={prefs.showInspector.value} icon="sidebarRight" onClick={() => { prefs.showInspector.value = !prefs.showInspector.value; }}
         title={L("右側の音源設定（本番モードでは本番用の表示）を出す・隠す")}>{L("音源設定")}</ToggleButton>
       <button class="ibtn" title={L("設定") + "（Ctrl+,）"} onClick={() => { settingsOpen.value = true; }}><Icon name="gear" /></button>

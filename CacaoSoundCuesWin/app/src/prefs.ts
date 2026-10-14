@@ -19,6 +19,8 @@ export const prefs = {
   showKeyboard: stored("showKeyboard", true),
   /** 右側の音源設定（本番モードでは本番用の表示）を出すか */
   showInspector: stored("showInspector", true),
+  /** リストの欄を出すか（上の帯の「リスト」ボタン）。リストが 1 つも無ければ、ボタンで出したときだけ出す */
+  showList: stored("showList", true),
   showFunctionKeys: stored("showFunctionKeys", false),
   showKeypad: stored("showKeypad", false),
   /** キーボードの大きさ（1 = いちばん大きい） */
@@ -33,6 +35,8 @@ export const prefs = {
   splitKeyList: stored<number[]>("split.keyList", [0.24, 0.6]),
   /** 音源設定を隠しているとき（キーの一覧とリストの2分割） */
   splitKeyListNoInspector: stored<number[]>("split.keyList.noInspector", [0.4]),
+  /** リストを隠しているとき（キーの一覧と音源設定の2分割） */
+  splitKeyListNoList: stored<number[]>("split.keyList.noList", [0.4]),
 };
 
 /** 音を追加したときの最初の設定（設定画面で変更） */

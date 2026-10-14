@@ -3,7 +3,7 @@ import AudioToolbox
 import CoreAudio
 
 /// AVAudioEngine に自前ミキサー（CueMixer）を1つだけつないで鳴らす。
-/// ふだん（無料版）は Mac の出力（システムの設定）に左右 2ch で出す。
+/// ふだん（Simple 版）は Mac の出力（システムの設定）に左右 2ch で出す。
 /// Pro 版は route() で機器と、出口（系統）ごとの左右のチャンネルを決める（多チャンネルの機器や、まとめた機器セット）
 public final class AudioOutput {
     /// 出口ごとの、機器の左右のチャンネル（0 始まり）

@@ -77,6 +77,22 @@ final class AppModel {
         didSet { UserDefaults.standard.set(showMode, forKey: "showMode") }
     }
 
+    /// リストの欄を出すか（上の帯の「リスト」ボタン。この Mac に保存）。リストが 1 つもなければ、ボタンで出したときだけ出す
+    var showList = UserDefaults.standard.object(forKey: "showList") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(showList, forKey: "showList") }
+    }
+    /// リストが無いのに「リスト」ボタンで出した（リストを作るための空の欄。キューシートを開き直すと消える）
+    var emptyListRequested = false
+
+    /// リストの欄をいま出しているか
+    var listVisible: Bool { showList && (!show.sequences.isEmpty || emptyListRequested) }
+
+    /// 「リスト」ボタン。リストが無いときに出すと、「リストを作る」の空の欄を出す
+    func setListVisible(_ on: Bool) {
+        showList = on
+        emptyListRequested = on && show.sequences.isEmpty
+    }
+
     @ObservationIgnored let output = AudioOutput()
     /// delete キーで消すもの（音量ラインで選んでいるマーク）。設定画面が選んだときに入れる
     @ObservationIgnored var deleteKeyAction: (() -> Void)?
@@ -408,7 +424,7 @@ final class AppModel {
 
     func isRunning(_ id: UUID) -> Bool { run?.sequenceID == id }
 
-    /// Pro 版の台本進行中か（リストは音源設定だけになり、続けて鳴らさない）。無料版はいつも false
+    /// Pro 版の台本進行中か（リストは音源設定だけになり、続けて鳴らさない）。Simple 版はいつも false
     var scriptRun: Bool {
         #if PRO
         return ProModel.shared.scriptRun
@@ -417,7 +433,7 @@ final class AppModel {
         #endif
     }
 
-    /// Pro 版の台本進行の Standby（キーかリストの曲の ID）。無料版はいつも nil
+    /// Pro 版の台本進行の Standby（キーかリストの曲の ID）。Simple 版はいつも nil
     var scriptStandbyID: UUID? {
         #if PRO
         return ProModel.shared.scriptRun ? ProModel.shared.scriptStandby : nil
@@ -984,6 +1000,8 @@ final class AppModel {
         seq.loop = true
         show.sequences.append(seq)
         selectedSequenceID = seq.id
+        // 「使い方」などから作ったときも、リストの欄を出す
+        showList = true
     }
 
     func removeSequence(_ id: UUID) {
@@ -1046,6 +1064,7 @@ final class AppModel {
         showURL = nil
         selection = .none
         show = Show(name: L("新しいキューシート"))
+        emptyListRequested = false
         selectedSequenceID = nil
         dirty = false
         #if PRO
@@ -1080,6 +1099,7 @@ final class AppModel {
             showURL = url
             selection = .none
             show = loaded
+            emptyListRequested = false
             // 名前を付けずに保存した古いキューシートは、ファイル名を名前にする
             let renamed = Self.isUntitled(show.name)
             if renamed { show.name = url.deletingPathExtension().lastPathComponent }

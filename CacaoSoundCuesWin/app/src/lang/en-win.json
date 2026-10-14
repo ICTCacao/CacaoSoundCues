@@ -38,6 +38,7 @@
     "（Enter の %@後）": "(%@ after Enter)",
     "「%@」は読み込めていないため、鳴らせません。": "“%@” has not been loaded and cannot be played.",
     "音ファイルをドラッグして割り当て。割り当て済みのキーはドラッグで別のキーへ移せます（Ctrl を押しながらでコピー）": "Drag an audio file to assign. Drag an assigned key to move it to another key (hold Ctrl to copy).",
-    "コピー先のキーには「%@」が割り当て済みです。空いているキーへコピーしてください": "\"%@\" is already assigned to that key. Copy to an empty key."
+    "コピー先のキーには「%@」が割り当て済みです。空いているキーへコピーしてください": "\"%@\" is already assigned to that key. Copy to an empty key.",
+    "リスト（曲を順番に流す）の欄を出す・隠す。リストが 1 つも無いときは隠れます": "Show or hide the list area (tracks played in order). It is hidden when there are no lists"
   }
 }

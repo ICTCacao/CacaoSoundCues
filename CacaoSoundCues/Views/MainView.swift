@@ -18,13 +18,15 @@ struct MainView: View {
                 .background(model.showMode ? Color.red.opacity(0.22) : Theme.topBar)
             ThemeDivider()
             VStack(spacing: 0) {
+            // リストの欄は、リストがあるとき（か「リスト」ボタンで出したとき）だけ
+            let list = model.listVisible
             if showKeyboard {
                 KeyboardView()
                     .padding(.vertical, 12)
                     .background(Theme.background)
                 ThemeDivider()
-                // 音源設定を出す・隠すで分割の数が変わるので、別々の分割画面にして仕切りの位置も別に覚える
-                if showInspector {
+                // 音源設定・リストを出す・隠すで分割の数が変わるので、別々の分割画面にして仕切りの位置も別に覚える
+                if showInspector && list {
                     HSplitView {
                         SequencePanel()
                             .frame(minWidth: 400, idealWidth: 480)
@@ -34,12 +36,18 @@ struct MainView: View {
                         rightPanel
                             .frame(minWidth: 480)
                     }
-                } else {
+                } else if showInspector {
+                    rightPanel
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if list {
                     SequencePanel()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Theme.background)
+                } else {
+                    Theme.background
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-            } else if showInspector {
+            } else if showInspector && list {
                 HSplitView {
                     KeyListPanel()
                         .frame(minWidth: 260, idealWidth: 320)
@@ -52,7 +60,17 @@ struct MainView: View {
                     rightPanel
                         .frame(minWidth: 460)
                 }
-            } else {
+            } else if showInspector {
+                HSplitView {
+                    KeyListPanel()
+                        .frame(minWidth: 260, idealWidth: 320)
+                        .background(Theme.background)
+                        // 仕切りの位置を覚えておく（キーの一覧と音源設定の2分割）
+                        .background(SplitPersistence(key: "split.keyList.noList"))
+                    rightPanel
+                        .frame(minWidth: 460)
+                }
+            } else if list {
                 HSplitView {
                     KeyListPanel()
                         .frame(minWidth: 260, idealWidth: 320)
@@ -63,6 +81,10 @@ struct MainView: View {
                         .frame(minWidth: 380, idealWidth: 460)
                         .background(Theme.background)
                 }
+            } else {
+                KeyListPanel()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Theme.background)
             }
             }
             // Pro 版だけ: 台本のパネルを横に出す
@@ -139,7 +161,7 @@ struct TopBar: View {
             .buttonStyle(.borderedProminent)
             .tint(model.showMode ? .red : .gray)
             .help(model.showMode ? L("本番モードを終了して、編集できるようにする") : L("編集を止めて、キー操作と再生だけにする"))
-            // 並びは 台本（Pro 版だけ）・キーボード・音源設定
+            // 並びは 台本（Pro 版だけ）・キーボード・リスト・音源設定
             #if PRO
             ProTopBarItems()
             #endif
@@ -148,6 +170,12 @@ struct TopBar: View {
             }
             .toggleStyle(.button)
             .help(L("キーボードを隠すと、割り当てたキーだけを一覧で表示します"))
+            // リストの欄（リストが無いときは隠れる。押すと「リストを作る」の欄が出る）
+            Toggle(isOn: Binding(get: { model.listVisible }, set: { model.setListVisible($0) })) {
+                Label(L("リスト"), systemImage: "music.note.list")
+            }
+            .toggleStyle(.button)
+            .help(L("リスト（曲を順番に流す）の欄を出す・隠す。リストが 1 つも無いときは隠れます"))
             Toggle(isOn: $showInspector) {
                 Label(L("音源設定"), systemImage: "sidebar.right")
             }
@@ -212,7 +240,7 @@ struct AnyLabelStyle: LabelStyle {
 }
 
 extension View {
-    /// Pro 版だけ: 台本のパネルを横に並べる（無料版ではそのまま）
+    /// Pro 版だけ: 台本のパネルを横に並べる（Simple 版ではそのまま）
     @ViewBuilder
     func proScriptPanel() -> some View {
         #if PRO

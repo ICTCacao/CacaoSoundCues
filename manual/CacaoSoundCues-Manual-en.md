@@ -130,7 +130,7 @@ macOS 14: **right-click** the app → **Open** → **Open**. After the first tim
 
 </div>
 
-<span class="small">Top: buttons, master volume / Middle: keyboard / Bottom left: list / Bottom right: selected sound</span>
+<span class="small">Top: buttons, master volume / Middle: keyboard / Bottom left: list (if any) / Bottom right: selected sound</span>
 
 ---
 
@@ -260,11 +260,11 @@ Turn on “Volume line” to draw the volume through the track. Click to add a p
 
 <div class="shot">
 
-![h:480](img/en-03-list.png)
+![h:440](img/en-03-list.png)
 
 </div>
 
-<span class="small">Click ＋ next to “List”, then drag track files into the list. You can also set a start/stop key (e.g. <kbd>M</kbd>).</span>
+<span class="small">No lists yet? Click **List** in the top bar. Click ＋ next to “List”, then drag track files into the list. You can also set a start/stop key (e.g. <kbd>M</kbd>).</span>
 
 ---
 

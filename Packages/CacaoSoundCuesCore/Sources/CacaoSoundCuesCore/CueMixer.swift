@@ -179,7 +179,7 @@ public final class CueMixer: @unchecked Sendable {
     public static let maxVoices = 32
 
     public let sampleRate: Double
-    /// 出口（ステレオ）の数。無料版は 1
+    /// 出口（ステレオ）の数。Simple 版は 1
     public let busCount: Int
     private let lock: UnsafeMutablePointer<os_unfair_lock>
     private var pending: [MixerCommand] = []
@@ -227,7 +227,7 @@ public final class CueMixer: @unchecked Sendable {
 
     // MARK: - 音声スレッド側
 
-    /// 出口が 1 つのとき（無料版）。どの出口の音もここに出す
+    /// 出口が 1 つのとき（Simple 版）。どの出口の音もここに出す
     public func render(frames n: Int, left L: UnsafeMutablePointer<Float>, right R: UnsafeMutablePointer<Float>) {
         var l = L, r = R
         render(frames: n, busLeft: &l, busRight: &r, buses: 1)
