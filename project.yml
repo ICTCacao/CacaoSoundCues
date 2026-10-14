@@ -38,8 +38,8 @@ targets:
       properties:
         CFBundleDisplayName: CacaoSoundCues
         CFBundleName: CacaoSoundCues
-        CFBundleShortVersionString: "5.0.3"
-        CFBundleVersion: "5.0.3"
+        CFBundleShortVersionString: "5.1.0"
+        CFBundleVersion: "5.1.0"
         LSMinimumSystemVersion: "14.0"
         CFBundleDevelopmentRegion: ja
         CFBundleLocalizations: [ja, en]

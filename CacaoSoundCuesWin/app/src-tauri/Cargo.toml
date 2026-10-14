@@ -1,6 +1,6 @@
 [package]
 name = "cacaosoundcueswin"
-version = "5.0.3"
+version = "5.1.0"
 description = "CacaoSoundCues Windows 版（舞台のための、ポン出し音響アプリ）"
 authors = ["ICTCacao"]
 edition = "2021"

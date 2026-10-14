@@ -58,7 +58,7 @@ footer: "CacaoSoundCues マニュアル（Windows 版） ／ ICTCacao"
 # CacaoSoundCues マニュアル
 
 舞台のための、ポン出し音響アプリ（Windows 版）
-バージョン 5.0.3 ／ 2026 年 10 月
+バージョン 5.1.0 ／ 2026 年 10 月
 
 ---
 
@@ -128,8 +128,8 @@ footer: "CacaoSoundCues マニュアル（Windows 版） ／ ICTCacao"
 <div class="cols">
 <div>
 
-1. **CacaoSoundCues-5.0.3-Windows-x64.zip** を右クリック →「**すべて展開**」
-2. 出てきた **CacaoSoundCues-5.0.3-Windows-x64-setup.exe** をダブルクリック
+1. **CacaoSoundCues-5.1.0-Windows-x64.zip** を右クリック →「**すべて展開**」
+2. 出てきた **CacaoSoundCues-5.1.0-Windows-x64-setup.exe** をダブルクリック
 3. 画面の案内どおりに「次へ」→「インストール」
 4. スタートメニューの **CacaoSoundCues** から起動
 
