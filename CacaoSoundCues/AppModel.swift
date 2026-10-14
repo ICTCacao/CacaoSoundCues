@@ -858,6 +858,39 @@ final class AppModel {
         selection = .key(to)
     }
 
+    /// キーの割り当てを別のキーへコピーする（option＋ドラッグ）。音・音量・フェードなどの設定はそのまま、別のキーとして使う。
+    /// コピー先は空いているキーだけ（割り当て済みのキーは上書きしない）
+    func copyKey(from: UInt16, to: UInt16) {
+        if lockedForShow() { return }
+        guard from != to, let src = cue(forKey: from) else { return }
+        if let reason = KeyboardLayout.reservedReason(to) {
+            message = reason
+            return
+        }
+        if let used = cue(forKey: to) {
+            message = L("コピー先のキーには「%@」が割り当て済みです。空いているキーへコピーしてください", used.name)
+            return
+        }
+        if let seq = sequence(forKey: to) {
+            message = L("このキーはリスト「%@」の開始／停止キーです", seq.name)
+            return
+        }
+        var copy = src
+        copy.id = UUID()
+        copy.keyCode = to
+        // 並びはコピー元のすぐ後ろに
+        if let i = show.keyCues.firstIndex(where: { $0.id == src.id }) {
+            show.keyCues.insert(copy, at: i + 1)
+        } else {
+            show.keyCues.append(copy)
+        }
+        #if PRO
+        // Pro 版だけ: 出力の系統も同じに（台本のきっかけと MIDI を送る設定はコピーしない）
+        ProModel.shared.copiedCue(from: src.id, to: copy.id)
+        #endif
+        selection = .key(to)
+    }
+
     func removeCue(atKey code: UInt16) {
         if lockedForShow() { return }
         if let cue = cue(forKey: code) { output.mixer.send(.stopOwner(cue.id, fadeFrames: 0)) }

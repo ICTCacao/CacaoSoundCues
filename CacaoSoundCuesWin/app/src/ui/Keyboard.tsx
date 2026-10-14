@@ -8,7 +8,7 @@ import {
   FUNCTION_ROW, KEYPAD_DECIMAL, KEYPAD_ROW123, KEYPAD_TOP_ROWS, KEYPAD_ZERO, ROW_INDENT, keyLabel, keyRows,
 } from "../keymap";
 import {
-  chooseFileForKey, colorOf, cueForKey, dropTarget, endEditing, isRunning, isWaiting, loadStates, moveKey, playingOwner,
+  chooseFileForKey, colorOf, copyKey, cueForKey, dropTarget, endEditing, isRunning, isWaiting, loadStates, moveKey, playingOwner,
   removeCue, run, selectedSequenceID, selection, sequenceForKey, trigger,
 } from "../store";
 import { openMenu } from "./common";
@@ -116,13 +116,14 @@ function KeyCap({ code, w, h }: { code: number; w: number; h: number }) {
       const el = document.elementFromPoint(ev.clientX, ev.clientY)?.closest<HTMLElement>("[data-key]");
       keyDrag.value = { from: code, over: el ? Number(el.dataset.key) : null };
     };
-    const up = () => {
+    const up = (ev: PointerEvent) => {
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
       const d = keyDrag.peek();
       keyDrag.value = null;
       if (moving) {
-        if (d?.over != null && d.over !== code) moveKey(code, d.over);
+        // Ctrl（または Alt）を押しながら離したらコピー（同じ音を、音量などを変えて別のキーでも使う。Mac 版の option）
+        if (d?.over != null && d.over !== code) (ev.ctrlKey || ev.altKey ? copyKey : moveKey)(code, d.over);
         return;
       }
       selection.value = { kind: "key", code };
@@ -147,7 +148,7 @@ function KeyCap({ code, w, h }: { code: number; w: number; h: number }) {
       data-key={code} data-drop={`key:${code}`}
       style={{ width: `${w}px`, height: `${h}px`, background: bg }}
       onPointerDown={onPointerDown} onContextMenu={onContextMenu}
-      title={cue ? `${cue.name}` : L("音ファイルをドラッグして割り当て。割り当て済みのキーはドラッグで別のキーへ移せます")}>
+      title={cue ? `${cue.name}` : L("音ファイルをドラッグして割り当て。割り当て済みのキーはドラッグで別のキーへ移せます（Ctrl を押しながらでコピー）")}>
       <div class="khead">
         <span class="label">{keyLabel(code)}</span>
         <span class="kicons">

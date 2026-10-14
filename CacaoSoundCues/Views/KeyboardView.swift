@@ -181,7 +181,7 @@ struct KeyCapView: View {
             model.selection = .key(code)
             if let seq { model.selectedSequenceID = seq.id }
         }
-        // 割り当て済みのキーは、別のキーへドラッグして移せる（移り先も割り当て済みなら入れ替え）
+        // 割り当て済みのキーは、別のキーへドラッグして移せる（移り先も割り当て済みなら入れ替え）。option を押しながらでコピー
         .onDrag {
             guard cue != nil || seq != nil, !model.showMode else { return NSItemProvider() }
             return NSItemProvider(object: (keyDragPrefix + String(code)) as NSString)
@@ -199,7 +199,7 @@ struct KeyCapView: View {
             }
         }
         .help(cue.map { L("%@（%@）", $0.name, model.sound($0.play.soundID)?.fileName ?? "") }
-              ?? L("音ファイルをドラッグして割り当て。割り当て済みのキーはドラッグで別のキーへ移せます"))
+              ?? L("音ファイルをドラッグして割り当て。割り当て済みのキーはドラッグで別のキーへ移せます（option を押しながらでコピー）"))
     }
 
     private func handleDrop(_ providers: [NSItemProvider]) -> Bool {
@@ -215,7 +215,9 @@ struct KeyCapView: View {
             _ = p.loadObject(ofClass: NSString.self) { text, _ in
                 guard let text = text as? String, text.hasPrefix(keyDragPrefix),
                       let from = UInt16(text.dropFirst(keyDragPrefix.count)) else { return }
-                DispatchQueue.main.async { model.moveKey(from: from, to: code) }
+                // option を押しながらドロップしたらコピー（同じ音を、音量などを変えて別のキーでも使う）
+                let copy = NSEvent.modifierFlags.contains(.option)
+                DispatchQueue.main.async { copy ? model.copyKey(from: from, to: code) : model.moveKey(from: from, to: code) }
             }
             return true
         }

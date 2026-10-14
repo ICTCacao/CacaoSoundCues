@@ -556,6 +556,27 @@ export function moveKey(from: number, to: number) {
   selection.value = { kind: "key", code: to };
 }
 
+/** キーの割り当てを別のキーへコピーする（Ctrl＋ドラッグ）。音・音量・フェードなどの設定はそのまま、別のキーとして使う。
+ *  コピー先は空いているキーだけ（割り当て済みのキーは上書きしない） */
+export function copyKey(from: number, to: number) {
+  if (lockedForShow() || from === to) return;
+  const reason = reservedReason(to);
+  if (reason) { message.value = reason; return; }
+  const src = cueForKey(from);
+  if (!src) return;
+  const used = cueForKey(to);
+  if (used) { message.value = L("コピー先のキーには「%@」が割り当て済みです。空いているキーへコピーしてください", used.name); return; }
+  const seq = sequenceForKey(to);
+  if (seq) { message.value = L("このキーはリスト「%@」の開始／停止キーです", seq.name); return; }
+  edit(sh => {
+    const copy = { ...structuredClone(src), id: newId(), keyCode: to };
+    // 並びはコピー元のすぐ後ろに
+    const i = sh.keyCues.findIndex(c => c.id === src.id);
+    sh.keyCues.splice(i < 0 ? sh.keyCues.length : i + 1, 0, copy);
+  });
+  selection.value = { kind: "key", code: to };
+}
+
 export function removeCue(code: number) {
   if (lockedForShow()) return;
   const cue = cueForKey(code);
