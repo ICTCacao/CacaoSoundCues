@@ -23,6 +23,8 @@ struct WaveformView: View {
     @Binding var fadeOutBezier: FadeBezier?
     /// 再生中に波形をクリックしたとき（秒）
     var onSeek: ((Double) -> Void)?
+    /// 表示だけ（Pro 版の台本パネルの「鳴っている音」）。つまみ・制御点を描かず、操作も受けない
+    var readOnly = false
 
     private enum Marker { case start, end, fadeIn, fadeOut, bezier(rising: Bool, second: Bool), seek }
     /// フェードの丸をつかめる上端の高さ
@@ -72,7 +74,7 @@ struct WaveformView: View {
                                    style: StrokeStyle(lineWidth: 2, dash: [5, 4]))
                     }
                     // ベジエの制御点（白い四角）と、端点から伸びる腕
-                    for rising in [true, false] {
+                    for rising in [true, false] where !readOnly {
                         guard let g = bezierGeometry(rising: rising, xIn: xIn, xOut: xOut, size: size) else { continue }
                         var arms = Path()
                         arms.move(to: g.p0); arms.addLine(to: g.c1)
@@ -86,7 +88,7 @@ struct WaveformView: View {
                     }
                     // フェードの長さを変える丸（上端）
                     for hx in [handleX(fadeIn: true, xIn: xIn, xOut: xOut, w: size.width),
-                               handleX(fadeIn: false, xIn: xIn, xOut: xOut, w: size.width)] {
+                               handleX(fadeIn: false, xIn: xIn, xOut: xOut, w: size.width)] where !readOnly {
                         let r = CGRect(x: hx - 7, y: 1, width: 14, height: 14)
                         ctx.fill(Path(ellipseIn: r), with: .color(.orange))
                         ctx.stroke(Path(ellipseIn: r), with: .color(.white), lineWidth: 1.5)
@@ -123,7 +125,7 @@ struct WaveformView: View {
             }
             .clipShape(RoundedRectangle(cornerRadius: 4))
             .contentShape(Rectangle())
-            .gesture(
+            .gesture(readOnly ? nil :
                 DragGesture(minimumDistance: 0)
                     .onChanged { g in
                         guard duration > 0, w > 0 else { return }

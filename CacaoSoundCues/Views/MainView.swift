@@ -7,6 +7,9 @@ struct MainView: View {
     @AppStorage("showKeyboard") private var showKeyboard = true
     /// 右側の音源設定（本番モードでは本番用の表示）を出すか
     @AppStorage("showInspector") private var showInspector = true
+    /// キーボードの大きさ・テンキー（台本の横に並べるときの最小の幅を出すため）
+    @AppStorage("keyboardScale") private var keyboardScale = 1.0
+    @AppStorage("showKeypad") private var showKeypad = false
     /// 言語が変わったら画面全体を作り直す
     @AppStorage(LanguageManager.storageKey) private var language = LanguageManager.defaultCode
     @Environment(\.openSettings) private var openSettings
@@ -20,7 +23,11 @@ struct MainView: View {
             VStack(spacing: 0) {
             // リストの欄は、リストがあるとき（か「リスト」ボタンで出したとき）だけ
             let list = model.listVisible
-            if showKeyboard {
+            if showKeyboard && scriptSide {
+                // Pro 版で台本を出しているとき: キーボードのボタンだけを台本の右に、リスト・音源設定はさらに右へ横に並べる
+                // （キーボードを上に置く並びだと主画面が横に広く要り、台本を広げられないため）
+                scriptSideLayout(list: list)
+            } else if showKeyboard {
                 KeyboardView()
                     .padding(.vertical, 12)
                     .background(Theme.background)
@@ -112,6 +119,50 @@ struct MainView: View {
 }
 
 extension MainView {
+    /// Pro 版で台本のパネルを出しているか（出しているときは主画面を横並びにする）
+    var scriptSide: Bool {
+        #if PRO
+        return ProModel.shared.showPanel
+        #else
+        return false
+        #endif
+    }
+
+    /// 台本の横の主画面: キーボードのボタン（リストがあるときはその下にリスト） ｜ 音源設定（出しているとき）。
+    /// 音源設定の出す・隠すで分割の数が変わるので、別々の分割画面にして仕切りの位置も別に覚える
+    @ViewBuilder
+    func scriptSideLayout(list: Bool) -> some View {
+        if showInspector {
+            HSplitView {
+                keyboardColumn(list: list)
+                    .background(SplitPersistence(key: list ? "split.script.keyboard.list" : "split.script.keyboard.inspector"))
+                rightPanel
+                    .frame(minWidth: 460)
+            }
+        } else {
+            keyboardColumn(list: list)
+        }
+    }
+
+    /// キーボードのボタンの列（上に寄せる。狭い列でも収まるようキーを小さくできる）。リストがあればキーボードの下に
+    func keyboardColumn(list: Bool) -> some View {
+        let keyboardMin = KeyboardView.minWidth(scale: keyboardScale, keypad: showKeypad, compact: true)
+        let minWidth = list ? max(keyboardMin, 380) : keyboardMin
+        return VStack(spacing: 0) {
+            KeyboardView(compact: true)
+                .padding(.vertical, 12)
+            if list {
+                ThemeDivider()
+                SequencePanel()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                Spacer(minLength: 0)
+            }
+        }
+        .frame(minWidth: minWidth, idealWidth: minWidth + 60, maxWidth: .infinity, maxHeight: .infinity)
+        .background(Theme.background)
+    }
+
     /// 右側: ふだんは設定画面、本番モードでは本番用の表示
     @ViewBuilder
     var rightPanel: some View {
@@ -153,8 +204,14 @@ struct TopBar: View {
             Button { model.openPanel() } label: { Label(L("開く…"), systemImage: "folder") }
                 .disabled(model.showMode)
                 .help(L("開く…"))
+            #if PRO
+            // Pro 版: 絵だけのときに「ダウンロード」に見えないよう、昔のフロッピーの絵にする（Simple 版は 5.1.2 で最終なので変えない）
+            Button { model.save() } label: { Label { Text(L("保存")) } icon: { FloppyIcon() } }
+                .help(L("保存（キューシートを上書き保存。⌘S）"))
+            #else
             Button { model.save() } label: { Label(L("保存"), systemImage: "square.and.arrow.down") }
                 .help(L("保存"))
+            #endif
             Button { model.toggleShowMode() } label: {
                 Label(model.showMode ? L("本番モード中") : L("本番モード"), systemImage: model.showMode ? "lock.fill" : "lock.open")
             }

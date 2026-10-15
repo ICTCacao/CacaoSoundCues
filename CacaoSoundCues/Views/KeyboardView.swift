@@ -17,6 +17,16 @@ struct KeyboardView: View {
     @AppStorage("showKeypad") private var showKeypad = false
     /// キーボードの大きさ（1 = いちばん大きい。設定のメニューで 大・中・小）
     @AppStorage("keyboardScale") private var scale = 1.0
+    /// 狭い列に出すとき（Pro 版で台本の横に並べるとき）は、キーをもっと小さくしてでも横幅に収める
+    var compact = false
+
+    /// キーの最小の幅（ふだんは 44。狭い列では 34）。大きさの設定が 1 より小さければそのぶん小さく
+    static func minKeyWidth(scale: Double, compact: Bool) -> CGFloat { (compact ? 34 : 44) * min(scale, 1) }
+    /// キーボード全体の最小の幅（メイン 13 キー分 + テンキー 4 キー分 + 左右の余白）
+    static func minWidth(scale: Double, keypad: Bool, compact: Bool) -> CGFloat {
+        let columns: CGFloat = 13 + (keypad ? 4 : 0)
+        return minKeyWidth(scale: scale, compact: compact) * columns + spacing * (columns - 1) + (keypad ? keypadGap : 0) + 40
+    }
 
     private var keyHeight: CGFloat { (Self.keyHeight * scale).rounded() }
     private var fnHeight: CGFloat { (Self.functionKeyHeight * scale).rounded() }
@@ -34,7 +44,7 @@ struct KeyboardView: View {
             // 横幅に収まるようにキーの大きさを決める（メイン 13 キー分 + テンキー 4 キー分）
             let columns: CGFloat = 13 + (showKeypad ? 4 : 0)
             let fixed = Self.spacing * (columns - 1) + (showKeypad ? Self.keypadGap : 0) + 40
-            let kw = min(Self.maxKeyWidth * scale, max(44 * min(scale, 1), (geo.size.width - fixed) / columns))
+            let kw = min(Self.maxKeyWidth * scale, max(Self.minKeyWidth(scale: scale, compact: compact), (geo.size.width - fixed) / columns))
             VStack(spacing: Self.spacing) {
                 if showFunctionKeys {
                     HStack(spacing: Self.spacing) {
